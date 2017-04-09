@@ -1,0 +1,44 @@
+<html>
+<form id="form" method="POST">
+    <input type="hidden" value="{{instructions}}" name="postTag">
+</form>
+<div>
+In the testing phase you will again see a number of grey vertical bars. Each trial will show a selected bar outlined in red. By clicking on the selected bar, you will be able to adjust the height of a black bar. Your goal on each trial will be to guess as close as possible the exact score associated with that bar. Once satisfied that the height of the black bar indicates the score associated with the selected bar, press space to continue to the next trial, where a new bar will be selected and outlined in red. After each trial, you the true score associated with the selected bar will be shown as the height of a red bar. Your total score will increase by the maximum possible score for all of the bars minus the difference between the true score and your guess.
+</div>
+<div class="container">
+<p>Total Score: 0 </p>
+<canvas id="bar1" class="bar" height="250" width="15"></canvas>
+<canvas id="bar2" class="bar focus" height="250" width="15"></canvas>
+<canvas id="bar3" class="bar" height="250" width="15"></canvas>
+</div>
+<div class="container">
+<p>Total Score: 0 </p>
+<canvas id="bar1" class="bar" height="250" width="15"></canvas>
+<canvas id="bar2" class="bar focus selected" height="250" width="15"></canvas>
+<canvas id="bar3" class="bar" height="250" width="15"></canvas>
+</div>
+<div class="container">
+<p>Total Score: 450 </p>
+<canvas id="bar1" class="bar" height="250" width="15"></canvas>
+<canvas id="bar2" class="bar focus example1" height="250" width="15"></canvas>
+<canvas id="bar3" class="bar" height="250" width="15"></canvas>
+</div>
+<div class="container">
+<p>Total Score: 820 </p>
+<canvas id="bar1" class="bar" height="250" width="15"></canvas>
+<canvas id="bar2" class="bar example1" height="250" width="15"></canvas>
+<canvas id="bar3" class="bar focus example2" height="250" width="15"></canvas>
+</div>
+<div>
+Press Space to continue
+</div>
+
+<script type="text/javascript" src="../../static/init_bars.js"></script>
+<script type="text/javascript" src="../../static/continue.js"></script>
+<script>
+init_bars([100])
+</script>
+<script type="text/javascript" src="../../static/min_error_examples.js"></script>
+<link rel="stylesheet" type="text/css" href="../../static/bar_style.css">
+
+</html>

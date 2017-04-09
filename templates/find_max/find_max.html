@@ -1,0 +1,60 @@
+<html>
+<body>
+
+<div id="barContainer">
+{%for i in range(y|length)%}
+<canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="15" onmousedown="Click(event)"></canvas>
+{% endfor %}
+</div>
+
+<form method="POST" id="form">
+	<input type="hidden" value="testing" name="postTag">
+  	<input type="hidden" id="test_response" name="test_response">
+  	<input type="hidden" id="final_score" name="final_score">
+</form>
+
+<script type="text/javascript">
+	var y={{y}}
+	var train={{train}}
+	var allBars = document.getElementsByClassName("bar")
+	for(var i=0; i<allBars.length; i++){
+		var ctx = allBars[i].getContext("2d")
+		if(train.indexOf(i) < 0){
+			ctx.fillStyle = "grey"
+			ctx.fillRect(0, 0, allBars[i].width, allBars[i].height)
+		}else{
+			ctx.fillStyle="black"
+			ctx.fillRect(0, allBars[i].height-y[i], allBars[i].width, allBars[i].height)
+		}
+	}
+
+	function Click(event){
+		var bar = event.target
+		if(bar.className.indexOf(" active") < 0){
+		   	if(bar.className.indexOf(" focus") > 0){
+		   		bar.className += " active"
+		   		var x=parseInt(bar.id.substring(3))
+		   		var score=y[x]
+		        Submit(x,score);
+
+		    }else{
+		        bars = document.getElementsByClassName("focus");
+		        for(var i=0; i<bars.length; i++){
+		            bars[i].className = bars[i].className.replace(" focus", "")
+		        }
+		        bar.className += " focus";
+		    }
+		}
+	}
+
+	function Submit(x,score){
+		document.getElementById("test_response").value=x
+		document.getElementById("final_score").value=score
+		document.getElementById("form").submit()
+	}
+
+</script>
+<link rel="stylesheet" type="text/css" href="../static/bar_style.css">
+
+</body>
+</html>

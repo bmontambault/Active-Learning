@@ -1,0 +1,115 @@
+<html>
+<body>
+
+<div id="ui">
+Trials Remaining: {{test_trials}}
+<br>
+Total Score: 0
+</div>
+
+<div id="barContainer">
+{%for i in range(y|length)%}
+<canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="15" onmousedown="Click(event)"></canvas>
+{% endfor %}
+</div>
+
+<form method="POST" id="form">
+	<input type="hidden" value="testing" name="postTag">
+  	<input type="hidden" id="test_response" name="test_response">
+  	<input type="hidden" id="final_score" name="final_score">
+</form>
+
+<script type="text/javascript">
+	var totalScore=0
+	var trials={{test_trials}}
+	var y={{y}}
+	var train={{train}}
+	var test_response=[]
+	var index=[]
+	var allBars = document.getElementsByClassName("bar")
+	console.log(train)
+	for(var i=0; i<allBars.length; i++){
+		var ctx = allBars[i].getContext("2d")
+		if(train.indexOf(i) < 0){
+			ctx.fillStyle = "grey"
+			ctx.fillRect(0, 0, allBars[i].width, allBars[i].height)
+			index.push(allBars[i])
+		}else{
+			ctx.fillStyle="red"
+			ctx.fillRect(0, allBars[i].height-y[i], allBars[i].width, allBars[i].height)
+		}
+	}
+
+	index=shuffleArray(index)
+	shiftFocus(index[trials-1])
+
+	function shuffleArray(array) {
+	    for (var i = array.length - 1; i > 0; i--) {
+	        var j = Math.floor(Math.random() * (i + 1));
+	        var temp = array[i];
+	        array[i] = array[j];
+	        array[j] = temp;
+	    }
+	    return array;
+	}
+
+	function shiftFocus(bar){
+		bars = document.getElementsByClassName("focus");
+		    for(var i=0; i<bars.length; i++){
+		        bars[i].className = bars[i].className.replace(" focus", "")
+		    }
+		bar.className += " focus";
+	}
+
+	function Click(event){
+        var bar = event.target
+        if(bar.className.indexOf(" focus") > 0){
+        	var x=parseInt(bar.id.substring(3))
+		   	score=y[x]
+		   	scoreGuess=bar.height-Math.min(Math.max(0, event.y-bar.offsetTop),bar.height)
+		   	error=scoreGuess-score
+		   	console.log(scoreGuess)
+            Move(scoreGuess);
+        }
+    }
+
+    function Move(scoreGuess){
+        bar = document.getElementsByClassName("focus")[0];
+        ctx = bar.getContext("2d");
+        ctx.clearRect(0, 0, bar.width, bar.height);
+        ctx.fillStyle="black"
+        ctx.fillRect(0, bar.height-scoreGuess, 15, bar.height);
+    }
+
+    function Submit(event){
+    	if (event.keyCode==32){
+    		trials-=1
+    		test_response.push([score,scoreGuess])
+    		totalScore+=(Math.max.apply(Math, y)-Math.abs(scoreGuess-score))
+			document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br> Total Score: "+Math.round(totalScore)
+    		if(error>=0){
+    			ctx.fillStyle="red"
+        		ctx.fillRect(0, bar.height-score, 15, bar.height);
+    		}else{
+    			ctx.clearRect(0, 0, bar.width, bar.height);
+    			ctx.fillStyle="red"
+        		ctx.fillRect(0, bar.height-score, 15, bar.height);
+        		ctx.fillStyle="black"
+        		ctx.fillRect(0, bar.height-scoreGuess, 15, bar.height);
+    		}
+    	}
+    	if (trials==0){
+    		document.getElementById("test_response").value=test_response
+    		document.getElementById("final_score").value=totalScore
+    		document.getElementById("form").submit()
+    	}else{
+    		shiftFocus(index[trials-1])
+    	}
+    }
+   	document.addEventListener("keydown", Submit)
+
+</script>
+<link rel="stylesheet" type="text/css" href="../static/bar_style.css">
+
+</body>
+</html>

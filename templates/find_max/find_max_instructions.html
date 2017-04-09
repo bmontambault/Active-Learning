@@ -1,0 +1,34 @@
+<html>
+<form id="form" method="POST">
+    <input type="hidden" value="{{instructions}}" name="postTag">
+</form>
+<div>
+In the testing phase you will again see a number of grey vertical bars, each associated with a score. Your task will be to select one of the bars by clicking on it twice. On the first click, your selected bar will be outlined in red. On the second, Your choice will be entered and the task will conclude. Your goal is to choose the bar that yeilds the highest possible score.
+</div>
+<div class="container">
+<p>Total Score: 0 </p>
+<canvas id="bar1" class="bar" height="250" width="15"></canvas>
+<canvas id="bar2" class="bar" height="250" width="15"></canvas>
+<canvas id="bar3" class="bar" height="250" width="15"></canvas>
+</div>
+<div class="container">
+<p>Total Score: 0 </p>
+<canvas id="bar1" class="bar" height="250" width="15"></canvas>
+<canvas id="bar2" class="bar focus selected" height="250" width="15"></canvas>
+<canvas id="bar3" class="bar" height="250" width="15"></canvas>
+</div>
+<div class="container">
+<p>Total Score: 100 </p>
+</div>
+<div>
+Press space to continue
+</div>
+
+<script type="text/javascript" src="../../static/init_bars.js"></script>
+<script type="text/javascript" src="../../static/continue.js"></script>
+<script>
+init_bars([100])
+</script>
+<link rel="stylesheet" type="text/css" href="../../static/bar_style.css">
+
+</html>
