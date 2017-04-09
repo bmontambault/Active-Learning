@@ -66,9 +66,10 @@ Total Score: 0
         if(bar.className.indexOf(" focus") > 0){
         	var x=parseInt(bar.id.substring(3))
 		   	score=y[x]
-		   	scoreGuess=bar.height-Math.min(Math.max(0, event.y-bar.offsetTop),bar.height)
-		   	error=scoreGuess-score
+		   	console.log(event.clientY)
+		   	scoreGuess=bar.height-Math.min(Math.max(0, event.clientY-bar.offsetTop),bar.height)
 		   	console.log(scoreGuess)
+		   	error=scoreGuess-score
             Move(scoreGuess);
         }
     }
