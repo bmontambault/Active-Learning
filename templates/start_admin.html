@@ -9,9 +9,9 @@
     </fieldset>
 
     <fieldset id="function_name">
-      <input type="radio" name="function_name" value="linear" checked> Positive Linear
-      <input type="radio" name="function_name" value="power"> Negative Linear
-      <input type="radio" name="function_name" value="sin"> Power
+      {%for f in function_names%}
+        <input type="radio" name="function_name" value={{f}}>{{f}}
+      {%endfor%}
     </fieldset>
     <input type="hidden" value="0" name="index">
     <button type="submit">Go</button>

@@ -9,8 +9,9 @@ import string
 import random
 from config import nbars,max_score,trials
 
+path=os.path.dirname(os.path.realpath(__file__))
 goals=['max_score','find_max','min_error']
-functions=['pos_linear','neg_linear','pos_power','neg_power','pos_quad','neg_quad','sin','se']
+functions=['pos_linear','neg_linear','pos_power','neg_power','pos_quad','neg_quad','sin','sinc','se']
 
 funcmap={f:''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(10)) for f in functions}
 revfuncmap={value:key for key,value in funcmap.iteritems()}
@@ -24,7 +25,7 @@ def start():
     elif request.method=='POST':
         index=request.form['index']
         if index=='0':
-            with open('data.json') as json_data:
+            with open(path+'/'+'data.json') as json_data:
                 data=json.load(json_data)
                 json_data.close()
 
@@ -58,7 +59,7 @@ def start():
 @app.route('/admin',methods=['GET','POST'])
 def start_admin():
     if request.method=='GET':
-        return render_template('start_admin.html')
+        return render_template('start_admin.html',function_names=functions)
     elif request.method=='POST':
         goal=request.form['goal']
         function_tag=request.form['function_name']
@@ -70,12 +71,12 @@ def start_admin():
         return task('test',goal,function_name,index)
 
 def task(idtag,goal,function_name,index):
-    with open('functions.json') as json_data:
+    with open(path+'/'+'functions.json') as json_data:
             function=json.load(json_data)[function_name]
             json_data.close()
 
     if index=='exit':
-        with open('data.json') as json_data:
+        with open(path+'/'+'data.json') as json_data:
             data=json.load(json_data)
             json_data.close()
         ID=idtag+str(len(data['ID'])+1)
@@ -89,7 +90,7 @@ def task(idtag,goal,function_name,index):
         data['ID'].append(ID)
 
         data['function'].append(function)
-        with open('data.json', 'w') as json_data:
+        with open(path+'/'+'data.json', 'w') as json_data:
             json.dump(data,json_data)
         return 'Thank you for participating. Your final score is {0}'.format(data['final_score'][-1].split('.')[0])
 
