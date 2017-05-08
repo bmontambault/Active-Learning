@@ -1,0 +1,40 @@
+<html>
+<form method="POST">
+<input type="hidden" value="{{goal}}" name="goal">
+<input type="hidden" value="{{function_name}}" name="function_name">
+<input type="hidden" value="exit" name="index">
+<input type="hidden" value="{{test_response}}" name="test_response">
+<input type="hidden" value="{{final_score}}" name="final_score">
+<div>
+Age
+<br>
+<select name="age" class="age"></select>
+</div>
+<div>
+Please describe the goal of this game.
+<br>
+<textarea name="describe_goal"></textarea>
+</div>
+<div>
+Please describe in as much detail as possible your strategy while playing this game.
+<br>
+<textarea name="describe_strategy"></textarea>
+</div>
+<div>
+Please describe in as much detail as possible anything that was unclear or confusing to you while playing this game.
+<br>
+<textarea name="describe_unclear"></textarea>
+</div>
+<input type="submit" value="Submit">
+</form>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript">
+$(function(){
+    var $select = $(".age");
+    for (i=18;i<=100;i++){
+        $select.append($('<option></option>').val(i).html(i))
+    }
+});
+</script>
+</html>

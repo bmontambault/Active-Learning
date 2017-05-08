@@ -1,0 +1,83 @@
+<html>
+<form id="form" method="POST">
+	<input type="hidden" value="{{goal}}" name="goal">
+	<input type="hidden" value="{{function_name}}" name="function_name">
+    <input type="hidden" value="2" name="index">
+    <input type="hidden" id="test_response" name="test_response">
+  	<input type="hidden" id="final_score" name="final_score">
+</form>
+<body>
+<div id="ui">
+Trials Remaining: {{trials}}
+<br>
+Total Score: 0
+</div>
+<br>
+<div id="help">
+Click one of the bars below once to highlight it. Click the same bar again to reveal its value and add it to your total score.
+</div>
+<br>
+<div id="barContainer">
+{%for i in range(nbars)%}
+<canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="15" onmousedown="Click(event)"></canvas>
+{% endfor %}
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" src="../static/init_bars.js"></script>
+<script>
+
+	init_bars([])
+	var trials={{trials}}
+	var test_response=[]
+	var totalScore=0
+
+	function Click(event){
+		var bar = event.target
+		/*if(bar.className.indexOf(" active") < 0){*/
+		   	if(bar.className.indexOf(" focus") > 0){
+		   		document.getElementById("help").innerHTML="Click any of the non-highlighted bars below once to highlight it. Click the same bar again to reveal its value and add it to your total score. Clicking the bar that is currently highlighted once will add its value to your total score."
+		   		bar.className += " active"
+		   		var x=parseInt(bar.id.substring(3))
+		   		var score={{function}}[x]
+		   		console.log(x)
+		   		console.log(score)
+		        Move(bar.height-score);
+		        Submit(x,score);
+
+		    }else{
+		        bars = document.getElementsByClassName("focus");
+		        document.getElementById("help").innerHTML="Click the highlighted bar again to reveal its value and add it to your total score, or click another bar to highlight it."
+		        for(var i=0; i<bars.length; i++){
+		            bars[i].className = bars[i].className.replace(" focus", "")
+		        }
+		        bar.className += " focus";
+			}
+		/*}*/
+	}
+
+	function Move(ypos){
+	    bar = document.getElementsByClassName("focus")[0];
+	    ctx = bar.getContext("2d");
+	    ctx.fillStyle = "black"
+	    ctx.clearRect(0, 0, bar.width, bar.height);
+	    ctx.fillRect(0, ypos, 15, bar.height);
+	}
+
+	function Submit(x,score){
+		test_response.push(x)
+		totalScore+=score
+		trials-=1
+		document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br>Total Score: "+Math.round(totalScore)
+		if(trials==0){
+			document.getElementById("test_response").value=test_response
+			document.getElementById("final_score").value=totalScore
+			document.getElementById("form").submit()
+		}
+	}
+	
+</script>
+<link rel="stylesheet" type="text/css" href="../static/bar_style.css">
+
+</body>
+</html>

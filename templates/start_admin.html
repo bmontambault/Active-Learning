@@ -1,0 +1,21 @@
+<html>
+<body>
+
+<form method="POST">
+    <fieldset id="goal">
+      <input type="radio" name="goal" value="max_score" checked> Maximize Score
+      <input type="radio" name="goal" value="find_max"> Find Max
+      <input type="radio" name="goal" value="min_error"> Minimize Error
+    </fieldset>
+
+    <fieldset id="function_name">
+      <input type="radio" name="function_name" value="linear" checked> Positive Linear
+      <input type="radio" name="function_name" value="power"> Negative Linear
+      <input type="radio" name="function_name" value="sin"> Power
+    </fieldset>
+    <input type="hidden" value="0" name="index">
+    <button type="submit">Go</button>
+</form>
+
+</body>
+<html>
