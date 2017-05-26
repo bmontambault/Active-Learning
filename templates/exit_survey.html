@@ -1,4 +1,5 @@
 <html>
+<link rel="stylesheet" type="text/css" href="../../static/main.css">
 <form method="POST">
 <input type="hidden" value="{{goal}}" name="goal">
 <input type="hidden" value="{{function_name}}" name="function_name">
@@ -6,22 +7,22 @@
 <input type="hidden" value="{{test_response}}" name="test_response">
 <input type="hidden" value="{{final_score}}" name="final_score">
 <div>
-Age
+What is your age? Choose "NA" if you prefer not to say.
 <br>
 <select name="age" class="age"></select>
 </div>
 <div>
-Please describe the goal of this game.
+What was the goal of the game?
 <br>
 <textarea name="describe_goal"></textarea>
 </div>
 <div>
-Please describe in as much detail as possible your strategy while playing this game.
+What was your strategy in playing the game?
 <br>
 <textarea name="describe_strategy"></textarea>
 </div>
 <div>
-Please describe in as much detail as possible anything that was unclear or confusing to you while playing this game.
+Was anything unclear or confusing about the game?
 <br>
 <textarea name="describe_unclear"></textarea>
 </div>
@@ -35,6 +36,7 @@ $(function(){
     for (i=18;i<=100;i++){
         $select.append($('<option></option>').val(i).html(i))
     }
+    $select.append('<option>NA</option>')
 });
 </script>
 </html>

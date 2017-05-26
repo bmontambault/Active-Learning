@@ -1,16 +1,25 @@
 <html>
+<link rel="stylesheet" type="text/css" href="../../static/main.css">
 <form id="form" method="POST">
 	<input type="hidden" value="{{goal}}" name="goal">
 	<input type="hidden" value="{{function_name}}" name="function_name">
     <input type="hidden" value="1" name="index">
 </form>
 <div>
-This is a game where you are trying to find the maximum possible score, by selecting different vertical bars. At the beginning of the game, the value associated with each bar is hidden, but once you select a bar it will be revealed, with the height of the black part of the bar indicating its values.
+<h1>Instructions</h1>
+<div>
+  This is a game where you are trying to get as many points as possible, by <b>finding the vertical bar with the greatest height</b>.
+  <p>At the beginning of the game, the height of each bar is hidden.
+  <br>Once you select a bar, its height will be revealed.
+  <br>You select a bar by clicking on it twice. The first time you click, it will be outlined in red.
+  <br>Click again to submit your selection. You will earn points equal to its height, added to your total score.
+  <p>The picture below shows an example with three bars.
+  <p>The player first selected the middle bar, which would be worth 100 points.
+  <br>Next, the player select the right bar, which would be worth 200 points.
+  <br>Next, the player selects the left bar. It is not the highest bar, so the score does not change.
+  <br>Your score is based <b>only on the highest bar that you select.</b>
 </div>
 <br>
-<div>
-You select a bar by clicking on it twice. The first time you click, it will be outlined in red; the second click means you have selected it, so its value is revealed. You will have {{trials}} chances to select bars that yields the maximum possible score.
-</div>
 
 <div class="container">
 <p>Score: 0 </p>
@@ -59,7 +68,9 @@ You select a bar by clicking on it twice. The first time you click, it will be o
 <br>
 <br>
 <div>
-If you score in the top 10%, you will earn a bonus equal to the base payment for this HIT (If there are fewer than ten people, the top scorer will receive a bonus). If your performance is worse than it would be by random guessing, your HIT may be rejected.
+  You will have {{trials}} chances to select bars and try to find the highest one.
+  <p>If you score in the top 10%, you will earn a bonus equal to the base payment for this HIT (If there are fewer than ten people, the top scorer will receive a bonus).
+  <br>If your performance is worse than it would be by random guessing, your HIT may be rejected.
 </div>
 <br>
 <div>
@@ -72,6 +83,4 @@ Press Space to begin
 init_bars([100,100,100,200,100,200,50,100,200])
 </script>
 <link rel="stylesheet" type="text/css" href="../../static/bar_style.css">
-
-</html>
 </html>
