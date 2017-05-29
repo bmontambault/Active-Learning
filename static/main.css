@@ -1,0 +1,22 @@
+html,body{font-family:Verdana,sans-serif;font-size:15px;line-height:1.5}
+	
+ul, ol, dl {
+}
+
+h1 {
+}
+
+h2 {
+}
+
+h3 {
+}
+
+.header {
+	background: #006699;
+	/* #8f8f8f; gray*/
+	/* background: #250c12; */
+	font-family:"Lucida Grande", Tahoma, Helvetica, sans-serif;
+	margin-left:auto;
+	margin-right:auto;
+}
