@@ -1,6 +1,6 @@
 <html>
 <link rel="stylesheet" type="text/css" href="../../static/main.css">
-<form method="POST">
+<form id="data">
 <input type="hidden" value="{{goal}}" name="goal">
 <input type="hidden" value="{{function_name}}" name="function_name">
 <input type="hidden" value="exit" name="index">
@@ -26,8 +26,8 @@ Was anything unclear or confusing about the game?
 <br>
 <textarea name="describe_unclear"></textarea>
 </div>
-<input type="submit" value="Submit">
 </form>
+<button onclick="return log()">Submit</button>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script type="text/javascript">
@@ -38,5 +38,16 @@ $(function(){
     }
     $select.append('<option>NA</option>')
 });
+
+function log(){
+	var formArray=$("#data").serializeArray()
+	var returnArray = {};
+	for (var i = 0; i < formArray.length; i++){
+		returnArray[formArray[i]['name']] = formArray[i]['value'];
+	}
+	console.log(returnArray);
+}
+
+
 </script>
 </html>

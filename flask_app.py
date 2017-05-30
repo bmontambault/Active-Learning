@@ -3,10 +3,11 @@
 
 from __future__ import print_function
 import sys,os
-from flask import Flask,render_template,request
+from flask import Flask,render_template,request,jsonify
 import json
 import string
 import random
+import uuid
 from config import nbars,max_score,trials
 
 path=os.path.dirname(os.path.realpath(__file__))
@@ -72,8 +73,8 @@ def start_admin():
 
 def task(idtag,goal,function_name,index):
     with open(path+'/'+'functions.json') as json_data:
-            function=json.load(json_data)[function_name]
-            json_data.close()
+        function=json.load(json_data)[function_name]
+        json_data.close()
 
     if index=='exit':
         with open(path+'/'+'data.json') as json_data:
@@ -83,16 +84,21 @@ def task(idtag,goal,function_name,index):
 
         for key in request.form.keys():
             if key in data.keys():
-                if key=='function_name':
-                    data[key].append(revfuncmap[request.form[key]])
-                else:
-                    data[key].append(request.form[key])
+                data[key].append(request.form[key])
         data['ID'].append(ID)
-
         data['function'].append(function)
         with open(path+'/'+'data.json', 'w') as json_data:
             json.dump(data,json_data)
-        return 'Thank you for participating. Your final score is {0}'.format(data['final_score'][-1].split('.')[0])
+            
+        participant={}
+        for key in request.form.keys():
+            participant[key]=request.form[key]
+        ID2=str(uuid.uuid4())
+        participant['ID']=ID2
+        participant['function']=function
+        return None
+        #return render_template('show_score.html',score=participant['final_score'].split('.')[0],participant=(participant))
+        #return 'Thank you for participating. Your final score is {0}'.format(data['final_score'][-1].split('.')[0])
 
     elif goal=='max_score':
         if index=='0':
@@ -102,7 +108,7 @@ def task(idtag,goal,function_name,index):
         elif index=='2':
             test_response=request.form['test_response']
             final_score=request.form['final_score']
-            return render_template('exit_survey.html',goal=goal,function_name=funcmap[function_name],test_response=test_response,final_score=final_score)
+            return render_template('exit_survey.html',goal=goal,function_name=function_name,test_response=test_response,final_score=final_score)
 
     elif goal=='find_max':
         if index=='0':
@@ -112,7 +118,7 @@ def task(idtag,goal,function_name,index):
         elif index=='2':
             test_response=request.form['test_response']
             final_score=request.form['final_score']
-            return render_template('exit_survey.html',goal=goal,function_name=funcmap[function_name],test_response=test_response,final_score=final_score)
+            return render_template('exit_survey.html',goal=goal,function_name=function_name,test_response=test_response,final_score=final_score)
 
     elif goal=='min_error':
         if index=='0':
@@ -125,7 +131,7 @@ def task(idtag,goal,function_name,index):
         elif index=='3':
             test_response=request.form['test_response']
             final_score=request.form['final_score']
-            return render_template('exit_survey.html',goal=goal,function_name=funcmap[function_name],test_response=test_response,final_score=final_score)
+            return render_template('exit_survey.html',goal=goal,function_name=function_name,test_response=test_response,final_score=final_score)
 
 if __name__=="__main__":
     app.run()
