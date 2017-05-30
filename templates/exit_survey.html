@@ -30,22 +30,56 @@ Was anything unclear or confusing about the game?
 <button onclick="return log()">Submit</button>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+// For testing, use localhost where possible
+var wso = new WebSocket("ws://somata.inf.ed.ac.uk/chunks/ws");
+var wsError = 0; // Keeps track of whether any websocket errors have occurred
+wso.onopen = function() {
+  /* Send a small message to the console once the connection is established */
+  console.log('chunk ws connection open.');
+}
+
+wso.onmessage = function(event) {
+  message = JSON.parse(event.data);
+  console.log('received websocket message: ' + message);
+}
+
+wso.onerror = function(error){
+  console.log('websocket error detected: ' + JSON.stringify(error));
+  wsError = 1;
+}
+
+function sendData(dataChunk) {
+  dataChunk["experimentId"]="algoals";
+  dataChunk["experimentVersion"]="0.0.1"; // optional but helpful
+  dataChunk["sessionId"]="TODO"; // required; by convention, this is provided at the first point of entry to the webApp (typically the consent form)
+  // isComplete allows the server to record completion, but is optional
+  dataChunk["isComplete"] = true;
+  var dataStr = JSON.stringify(dataChunk);
+  wso.send(dataStr);
+  // Could wait to see if storage is successful, or jump immediately to a completion page. Doing nothing yet.
+  // window.location.href = "./code.html"
+}
+</script>
+
 <script type="text/javascript">
 $(function(){
     var $select = $(".age");
-    for (i=18;i<=100;i++){
+    for (i=18;i<=100;i++) {
         $select.append($('<option></option>').val(i).html(i))
     }
     $select.append('<option>NA</option>')
 });
 
 function log(){
-	var formArray=$("#data").serializeArray()
-	var returnArray = {};
-	for (var i = 0; i < formArray.length; i++){
-		returnArray[formArray[i]['name']] = formArray[i]['value'];
-	}
-	console.log(returnArray);
+      var formArray=$("#data").serializeArray()
+      var returnArray = {};
+      for (var i = 0; i < formArray.length; i++){
+      returnArray[formArray[i]['name']] = formArray[i]['value'];
+      }
+      console.log('sending: ' + returnArray);
+      sendData(returnArray);
 }
 
 
