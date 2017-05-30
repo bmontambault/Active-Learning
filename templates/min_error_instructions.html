@@ -1,57 +1,89 @@
 <html>
+<link rel="stylesheet" type="text/css" href="../../static/main.css">
 <form id="form" method="POST">
 	<input type="hidden" value="{{goal}}" name="goal">
 	<input type="hidden" value="{{function_name}}" name="function_name">
     <input type="hidden" value="1" name="index">
 </form>
+<h1>Instructions</h1>
 <div>
-This is a game where you are trying to learn how many points different vertical bars are worth, by selecting different vertical bars. At the beginning of the game, the value associated with each bar is hidden, but once you select a bar it will be revealed, with the height of the black part of the bar indicating its values.
+  This is a game where you are trying to get as many points as possible, by <b>predicting the height of vertical bars</b>.
+  <p>At the beginning of the game, the height of each bar is hidden.
+  <br>Once you select a bar, its height will be revealed.
+  <br>You select a bar by clicking on it twice. The first time you click, it will be outlined in red.
+  <br>Click again to submit your selection
+  <br>Once {{trials}} bars have been selected, you will try and predict the height of {{trials}} different bars.
+  <br>The target bar will be outlined in red.
+  <br>Predict the height of the bar by clicking anywhere within the red outline.
+  <br>Press the spacebar to submit your prediction. You will earn points proportional to the accuracy of your prediction, added to your total score.
 
-</div>
-<br>
-<div>
-You select a bar by clicking on it twice. The first time you click, it will be outlined in red; the second click means you have selected it, so its  value is revealed. You will have {{trials}} chances to select bars and learn about which bars have different values. After you have selected the bars to you want see, you will be asked to predict the values of bars you have not yet revealed. The more accurate your predictions are, the higher your score will be.
+  <p>The picture below shows an example with three bars.
+
+  <p>The middle bar is selected.
+  <br>The player guessed the height of the bar, shown in black.
+  <br>The player submitted the guess, and the true height was shown in red. The player earned 450 points (maximum possible score - prediction error).
+  Your score is based <b>on the all of the predictions you make.</b>
+
 </div>
 
 <div class="container">
-<canvas id="bar1" class="bar" height="250" width="15"></canvas>
-<canvas id="bar2" class="bar" height="250" width="15"></canvas>
-<canvas id="bar3" class="bar" height="250" width="15"></canvas>
-</div>
-<div class="container">
+<p>Total Score: 0 </p>
 <canvas id="bar1" class="bar" height="250" width="15"></canvas>
 <canvas id="bar2" class="bar focus" height="250" width="15"></canvas>
 <canvas id="bar3" class="bar" height="250" width="15"></canvas>
 </div>
 <div class="container">
+<p>Total Score: 0 </p>
 <canvas id="bar1" class="bar" height="250" width="15"></canvas>
 <canvas id="bar2" class="bar focus selected" height="250" width="15"></canvas>
 <canvas id="bar3" class="bar" height="250" width="15"></canvas>
 </div>
 <div class="container">
+<p>Total Score: 450 </p>
 <canvas id="bar1" class="bar" height="250" width="15"></canvas>
-<canvas id="bar2" class="bar selected" height="250" width="15"></canvas>
-<canvas id="bar3" class="bar focus" height="250" width="15"></canvas>
-</div>
-<div class="container">
-<canvas id="bar1" class="bar" height="250" width="15"></canvas>
-<canvas id="bar2" class="bar selected" height="250" width="15"></canvas>
-<canvas id="bar3" class="bar focus selected" height="250" width="15"></canvas>
+<canvas id="bar2" class="bar focus example1" height="250" width="15"></canvas>
+<canvas id="bar3" class="bar" height="250" width="15"></canvas>
 </div>
 <br>
 <br>
 <div>
-If you score in the top 10%, you will earn a bonus equal to the base payment for this HIT (If there are fewer than ten people, the top scorer will receive a bonus). If your performance is worse than it would be by random guessing, your HIT may be rejected.
+  You will have {{trials}} chances to make predictions and increase your score.
+  <p>If you score in the top 10%, you will earn a bonus equal to the base payment for this HIT (If there are fewer than ten people, the top scorer will receive a bonus).
+  <br>If your performance is worse than it would be by random guessing, your HIT may be rejected.
 </div>
 <br>
 <div>
-Press Space to begin
+Press Space to begin.
 </div>
 
 <script type="text/javascript" src="../../static/init_bars.js"></script>
 <script type="text/javascript" src="../../static/continue.js"></script>
-<script>
-init_bars([100,100,100,200])
+<script type="text/javascript">
+	var allBars = document.getElementsByClassName("bar")
+	for(var i=0; i<allBars.length; i++){
+		var ctx = allBars[i].getContext("2d")
+		ctx.fillStyle = "grey"
+		ctx.fillRect(0, 0, allBars[i].width, allBars[i].height)
+	}
+
+	var selectedBars= document.getElementsByClassName("selected")
+	for(var i=0; i<selectedBars.length; i++){
+		var ctx = selectedBars[i].getContext("2d")
+		ctx.fillStyle = "black"
+		ctx.clearRect(0, 0, selectedBars[i].width, selectedBars[i].height);
+		ctx.fillRect(0, selectedBars[i].height-100, selectedBars[i].width, selectedBars[i].height)
+	}
+
+	var example1Bars = document.getElementsByClassName("example1")
+	for(var i=0; i<example1Bars.length; i++){
+		var ctx = example1Bars[i].getContext("2d")
+		ctx.fillStyle = "black"
+		ctx.clearRect(0, 0, example1Bars[i].width, example1Bars[i].height);
+		ctx.fillRect(0, example1Bars[i].height-100, example1Bars[i].width, example1Bars[i].height)
+		ctx.fillStyle = "red"
+		ctx.fillRect(0, example1Bars[i].height-50, example1Bars[i].width, example1Bars[i].height)
+	}
+
 </script>
 <link rel="stylesheet" type="text/css" href="../../static/bar_style.css">
 
