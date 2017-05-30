@@ -1,4 +1,5 @@
 <html>
+<link rel="stylesheet" type="text/css" href="../../static/main.css">
 <form id="form" method="POST">
 	<input type="hidden" value="{{goal}}" name="goal">
 	<input type="hidden" value="{{function_name}}" name="function_name">
@@ -35,6 +36,8 @@ Click the highlighted bar at the height that you think corresponds with its valu
 	var totalScore=0
 	var index=[]
 
+	document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br> Total Score: "+0
+
 	/*
 	for(var i=0; i<phase1_response.length; i++){
 		var bar=document.getElementById("bar"+phase1_response[i])
@@ -49,6 +52,7 @@ Click the highlighted bar at the height that you think corresponds with its valu
 			ctx.fillRect(0, bar.height-y[i], bar.width, bar.height)
 		}
 	} */
+	console.log({{trials}})
 	console.log(phase1_response)
 	var allBars = document.getElementsByClassName("bar")
 	for(var i=0; i<allBars.length; i++){
