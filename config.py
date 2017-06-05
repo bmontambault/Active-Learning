@@ -1,11 +1,16 @@
 import numpy as np
 import scipy.stats as st
 import json
+import subprocess
 
-max_score=500
+version=subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
+max_height=500
+bar_width=15
 nbars=80
 trials=25
+predict_trials=10
 se_length=5
+
 
 functions={'pos_linear':lambda x:x,
            'neg_linear':lambda x:-x,
@@ -15,13 +20,12 @@ functions={'pos_linear':lambda x:x,
            'neg_quad':lambda x:-((x-(nbars/2.))**2),
            'sin':lambda x:np.sin(x),
            'sinc':lambda x:np.sin(x-(nbars/2.))/(x-(nbars/2.)),
-           'se':lambda x: st.multivariate_normal.rvs(np.zeros(len(x)),np.array([[np.exp(-((xi-xj)**2/float(2*se_length**2))) for xi in x] for xj in x]))
-           
+           'se':lambda x: st.multivariate_normal.rvs(np.zeros(len(x)),np.array([[np.exp(-((xi-xj)**2/float(2*se_length**2))) for xi in x] for xj in x]))      
 }
 
 def write_functions():
-    miny=np.random.uniform(0.,.2)*max_score
-    maxy=np.random.uniform(.8,1.)*max_score
+    miny=np.random.uniform(0.,.2)*max_height
+    maxy=np.random.uniform(.8,1.)*max_height
     x=np.arange(0,nbars)
     y={f:[1 if np.isnan(yi) else yi for yi in functions[f](x)] for f in functions}
     norm_func={f:[(maxy-miny)/(max(y[f])-min(y[f]))*(val-max(y[f]))+maxy for val in y[f]] for f in functions}
