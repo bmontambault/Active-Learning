@@ -5,6 +5,8 @@
 	<input type="hidden" value="{{function_name}}" name="function_name">
     <input type="hidden" value="2" name="index">
     <input type="hidden" id="test_response" name="test_response">
+    <input type="hidden" id="test_response_time" name="test_response_time">
+    <input type="hidden" id="test_start_time" name="test_start_time">
   	<input type="hidden" id="final_score" name="final_score">
 </form>
 <body>
@@ -18,7 +20,7 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 <br>
 <div id="barContainer">
 {%for i in range(nbars)%}
-<canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="15" onmousedown="Click(event)"></canvas>
+<canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="{{bar_width}}" onmousedown="Click(event)"></canvas>
 {% endfor %}
 </div>
 
@@ -29,7 +31,9 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 	init_bars([])
 	var trials={{trials}}
 	var test_response=[]
+	var test_response_time=[]
 
+	document.getElementById('test_start_time').value=Date.now()
 	function Click(event){
 		var bar = event.target
 		/*if(bar.className.indexOf(" active") < 0){*/
@@ -38,8 +42,6 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 		   		bar.className += " active"
 		   		var x=parseInt(bar.id.substring(3))
 		   		var score={{function}}[x]
-		   		console.log(x)
-		   		console.log(score)
 		        Move(bar.height-score);
 		        Submit(x);
 
@@ -64,10 +66,12 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 
 	function Submit(x){
 		test_response.push(x)
+		test_response_time.push(Date.now())
 		trials-=1
 		document.getElementById("ui").innerHTML="Trials Remaining: "+trials
 		if(trials==0){
 			document.getElementById("test_response").value=test_response
+			document.getElementById("test_response_time").value=test_response_time
 			document.getElementById("form").submit()
 		}
 	}

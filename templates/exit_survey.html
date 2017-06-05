@@ -1,11 +1,27 @@
 <html>
 <link rel="stylesheet" type="text/css" href="../../static/main.css">
 <form id="data">
-<input type="hidden" value="{{goal}}" name="goal">
+<input type="hidden" value="{{id}}" name="id">
 <input type="hidden" value="{{function_name}}" name="function_name">
-<input type="hidden" value="exit" name="index">
+<input type="hidden" value="{{goal}}" name="goal">
+<input type="hidden" value="{{function}}" name="function">
+<input type="hidden" value="{{max_score}}" name="max_score">
 <input type="hidden" value="{{test_response}}" name="test_response">
+<input type="hidden" value="{{test_start_time}}" name="test_start_time">
+<input type="hidden" value="{{test_response_time}}" name="test_response_time">
+<input type="hidden" value="{{predict_response}}" name="predict_response">
+<input type="hidden" value="{{predict_start_time}}" name="predict_start_time">
+<input type="hidden" value="{{predict_response_time}}" name="predict_response_time">
 <input type="hidden" value="{{final_score}}" name="final_score">
+<input type="hidden" value="{{max_total_score}}" name="max_total_score">
+
+
+<input type="hidden" value="{{max_height}}" name="max_height">
+<input type="hidden" value="{{bar_width}}" name="bar_width">
+<input type="hidden" value="{{number_of_bars}}" name="number_of_bars">
+<input type="hidden" value="{{plot_width}}" name="plot_width">
+<input type="hidden" value="{{experiment}}" name="experiment">
+<input type="hidden" value="{{version}}" name="version">
 <div>
 What is your age? Choose "NA" if you prefer not to say.
 <br>
@@ -33,10 +49,10 @@ Was anything unclear or confusing about the game?
 <script type="text/javascript">
 $(function(){
     var $select = $(".age");
+    $select.append('<option>NA</option>')
     for (i=18;i<=100;i++){
         $select.append($('<option></option>').val(i).html(i))
     }
-    $select.append('<option>NA</option>')
 });
 
 function log(){

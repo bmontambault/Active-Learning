@@ -2,9 +2,14 @@
 <form id="form" method="POST">
 	<input type="hidden" value="{{goal}}" name="goal">
 	<input type="hidden" value="{{function_name}}" name="function_name">
-    <input type="hidden" value="2" name="index">
+    <input type="hidden" value="exit" name="index">
     <input type="hidden" id="test_response" name="test_response">
+    <input type="hidden" id="test_response_time" name="test_response_time">
+    <input type="hidden" id="test_start_time" name="test_start_time">
   	<input type="hidden" id="final_score" name="final_score">
+  	<input type="hidden" value="" name="predict_response">
+  	<input type="hidden" value="" name="predict_response_time">
+  	<input type="hidden" value="" name="predict_start_time">
 </form>
 <body>
 <div id="ui">
@@ -19,7 +24,7 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 <br>
 <div id="barContainer">
 {%for i in range(nbars)%}
-<canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="15" onmousedown="Click(event)"></canvas>
+<canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="{{bar_width}}" onmousedown="Click(event)"></canvas>
 {% endfor %}
 </div>
 
@@ -30,30 +35,28 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 	init_bars([])
 	var trials={{trials}}
 	var test_response=[]
+	var test_response_time=[]
 	var totalScore=0
 
+	document.getElementById("test_start_time").value=Date.now()
 	function Click(event){
 		var bar = event.target
-		/*if(bar.className.indexOf(" active") < 0){*/
-		   	if(bar.className.indexOf(" focus") > 0){
-		   		document.getElementById("help").innerHTML="Click any of the non-highlighted bars below once to highlight it. Click the same bar again to reveal its value. Clicking the bar that is currently highlighted once will do nothing besides using up a trial."
-		   		bar.className += " active"
-		   		var x=parseInt(bar.id.substring(3))
-		   		var score={{function}}[x]
-		   		console.log(x)
-		   		console.log(score)
-		        Move(bar.height-score);
-		        Submit(x,score);
+		if(bar.className.indexOf(" focus") > 0){
+			document.getElementById("help").innerHTML="Click any of the non-highlighted bars below once to highlight it. Click the same bar again to reveal its value. Clicking the bar that is currently highlighted once will do nothing besides using up a trial."
+		   	bar.className += " active"
+		   	var x=parseInt(bar.id.substring(3))
+	   		var score={{function}}[x]
+	        Move(bar.height-score);
+	        Submit(x,score);
 
-		    }else{
-		        bars = document.getElementsByClassName("focus");
-		        document.getElementById("help").innerHTML="Click the highlighted bar again to reveal its value. This value will be your new score if it is greater than your current score."
-		        for(var i=0; i<bars.length; i++){
-		            bars[i].className = bars[i].className.replace(" focus", "")
-		        }
-		        bar.className += " focus";
-			}
-		/*}*/
+		}else{
+		    bars = document.getElementsByClassName("focus");
+	        document.getElementById("help").innerHTML="Click the highlighted bar again to reveal its value. This value will be your new score if it is greater than your current score."
+	        for(var i=0; i<bars.length; i++){
+	            bars[i].className = bars[i].className.replace(" focus", "")
+	        }
+	        bar.className += " focus";
+		}
 	}
 
 	function Move(ypos){
@@ -66,6 +69,7 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 
 	function Submit(x,score){
 		test_response.push(x)
+		test_response_time.push(Date.now())
 		if(score>totalScore){
 			totalScore=score
 		}
@@ -73,6 +77,7 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 		document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br>Total Score: "+Math.round(totalScore)
 		if(trials==0){
 			document.getElementById("test_response").value=test_response
+			document.getElementById("test_response_time").value=test_response_time
 			document.getElementById("final_score").value=totalScore
 			document.getElementById("form").submit()
 		}
