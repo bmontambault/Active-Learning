@@ -8,7 +8,7 @@ import json
 import string
 import random
 import uuid
-from config import nbars,max_height,bar_width,trials,predict_trials,version
+from config import nbars,max_height,bar_width,trials,predict_trials,version,se_length
 
 path=os.path.dirname(os.path.realpath(__file__))
 goals=['max_score','find_max','min_error']
@@ -100,6 +100,7 @@ def task(goal,function_name,index):
         participant['experiment']='bmontambault/Active-Learning'
         participant['max_total_score']=int(find_max_score(goal,function,trials,predict_trials))
         participant['version']=version
+        participant['se_function_lengthscale']=se_length
         print (participant,file=sys.stderr)
         return render_template('exit_survey.html',**participant)
         
