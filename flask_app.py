@@ -30,9 +30,11 @@ def find_max_score(goal,function,trials,predict_trials):
 @app.route('/',methods=['GET','POST'])
 def start():
     if request.method=='GET':
-        if 'id' not in session:
-            session['id']=str(uuid.uuid4())
-        sessionId=str(uuid.uuid4())
+        #if 'sessionId' not in session:
+        sessionId = request.args.get("sessionId")
+        if sessionId is None:
+            #session['id']=str(uuid.uuid4())
+            sessionId=str(uuid.uuid4())
         return render_template('start.html',sessionId=sessionId)
     elif request.method=='POST':
         index=request.form['index']
