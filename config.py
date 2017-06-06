@@ -1,9 +1,8 @@
 import numpy as np
 import scipy.stats as st
 import json
-import subprocess
 
-version=subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
+version="0.1.0"
 max_height=500
 bar_width=15
 nbars=80
