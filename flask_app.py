@@ -32,7 +32,8 @@ def start():
     if request.method=='GET':
         if 'id' not in session:
             session['id']=str(uuid.uuid4())
-        return render_template('start.html')
+        sessionId=str(uuid.uuid4())
+        return render_template('start.html',sessionId=sessionId)
     elif request.method=='POST':
         index=request.form['index']
         if index=='0':
