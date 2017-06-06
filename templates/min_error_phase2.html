@@ -3,10 +3,14 @@
 <form id="form" method="POST">
 	<input type="hidden" value="{{goal}}" name="goal">
 	<input type="hidden" value="{{function_name}}" name="function_name">
-    <input type="hidden" value="3" name="index">
-    <input type="hidden" id="test_response" name="test_response">
+    <input type="hidden" value="exit" name="index">
+    <input type="hidden" id="predict_response" name="predict_response">
+    <input type="hidden" id="predict_start_time" name="predict_start_time">
+    <input type="hidden" id="predict_response_time" name="predict_response_time">
   	<input type="hidden" id="final_score" name="final_score">
-    <input type="hidden" value="[{{phase1_response}}]" name="phase1_response">
+    <input type="hidden" value="[{{phase1_response}}]" name="test_response">
+    <input type="hidden" value="{{test_response_time}}" id="test_response_time" name="test_response_time">
+    <input type="hidden" value="{{test_start_time}}" id="test_start_time" name="test_start_time">
 </form>
 <body>
 <div id="ui">
@@ -21,7 +25,7 @@ Click the highlighted bar at the height that you think corresponds with its valu
 <br>
 <div id="barContainer">
 {%for i in range(nbars)%}
-<canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="15" onmousedown="Click(event)"></canvas>
+<canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="{{bar_width}}" onmousedown="Click(event)"></canvas>
 {% endfor %}
 </div>
 
@@ -30,30 +34,15 @@ Click the highlighted bar at the height that you think corresponds with its valu
 <script>
 
 	var phase1_response=[{{phase1_response}}]
-	/*init_bars()*/
 	var trials={{trials}}
 	var test_response=[]
+	var predict_response_time=[]
 	var totalScore=0
 	var index=[]
 
+	document.getElementById("predict_start_time").value=Date.now()
 	document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br> Total Score: "+0
 
-	/*
-	for(var i=0; i<phase1_response.length; i++){
-		var bar=document.getElementById("bar"+phase1_response[i])
-		var score='{{function}}'[phase1_response[i]]
-		var ctx = bar.getContext("2d")
-		if(train.indexOf(i) < 0){
-			ctx.fillStyle = "grey"
-			ctx.fillRect(0, 0, bar.width, bar.height)
-			index.push(allBars[i])
-		}else{
-			ctx.fillStyle="red"
-			ctx.fillRect(0, bar.height-y[i], bar.width, bar.height)
-		}
-	} */
-	console.log({{trials}})
-	console.log(phase1_response)
 	var allBars = document.getElementsByClassName("bar")
 	for(var i=0; i<allBars.length; i++){
 		var ctx = allBars[i].getContext("2d")
@@ -95,9 +84,7 @@ Click the highlighted bar at the height that you think corresponds with its valu
         if(bar.className.indexOf(" focus") > 0){
         	var x=parseInt(bar.id.substring(3))
 		   	score={{function}}[x]
-		   	console.log(event.clientY)
 		   	scoreGuess=bar.height-Math.min(Math.max(0, event.clientY-bar.offsetTop),bar.height)
-		   	console.log(scoreGuess)
 		   	error=scoreGuess-score
             Move(scoreGuess);
         }
@@ -115,6 +102,7 @@ Click the highlighted bar at the height that you think corresponds with its valu
     	if (event.keyCode==32){
     		trials-=1
     		test_response.push([score,scoreGuess])
+    		predict_response_time.push(Date.now())
     		totalScore+=(Math.max.apply(Math, {{function}})-Math.abs(scoreGuess-score))
 			document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br> Total Score: "+Math.round(totalScore)
     		if(error>=0){
@@ -130,6 +118,7 @@ Click the highlighted bar at the height that you think corresponds with its valu
     	}
     	if (trials==0){
     		document.getElementById("test_response").value=test_response
+    		document.getElementById("predict_response_time").value=predict_response_time
     		document.getElementById("final_score").value=totalScore
     		document.getElementById("form").submit()
     	}else{
