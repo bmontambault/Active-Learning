@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 import sys,os
-from flask import Flask,render_template,request,session
+from flask import Flask,render_template,request,session,url_for
 import json
 import string
 import random
@@ -27,38 +27,25 @@ def find_max_score(goal,function,trials,predict_trials):
     elif goal=='min_error':
         return max(function)*(predict_trials)
 
+
 @app.route('/',methods=['GET','POST'])
 def start():
     if request.method=='GET':
-        #if 'sessionId' not in session:
-        sessionId = request.args.get("sessionId")
+        sessionId=request.args.get("sessionId")
+        gi=request.args.get('gi')
+        fi=request.args.get('fi')
         if sessionId is None:
-            #session['id']=str(uuid.uuid4())
             sessionId=str(uuid.uuid4())
-        return render_template('start.html',sessionId=sessionId)
+        return render_template('start.html',sessionId=sessionId,gi=gi,fi=fi)
     elif request.method=='POST':
         index=request.form['index']
         if index=='0':
-            with open(path+'/'+'conditions.json') as json_data:
-                conditions=json.load(json_data)
-                json_data.close()
-            prev_func=conditions['function_index']
-            prev_goal=conditions['goal_index']
-            if len(functions)-prev_func==1:
-                if len(goals)-prev_goal==1:
-                    curr_goal=0
-                else:
-                    curr_goal=prev_goal+1
-                curr_function=0
-            else:
-                curr_goal=prev_goal
-                curr_function=prev_goal+1
-            goal=goals[curr_goal]
-            function_name=functions[curr_function]
-            conditions={'function_index':curr_function,'goal_index':curr_goal}
-            with open('conditions.json', 'w') as json_data:
-                json.dump(conditions,json_data)
-            return task(goal,function_name,index)
+            fi=int(request.args.get('fi'))
+            gi=int(request.args.get('gi'))
+            print (fi,file=sys.stderr)
+            print (gi,file=sys.stderr)
+            function_name=functions[fi]
+            goal=goals[gi]
         else:
             goal=request.form['goal']
             function_tag=request.form['function_name']
@@ -66,7 +53,7 @@ def start():
                 function_name=function_tag
             else:
                 function_name=revfuncmap[function_tag]
-            return task(goal,function_name,index)
+    return task(goal,function_name,index)
 
 
 @app.route('/admin',methods=['GET','POST'])
