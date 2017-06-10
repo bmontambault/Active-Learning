@@ -36,6 +36,7 @@ def start():
         fi=request.args.get('fi')
         if sessionId is None:
             sessionId=str(uuid.uuid4())
+        session["id"] = sessionId;
         return render_template('start.html',sessionId=sessionId,gi=gi,fi=fi)
     elif request.method=='POST':
         index=request.form['index']
