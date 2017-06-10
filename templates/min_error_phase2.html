@@ -39,6 +39,7 @@ Click the highlighted bar at the height that you think corresponds with its valu
 	var predict_response_time=[]
 	var totalScore=0
 	var index=[]
+	clicked=false
 
 	document.getElementById("predict_start_time").value=Date.now()
 	document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br> Total Score: "+0
@@ -80,6 +81,7 @@ Click the highlighted bar at the height that you think corresponds with its valu
 	}
 
 	function Click(event){
+		clicked = true
         var bar = event.target
         if(bar.className.indexOf(" focus") > 0){
         	var x=parseInt(bar.id.substring(3))
@@ -99,7 +101,8 @@ Click the highlighted bar at the height that you think corresponds with its valu
     }
 
     function Submit(event){
-    	if (event.keyCode==32){
+    	if (event.keyCode==32 && clicked==true){
+    		clicked=false
     		trials-=1
     		test_response.push([score,scoreGuess])
     		predict_response_time.push(Date.now())
@@ -117,7 +120,8 @@ Click the highlighted bar at the height that you think corresponds with its valu
     		}
     	}
     	if (trials==0){
-    		document.getElementById("test_response").value=test_response
+    		console.log('submit')
+    		document.getElementById("predict_response").value=predict_response
     		document.getElementById("predict_response_time").value=predict_response_time
     		document.getElementById("final_score").value=totalScore
     		document.getElementById("form").submit()
