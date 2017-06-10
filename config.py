@@ -12,7 +12,7 @@ predict_trials=10
 se_length=5
 sinc_offset=15
 neg_quad_offset=15
-pos_quad_offset=15
+pos_quad_offset=-15
 
 
 functions={'pos_linear':lambda x:x,
