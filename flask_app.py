@@ -18,6 +18,8 @@ funcmap={f:''.join(random.choice(string.ascii_lowercase + string.digits) for _ i
 revfuncmap={value:key for key,value in funcmap.iteritems()}
 
 app=Flask(__name__)
+app.secret_key='key'
+app.config['SESSION_TYPE']='filesystem'
 
 def find_max_score(goal,function,trials,predict_trials):
     if goal=='find_max':
@@ -119,6 +121,4 @@ def task(goal,function_name,index):
             return render_template('min_error_phase2.html',nbars=nbars,goal=goal,function_name=funcmap[function_name],function=function,trials=predict_trials,bar_height=max_height,bar_width=bar_width,phase1_response=phase1_response,test_start_time=test_start_time,test_response_time=test_response_time)
 
 if __name__=="__main__":
-    app.secret_key='key'
-    app.config['SESSION_TYPE']='filesystem'
     app.run()
