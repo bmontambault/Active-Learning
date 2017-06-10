@@ -75,6 +75,11 @@ wso.onerror = function(error){
 
 function sendData(dataChunk) {
   dataChunk["experimentId"]="algoals";
+  // Added these elements in order to see if some participants are using windows that are too small, causing wraparound of the bars.
+  dataChunk["windowHeight"]=$(window).height();
+  dataChunk["windowWidth"]=$(window).width();
+
+
   // isComplete allows the server to record completion, but is optional
   dataChunk["isComplete"] = true;
   var dataStr = JSON.stringify(dataChunk);
