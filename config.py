@@ -8,17 +8,21 @@ bar_width=15
 nbars=80
 trials=25
 predict_trials=10
+
 se_length=5
+sinc_offset=15
+neg_quad_offset=15
+pos_quad_offset=15
 
 
 functions={'pos_linear':lambda x:x,
            'neg_linear':lambda x:-x,
            'pos_power':lambda x:x**2,
            'neg_power':lambda x:-(x**2),
-           'pos_quad':lambda x:(x-(nbars/2.))**2,
-           'neg_quad':lambda x:-((x-(nbars/2.))**2),
+           'pos_quad':lambda x:(x-pos_quad_offset-(nbars/2.))**2,
+           'neg_quad':lambda x:-((x-neg_quad_offset-(nbars/2.))**2),
            'sin':lambda x:np.sin(x),
-           'sinc':lambda x:np.sin(x-(nbars/2.))/(x-(nbars/2.)),
+           'sinc':lambda x:np.sin(x-sinc_offset-(nbars/2.))/(x-sinc_offset-(nbars/2.)),
            'se':lambda x: st.multivariate_normal.rvs(np.zeros(len(x)),np.array([[np.exp(-((xi-xj)**2/float(2*se_length**2))) for xi in x] for xj in x]))      
 }
 
