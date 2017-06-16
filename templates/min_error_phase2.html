@@ -109,7 +109,7 @@ Click the bar that has a red outline to record what you think its height is. <b>
     		predict_response_time.push(Date.now())
     		predict_prompt.push(x)
     		predict_response.push(score)
-    		totalScore+=(Math.max.apply(Math, {{function}})-Math.abs(scoreGuess-score))*100
+    		totalScore+=(Math.max.apply(Math, {{function}})-Math.abs(scoreGuess-score))
 			document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br> Total Score: "+Math.round(totalScore)
     		if(error>=0){
     			ctx.fillStyle="red"

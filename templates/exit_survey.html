@@ -105,7 +105,13 @@ function log(){
       var formArray=$("#data").serializeArray()
       var returnArray = {};
       for (var i = 0; i < formArray.length; i++){
-      returnArray[formArray[i]['name']] = formArray[i]['value'];
+      	if (formArray[i]['value'][0] == '['){
+      		returnArray[formArray[i]['name']] = JSON.parse("[" + formArray[i]['value'] + "]")[0]
+      	}else if (isNaN(formArray[i]['value'])){
+      		returnArray[formArray[i]['name']] = formArray[i]['value'];
+      	}else{
+      		returnArray[formArray[i]['name']] = parseFloat(formArray[i]['value'])
+      	}
       }
       console.log('sending: ' + returnArray);
       sendData(returnArray);

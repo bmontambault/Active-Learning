@@ -71,8 +71,8 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 	function Submit(x,score){
 		test_response.push(x)
 		test_response_time.push(Date.now())
-		if(score*100>totalScore){
-			totalScore=score*100
+		if(score>totalScore){
+			totalScore=score
 		}
 		trials-=1
 		document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br>Total Score: "+Math.round(totalScore)

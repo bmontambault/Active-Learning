@@ -86,13 +86,13 @@ def task(goal,function_name,index):
         participant['function_name']=revfuncmap[participant['function_name']]
         participant['id']=session['id']
         participant['function']=function
-        participant['max_score']=int(max(function))
+        participant['max_score']=float(max(function))
         participant['max_height']=max_height
         participant['bar_width']=bar_width
         participant['number_of_bars']=nbars
         participant['plot_width']=bar_width*nbars
         participant['experiment']='bmontambault/Active-Learning'
-        participant['max_total_score']=int(find_max_score(goal,function,trials,predict_trials))
+        participant['max_total_score']=float(find_max_score(goal,function,trials,predict_trials))
         participant['version']=version
         participant['se_function_lengthscale']=se_length
         for key in participant:
