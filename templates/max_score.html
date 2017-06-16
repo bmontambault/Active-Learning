@@ -8,6 +8,7 @@
     <input type="hidden" id="test_response_time" name="test_response_time">
     <input type="hidden" id="test_start_time" name="test_start_time">
   	<input type="hidden" id="final_score" name="final_score">
+  	<input type="hidden" value="" name="predict_prompt">
   	<input type="hidden" value="" name="predict_response">
   	<input type="hidden" value="" name="predict_response_time">
   	<input type="hidden" value="" name="predict_start_time">
@@ -73,7 +74,7 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 	function Submit(x,score){
 		test_response.push(x)
 		test_response_time.push(Date.now())
-		totalScore+=score
+		totalScore+=score*100
 		trials-=1
 		document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br>Total Score: "+Math.round(totalScore)
 		if(trials==0){
