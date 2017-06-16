@@ -8,6 +8,7 @@ import json
 import string
 import random
 import uuid
+import ast
 from config import nbars,max_height,bar_width,trials,predict_trials,version,se_length
 
 path=os.path.dirname(os.path.realpath(__file__))
@@ -94,7 +95,13 @@ def task(goal,function_name,index):
         participant['max_total_score']=int(find_max_score(goal,function,trials,predict_trials))
         participant['version']=version
         participant['se_function_lengthscale']=se_length
-        print (participant,file=sys.stderr)
+        for key in participant:
+            if type(participant[key])==unicode:
+                if participant[key][0]=='[':
+                    participant[key]=ast.literal_eval(participant[key])
+                elif ',' in participant[key]:
+                    participant[key]=[float(v) for v in participant[key].split(',')]
+        #print (participant,file=sys.stderr)
         return render_template('exit_survey.html',**participant)
         
     elif goal=='max_score':
