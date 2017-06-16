@@ -2,7 +2,7 @@ import numpy as np
 import scipy.stats as st
 import json
 
-version="0.2.0"
+version="0.2.1"
 max_height=500
 bar_width=15
 nbars=80
@@ -27,8 +27,8 @@ functions={'pos_linear':lambda x:x,
 }
 
 def write_functions():
-    miny=np.random.uniform(0.,.2)*max_height
-    maxy=np.random.uniform(.8,1.)*max_height
+    miny=np.random.uniform(0.,.1)*max_height
+    maxy=np.random.uniform(.9,1.)*max_height
     x=np.arange(0,nbars)
     y={f:[1 if np.isnan(yi) else yi for yi in functions[f](x)] for f in functions}
     norm_func={f:[(maxy-miny)/(max(y[f])-min(y[f]))*(val-max(y[f]))+maxy for val in y[f]] for f in functions}
@@ -36,9 +36,10 @@ def write_functions():
         json.dump(norm_func, fp)
 
 def load():
-    with open('data.json') as json_data:
+    with open('pilot_020.json') as json_data:
         data=json.load(json_data)
         json_data.close()
+    
     return data
     
 def init():
