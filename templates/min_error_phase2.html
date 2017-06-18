@@ -83,9 +83,9 @@ Click the bar that has a red outline to record what you think its height is. <b>
 	}
 
 	function Click(event){
-		clicked = true
         var bar = event.target
         if(bar.className.indexOf(" focus") > 0){
+            clicked = true
         	x=parseInt(bar.id.substring(3))
 		   	score={{function}}[x]
 		   	scoreGuess=bar.height-Math.min(Math.max(0, event.clientY-bar.offsetTop),bar.height)
