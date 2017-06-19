@@ -97,7 +97,7 @@ def task(goal,function_name,index):
         participant['se_function_lengthscale']=se_length
         for key in participant:
             if type(participant[key])==unicode:
-                if participant[key][0]=='[':
+                if type(participant[key])==unicode and len(participant[key])>0:
                     participant[key]=ast.literal_eval(participant[key])
                 elif ',' in participant[key]:
                     participant[key]=[float(v) for v in participant[key].split(',')]
