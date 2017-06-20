@@ -31,7 +31,7 @@ def find_phase2_set(phase1,function,trials):
     r.append(min(candidates,key=lambda x: function[x]))
     while len(r)<trials:
         candidates=[i for i in xrange(len(function)) if i not in s and i not in r]
-        dist=[min([abs(ci-ri) for ri in r]) for ci in candidates]
+        dist=[min([abs(ci-ri) for ri in r+s]) for ci in candidates]
         max_dist=[i for i in xrange(len(dist)) if dist[i]==max(dist)]
         r.append(candidates[max_dist[random.randint(0,len(max_dist)-1)]])
     return r
