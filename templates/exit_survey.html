@@ -34,10 +34,12 @@ What was the goal of the game?
 <br>
 <textarea name="describe_goal"></textarea>
 </div>
-<div>
-What was your strategy in playing the game?
+<div id="describe_strategy">
+</div>
+<div id="describe_strategy_phase2">
+What was your strategy in playing the second part of the game?
 <br>
-<textarea name="describe_strategy"></textarea>
+<textarea name="describe_strategy_phase2"></textarea>
 </div>
 <div>
 Was anything unclear or confusing about the game?
@@ -52,6 +54,20 @@ Was anything unclear or confusing about the game?
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
 <script type="text/javascript">
+var describe = document.getElementById('describe_strategy')
+if ('{{goal}}' == 'min_error'){
+  describe.innerHTML = 'What was your strategy in playing the first part of the game?'
+  var input = document.createElement("textarea");
+}else{
+  describe.innerHTML = 'What was your strategy in playing the game?'
+  document.getElementById('describe_strategy_phase2').style.display="none"
+}
+var linebreak = document.createElement("br")
+var input = document.createElement("textarea")
+input.name = 'describe_strategy'
+describe.appendChild(linebreak)
+describe.appendChild(input)
+
 // For testing, use localhost where possible
 var wso = new WebSocket("ws://somata.inf.ed.ac.uk/chunks/ws");
 var wsError = 0; // Keeps track of whether any websocket errors have occurred

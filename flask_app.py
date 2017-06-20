@@ -46,8 +46,6 @@ def start():
         if index=='0':
             fi=int(request.args.get('fi'))
             gi=int(request.args.get('gi'))
-            print (fi,file=sys.stderr)
-            print (gi,file=sys.stderr)
             function_name=functions[fi]
             goal=goals[gi]
         else:
@@ -95,10 +93,16 @@ def task(goal,function_name,index):
         participant['max_total_score']=float(find_max_score(goal,function,trials,predict_trials))
         participant['version']=version
         participant['se_function_lengthscale']=se_length
+        print (participant,file=sys.stderr)
         for key in participant:
             if type(participant[key])==unicode:
-                if type(participant[key])==unicode and len(participant[key])>0:
-                    participant[key]=ast.literal_eval(participant[key])
+                if len(participant[key])>0 and participant[key][0]=='[':
+                    try:
+                        participant[key]=ast.literal_eval(participant[key])
+                    except:
+                        print (key,file=sys.stderr)
+                        print (participant[key], file=sys.stderr)
+                        raise ValueError('server error')
                 elif ',' in participant[key]:
                     participant[key]=[float(v) for v in participant[key].split(',')]
         #print (participant,file=sys.stderr)
