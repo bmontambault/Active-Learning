@@ -2,12 +2,12 @@ import numpy as np
 import scipy.stats as st
 import json
 
-version="0.2.2"
+version="0.3.1"
 max_height=500
 bar_width=15
 nbars=80
 trials=25
-predict_trials=35
+predict_trials=25
 
 se_length=5
 sinc_offset=15

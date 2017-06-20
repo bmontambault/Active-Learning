@@ -25,16 +25,16 @@ app.config['SESSION_TYPE']='filesystem'
 
 def find_phase2_set(phase1,function,trials):
     s=list(set(ast.literal_eval(phase1)))
-    print (s,file=sys.stderr)
+    r=[]
     candidates=[i for i in xrange(len(function)) if i not in s]
-    s.append(max(candidates,key=lambda x: function[x]))
-    s.append(min(candidates,key=lambda x: function[x]))
-    while len(s)<trials:
-        candidates=[i for i in xrange(len(function)) if i not in s]
-        dist=[min([abs(ci-si) for si in s]) for ci in candidates]
+    r.append(max(candidates,key=lambda x: function[x]))
+    r.append(min(candidates,key=lambda x: function[x]))
+    while len(r)<trials:
+        candidates=[i for i in xrange(len(function)) if i not in s and i not in r]
+        dist=[min([abs(ci-ri) for ri in r]) for ci in candidates]
         max_dist=[i for i in xrange(len(dist)) if dist[i]==max(dist)]
-        s.append(candidates[max_dist[random.randint(0,len(max_dist)-1)]])
-    return s
+        r.append(candidates[max_dist[random.randint(0,len(max_dist)-1)]])
+    return r
 
 def find_max_score(goal,function,trials,predict_trials):
     if goal=='find_max':
