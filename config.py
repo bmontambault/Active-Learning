@@ -7,7 +7,7 @@ max_height=500
 bar_width=15
 nbars=80
 trials=25
-predict_trials=10
+predict_trials=35
 
 se_length=5
 sinc_offset=15

@@ -35,12 +35,11 @@ Click the bar that has a red outline to record what you think its height is. <b>
 <script>
 
 	var phase1_response=[{{phase1_response}}]
+    var predict_prompt={{phase2_prompts}}
 	var trials={{trials}}
-	var predict_prompt=[]
 	var predict_response=[]
 	var predict_response_time=[]
 	var totalScore=0
-	var index=[]
 	clicked=false
 
 	document.getElementById("predict_start_time").value=Date.now()
@@ -53,7 +52,6 @@ Click the bar that has a red outline to record what you think its height is. <b>
 		if(phase1_response.indexOf(i) < 0){
 			ctx.fillStyle = "grey"
 			ctx.fillRect(0, 0, allBars[i].width, allBars[i].height)
-			index.push(allBars[i])
 		}else{
 			console.log(i)
 			ctx.fillStyle="red"
@@ -61,24 +59,14 @@ Click the bar that has a red outline to record what you think its height is. <b>
 		}
 	}
 
-	ndex=shuffleArray(index)
-	shiftFocus(index[trials-1])
-
-	function shuffleArray(array) {
-	    for (var i = array.length - 1; i > 0; i--) {
-	        var j = Math.floor(Math.random() * (i + 1));
-	        var temp = array[i];
-	        array[i] = array[j];
-	        array[j] = temp;
-	    }
-	    return array;
-	}
+	shiftFocus('bar'+predict_prompt[trials-1])
 
 	function shiftFocus(bar){
 		bars = document.getElementsByClassName("focus");
 		    for(var i=0; i<bars.length; i++){
 		        bars[i].className = bars[i].className.replace(" focus", "")
 		    }
+        bar = document.getElementById(bar)
 		bar.className += " focus";
 	}
 
@@ -107,7 +95,6 @@ Click the bar that has a red outline to record what you think its height is. <b>
     		clicked=false
     		trials-=1
     		predict_response_time.push(Date.now())
-    		predict_prompt.push(x)
     		predict_response.push(score)
     		totalScore+=(Math.max.apply(Math, {{function}})-Math.abs(scoreGuess-score))
 			document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br> Total Score: "+Math.round(totalScore)
@@ -130,7 +117,7 @@ Click the bar that has a red outline to record what you think its height is. <b>
     		document.getElementById("final_score").value=totalScore
     		document.getElementById("form").submit()
     	}else{
-    		shiftFocus(index[trials-1])
+    		shiftFocus('bar'+predict_prompt[trials-1])
     	}
     }
    	document.addEventListener("keydown", Submit)
