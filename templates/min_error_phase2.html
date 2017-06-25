@@ -59,7 +59,7 @@ Click the bar that has a red outline to record what you think its height is. <b>
 		}
 	}
 
-	shiftFocus('bar'+predict_prompt[trials-1])
+	shiftFocus('bar'+predict_prompt[{{trials}}-trials])
 
 	function shiftFocus(bar){
 		bars = document.getElementsByClassName("focus");
@@ -95,8 +95,11 @@ Click the bar that has a red outline to record what you think its height is. <b>
     		clicked=false
     		trials-=1
     		predict_response_time.push(Date.now())
-    		predict_response.push(score)
-    		totalScore+=(Math.max.apply(Math, {{function}})-Math.abs(scoreGuess-score))
+    		predict_response.push(scoreGuess)
+            points={{max_score}}-Math.abs(error)
+            console.log("error: "+error)
+            console.log("points: "+points)
+    		totalScore+=points
 			document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br> Total Score: "+Math.round(totalScore)
     		if(error>=0){
     			ctx.fillStyle="red"
@@ -117,7 +120,7 @@ Click the bar that has a red outline to record what you think its height is. <b>
     		document.getElementById("final_score").value=totalScore
     		document.getElementById("form").submit()
     	}else{
-    		shiftFocus('bar'+predict_prompt[trials-1])
+    		shiftFocus('bar'+predict_prompt[{{trials}}-trials])
     	}
     }
    	document.addEventListener("keydown", Submit)

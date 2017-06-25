@@ -42,7 +42,7 @@ def find_max_score(goal,function,trials,predict_trials):
     elif goal=='max_score':
         return max(function)*trials
     elif goal=='min_error':
-        return max(function)*(predict_trials)
+        return max(function)*predict_trials
 
 
 @app.route('/',methods=['GET','POST'])
@@ -136,12 +136,13 @@ def task(goal,function_name,index):
         elif index=='1':
             return render_template('min_error_phase1.html',nbars=nbars,goal=goal,function_name=funcmap[function_name],function=function,trials=trials,bar_height=max_height,bar_width=bar_width)
         elif index=='2':
+            max_score=float(max(function))
             phase1_response=request.form['test_response']
             test_start_time=request.form['test_start_time']
             test_response_time=request.form['test_response_time']
             phase2_prompts=find_phase2_set(phase1_response,function,predict_trials)
             random.shuffle(phase2_prompts)
-            return render_template('min_error_phase2.html',nbars=nbars,goal=goal,function_name=funcmap[function_name],function=function,trials=predict_trials,bar_height=max_height,bar_width=bar_width,phase1_response=phase1_response,phase2_prompts=phase2_prompts,test_start_time=test_start_time,test_response_time=test_response_time)
+            return render_template('min_error_phase2.html',max_score=max_score,nbars=nbars,goal=goal,function_name=funcmap[function_name],function=function,trials=predict_trials,bar_height=max_height,bar_width=bar_width,phase1_response=phase1_response,phase2_prompts=phase2_prompts,test_start_time=test_start_time,test_response_time=test_response_time)
 
 if __name__=="__main__":
     app.run()
