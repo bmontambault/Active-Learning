@@ -122,15 +122,17 @@ function log(){
       var formArray=$("#data").serializeArray()
       var returnArray = {};
       for (var i = 0; i < formArray.length; i++){
+        console.log(formArray[i]['name'])
       	if (formArray[i]['value'][0] == '['){
       		returnArray[formArray[i]['name']] = JSON.parse("[" + formArray[i]['value'] + "]")[0]
-      	}else if (isNaN(formArray[i]['value'])){
+      	}else if (isNaN(formArray[i]['value']) || formArray[i]['name'].indexOf('describe') !== -1){
       		returnArray[formArray[i]['name']] = formArray[i]['value'];
       	}else{
       		returnArray[formArray[i]['name']] = parseFloat(formArray[i]['value'])
       	}
       }
       console.log('sending: ' + returnArray);
+      console.log(returnArray)
       sendData(returnArray);
 }
 
