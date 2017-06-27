@@ -1,29 +1,32 @@
 <html>
 <link rel="stylesheet" type="text/css" href="../../static/main.css">
+<script>
+var dataToSave = {
+  sessionId:"{{id}}",
+  function_name:"{{function_name}}",
+  goal:"{{goal}}",
+  function:{{function}},
+  max_score:{{max_score}},
+  test_response:{{test_response}},
+  test_start_time:{{test_start_time}},
+  test_reponse_time:{{test_response_time}},
+  predict_prompt:{{predict_prompt}},
+  predict_response:{{predict_response}},
+  predict_start_time:{{predict_start_time}},
+  predict_response_time:{{predict_response_time}},
+  final_score:{{final_score}},
+  max_total_score:{{max_total_score}},
+  max_height:{{max_height}},
+  bar_width:{{bar_width}},
+  number_of_bars:{{number_of_bars}},
+  plot_width:{{plot_width}},
+  experiment:"{{experiment}}",
+  experimentVersion:"{{version}}",
+  se_function_lengthscale:{{se_function_lengthscale}}
+};
+console.log(dataToSave);
+</script>
 <form id="data">
-<input type="hidden" value="{{id}}" name="sessionId">
-<input type="hidden" value="{{function_name}}" name="function_name">
-<input type="hidden" value="{{goal}}" name="goal">
-<input type="hidden" value="{{function}}" name="function">
-<input type="hidden" value="{{max_score}}" name="max_score">
-<input type="hidden" value="{{test_response}}" name="test_response">
-<input type="hidden" value="{{test_start_time}}" name="test_start_time">
-<input type="hidden" value="{{test_response_time}}" name="test_response_time">
-<input type="hidden" value="{{predict_prompt}}" name="predict_prompt">
-<input type="hidden" value="{{predict_response}}" name="predict_response">
-<input type="hidden" value="{{predict_start_time}}" name="predict_start_time">
-<input type="hidden" value="{{predict_response_time}}" name="predict_response_time">
-<input type="hidden" value="{{final_score}}" name="final_score">
-<input type="hidden" value="{{max_total_score}}" name="max_total_score">
-
-
-<input type="hidden" value="{{max_height}}" name="max_height">
-<input type="hidden" value="{{bar_width}}" name="bar_width">
-<input type="hidden" value="{{number_of_bars}}" name="number_of_bars">
-<input type="hidden" value="{{plot_width}}" name="plot_width">
-<input type="hidden" value="{{experiment}}" name="experiment">
-<input type="hidden" value="{{version}}" name="experimentVersion">
-<input type="hidden" value="{{se_function_lengthscale}}" name="se_function_lengthscale">
 <div>
 What is your age? Choose "NA" if you prefer not to say.
 <br>
@@ -80,8 +83,8 @@ wso.onopen = function() {
 
 wso.onmessage = function(event) {
   message = JSON.parse(event.data);
-  console.log('received websocket message: ' + message);
-  wsMessageCode = "Y"+wsError+"-"+message.length;
+  console.log('received websocket message: ' + event.data);
+  wsMessageCode = "Y"+wsError+"-"+message.status.substring(0,2);
   if(doneState == 1) {document.getElementById("buttondiv").innerHTML = "Thanks! You're all done. Please submit the code " + wsMessageCode;}
 }
 
@@ -120,20 +123,10 @@ $(function(){
 
 function log(){
       var formArray=$("#data").serializeArray()
-      var returnArray = {};
       for (var i = 0; i < formArray.length; i++){
-        console.log(formArray[i]['name'])
-      	if (formArray[i]['value'][0] == '['){
-      		returnArray[formArray[i]['name']] = JSON.parse("[" + formArray[i]['value'] + "]")[0]
-      	}else if (isNaN(formArray[i]['value']) || formArray[i]['name'].indexOf('describe') !== -1){
-      		returnArray[formArray[i]['name']] = formArray[i]['value'];
-      	}else{
-      		returnArray[formArray[i]['name']] = parseFloat(formArray[i]['value'])
-      	}
+	dataToSave[formArray[i]['name']] = formArray[i]['value'];
       }
-      console.log('sending: ' + returnArray);
-      console.log(returnArray)
-      sendData(returnArray);
+      sendData(dataToSave);
 }
 
 
