@@ -13,7 +13,7 @@ from config import nbars,max_height,bar_width,trials,predict_trials,version,se_l
 
 path=os.path.dirname(os.path.realpath(__file__))
 goals=['max_score','find_max','min_error']
-functions=['pos_linear','neg_quad','sinc']
+functions=['pos_linear','neg_quad','sinc_compressed']
 
 funcmap={f:''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(10)) for f in functions}
 revfuncmap={value:key for key,value in funcmap.iteritems()}

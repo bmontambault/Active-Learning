@@ -2,7 +2,7 @@ import numpy as np
 import scipy.stats as st
 import json
 
-version="0.4.0"
+version="0.5.0"
 max_height=500
 bar_width=15
 nbars=80
@@ -23,17 +23,26 @@ functions={'pos_linear':lambda x:x,
            'neg_quad':lambda x:-((x-neg_quad_offset-(nbars/2.))**2),
            'sin':lambda x:np.sin(x),
            'sinc':lambda x:np.sin(x-sinc_offset-(nbars/2.))/(x-sinc_offset-(nbars/2.)),
+           'sinc_compressed': lambda x: np.sin(x/2.-30.000001)/(x/2.-30.000001),
            'se':lambda x: st.multivariate_normal.rvs(np.zeros(len(x)),np.array([[np.exp(-((xi-xj)**2/float(2*se_length**2))) for xi in x] for xj in x]))      
 }
 
-def write_functions():
-    miny=np.random.uniform(0.,.1)*max_height
+def write_functions(save=False):
+    miny_tmp=np.random.uniform(0.,.1)*max_height
     maxy=np.random.uniform(.9,1.)*max_height
     x=np.arange(0,nbars)
-    y={f:[1 if np.isnan(yi) else yi for yi in functions[f](x)] for f in functions}
-    norm_func={f:[(maxy-miny)/(max(y[f])-min(y[f]))*(val-max(y[f]))+maxy for val in y[f]] for f in functions}
-    with open('functions.json', 'w') as fp:
-        json.dump(norm_func, fp)
+    norm_func={}
+    for f in functions:
+        if f=='sinc_compressed':
+            miny=miny_tmp+75.
+        else:
+            miny=miny_tmp
+        y=functions[f](x)
+        norm_func[f]=[(maxy-miny)/(max(y)-min(y))*(yi-max(y))+maxy for yi in y]
+    if save==True:
+        with open('functions.json', 'w') as fp:
+            json.dump(norm_func, fp)
+    return norm_func
 
 def load():
     with open('pilot_020.json') as json_data:
