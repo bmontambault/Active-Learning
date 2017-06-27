@@ -2,7 +2,7 @@ import numpy as np
 import scipy.stats as st
 import json
 
-version="0.5.0"
+version="0.5.1"
 max_height=500
 bar_width=15
 nbars=80

@@ -116,6 +116,9 @@ def task(goal,function_name,index):
                         raise ValueError('server error')
                 elif ',' in participant[key]:
                     participant[key]=[float(v) for v in participant[key].split(',')]
+            if participant[key]=='':
+                participant[key]=[]
+        print (participant,file=sys.stderr)
         return render_template('exit_survey.html',**participant)
         
     elif goal=='max_score':
