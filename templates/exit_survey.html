@@ -1,5 +1,6 @@
 <html>
 <link rel="stylesheet" type="text/css" href="../../static/main.css">
+<!-- Flask/jinja-based repair of empty strings may be redundant with Brian's earlier fix, but shouldn't cause any harm. -->
 <script>
 var dataToSave = {
   sessionId:"{{id}}",
@@ -9,11 +10,11 @@ var dataToSave = {
   max_score:{{max_score}},
   test_response:{{test_response}},
   test_start_time:{{test_start_time}},
-  test_reponse_time:{{test_response_time}},
-  predict_prompt:{{predict_prompt}},
-  predict_response:{{predict_response}},
-  predict_start_time:{{predict_start_time}},
-  predict_response_time:{{predict_response_time}},
+  test_response_time:{{test_response_time}},
+  predict_prompt:{% if predict_prompt=='' %}null{% else %}{{predict_prompt}}{%endif %},
+  predict_response:{% if predict_response=='' %}null{% else %}{{predict_response}}{%endif %},
+  predict_start_time:{% if predict_start_time=='' %}null{% else %}{{predict_start_time}}{%endif %},
+  predict_response_time: {% if predict_response_time=='' %}null{% else %}{{predict_response_time}}{%endif %},
   final_score:{{final_score}},
   max_total_score:{{max_total_score}},
   max_height:{{max_height}},
@@ -26,25 +27,41 @@ var dataToSave = {
 };
 console.log(dataToSave);
 </script>
+<style>
+div.qDiv { margin-top: 20px }
+</style>
 <form id="data">
-<div>
+<div class="qDiv">
 What is your age? Choose "NA" if you prefer not to say.
 <br>
 <select name="age" class="age"></select>
 </div>
-<div>
+<div class="qDiv">
+  <!-- CL: This hard-coding of the labels isn't ideal, but I'm not familiar with flask and the javascript approach makes inspection/debugging more annoying -->
 What was the goal of the game?
-<br>
-<textarea name="describe_goal"></textarea>
+  <br>
+  <input type="radio" name="describe_goal"  id="r0"  value="I don't know"/
+    ><label for="r0">I don't know</label><br>
+  <input type="radio" name="describe_goal"  id="r1"  value="To find the bar with the greatest height" />
+    <label for="r1">To find the bar with the greatest height</label><br>
+  <input type="radio" name="describe_goal"  id="r2"  value="To select bars with greatest combined height, possibly selecting bars more than once" />
+    <label for="r2">To select bars with greatest combined height, possibly selecting bars more than once</label><br>
+  <input type="radio" name="describe_goal"  id="r3"  value="To select bars with greatest combined height, selecting each bar only once" />
+    <label for="r3">To select bars with greatest combined height, selecting each bar only once</label><br>
+  <input type="radio" name="describe_goal"  id="r4"  value="To accurately predict what a bar's height will be"/>
+    <label for="r4">To accurately predict what a bar's height will be</label><br>
+  <input type="radio" name="describe_goal"  id="r5"  value="To get the smallest number of points" />
+    <label for="r5">To get the smallest number of points</label><br>
+  <!-- <textarea name="describe_goal"></textarea> -->
 </div>
-<div id="describe_strategy">
+<div id="describe_strategy" class="qDiv">
 </div>
-<div id="describe_strategy_phase2">
+<div id="describe_strategy_phase2" class="qDiv">
 What was your strategy in playing the second part of the game?
 <br>
 <textarea name="describe_strategy_phase2"></textarea>
 </div>
-<div>
+<div class="qDiv">
 Was anything unclear or confusing about the game?
 <br>
 <textarea name="describe_unclear"></textarea>
@@ -115,10 +132,11 @@ function sendData(dataChunk) {
 <script type="text/javascript">
 $(function(){
     var $select = $(".age");
-    $select.append('<option>NA</option>')
+    $select.append('<option>--</option>')
     for (i=18;i<=100;i++){
         $select.append($('<option></option>').val(i).html(i))
     }
+    $select.append('<option>NA</option>');
 });
 
 function log(){

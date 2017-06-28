@@ -77,7 +77,7 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 		totalScore+=score
 		trials-=1
 		document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br>Total Score: "+Math.round(totalScore)
-		if(trials==0){
+		if(trials<=0){
 			document.getElementById("test_response").value=test_response
 			document.getElementById("test_response_time").value=test_response_time
 			document.getElementById("final_score").value=totalScore

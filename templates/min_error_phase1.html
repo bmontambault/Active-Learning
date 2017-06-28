@@ -69,7 +69,7 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 		test_response_time.push(Date.now())
 		trials-=1
 		document.getElementById("ui").innerHTML="Trials Remaining: "+trials
-		if(trials==0){
+		if(trials<=0){
 			document.getElementById("test_response").value=test_response
 			document.getElementById("test_response_time").value=test_response_time
 			document.getElementById("form").submit()
