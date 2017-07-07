@@ -23,7 +23,8 @@ var dataToSave = {
   plot_width:{{plot_width}},
   experiment:"{{experiment}}",
   experimentVersion:"{{version}}",
-  se_function_lengthscale:{{se_function_lengthscale}}
+  se_function_lengthscale:{{se_function_lengthscale}},
+  describe_goal_pre:"{{describe_goal_pre}}"
 };
 console.log(dataToSave);
 </script>
@@ -152,7 +153,6 @@ function checkAge(){
 }
 
 function checkGoal(){
-      console.log(($('input[name=describe_goal]:checked').length))
       if ($('input[name=describe_goal]:checked').length > 0){
           document.getElementById("goalPrompt").style.display='none'
           return true
