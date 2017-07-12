@@ -107,6 +107,7 @@ def task(goal,function_name,index):
         participant['max_total_score']=float(find_max_score(goal,function,trials,predict_trials))
         participant['version']=version
         participant['se_function_lengthscale']=se_length
+        
         for key in participant:
             if type(participant[key])==unicode:
                 if len(participant[key])>0 and participant[key][0]=='[':
@@ -119,10 +120,10 @@ def task(goal,function_name,index):
                         participant[key]=[float(v) for v in participant[key].split(',')]
                     except:
                         print (participant[key],file=sys.stderr)
-                        raise ValueError('stop')
             if participant[key]=='':
                 participant[key]=[]
         print (participant,file=sys.stderr)
+        
         return render_template('exit_survey.html',**participant)
         
     elif index=='goal_prompt':
@@ -139,13 +140,13 @@ def task(goal,function_name,index):
     
     elif goal=='find_max':
         if index=='0':
-            return render_template('find_max_instructions.html',goal=goal,function_name=funcmap[function_name])
+            return render_template('find_max_instructions.html',trials=trials,goal=goal,function_name=funcmap[function_name])
         elif index=='1':
             return render_template('find_max.html',describe_goal_pre=describe_goal_pre,nbars=nbars,goal=goal,function_name=funcmap[function_name],function=function,trials=trials,bar_height=max_height,bar_width=bar_width)
 
     elif goal=='min_error':
         if index=='0':
-            return render_template('min_error_instructions.html',goal=goal,function_name=funcmap[function_name])
+            return render_template('min_error_instructions.html',trials=trials,predict_trials=predict_trials,goal=goal,function_name=funcmap[function_name])
         elif index=='1':
             return render_template('min_error_phase1.html',describe_goal_pre=describe_goal_pre,nbars=nbars,goal=goal,function_name=funcmap[function_name],function=function,trials=trials,bar_height=max_height,bar_width=bar_width)
         elif index=='2':
