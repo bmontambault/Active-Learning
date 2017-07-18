@@ -12,6 +12,14 @@ h2 {
 h3 {
 }
 
+#barContainer {
+	white-space: nowrap
+}
+
+#help {
+	white-space: nowrap
+}
+
 .header {
 	background: #006699;
 	/* #8f8f8f; gray*/

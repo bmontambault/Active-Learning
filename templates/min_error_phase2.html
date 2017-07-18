@@ -27,7 +27,13 @@ Click the bar that has a red outline to record what you think its height is. <b>
 <br>
 <div id="barContainer">
 {%for i in range(nbars)%}
-<canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="{{bar_width}}" onmousedown="Click(event)"></canvas>
+{%if i==0%}
+<canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="{{bar_width}}" onmousedown="Click(event)">
+{%elif i==nbars.length%}
+</canvas><canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="{{bar_width}}" onmousedown="Click(event)"></canvas>
+{%else%}
+</canvas><canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="{{bar_width}}" onmousedown="Click(event)">
+{%endif%}
 {% endfor %}
 </div>
 

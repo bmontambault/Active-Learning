@@ -2,7 +2,7 @@
     border-style: solid;
     border-width: 1px;
     border-color: black;
-    float: left;
+    display: inline-block;
 
 }
 .focus{
