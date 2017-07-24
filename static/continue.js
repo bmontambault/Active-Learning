@@ -1,6 +1,6 @@
 function Continue(event){
 	if(event.keyCode == 32){
-		document.getElementById("form").submit();
+		nextPage();
 	}
 }
 document.addEventListener("keydown", Continue);
