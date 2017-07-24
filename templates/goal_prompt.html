@@ -1,37 +1,36 @@
 <html>
 <link rel="stylesheet" type="text/css" href="../../static/main.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<form id="form" method="POST">
-  <input type="hidden" value="{{goal}}" name="goal">
-  <input type="hidden" value="{{function_name}}" name="function_name">
-  <input type="hidden" value="1" name="index">
+<form id="form">
   <div class="qDiv">
   What is the goal of this game?
     <br>
-    <input type="radio" name="describe_goal_pre"  id="r0"  value="I don't know"/
+    <input type="radio" name="goal_pre"  id="r0"  value="I don't know"/
       ><label for="r0">I don't know</label><br>
-    <input type="radio" name="describe_goal_pre"  id="r1"  value="To find the bar with the greatest height" />
+    <input type="radio" name="goal_pre"  id="r1"  value="To find the bar with the greatest height" />
       <label for="r1">To find the bar with the greatest height</label><br>
-    <input type="radio" name="describe_goal_pre"  id="r2"  value="To select bars with greatest combined height, possibly selecting bars more than once" />
+    <input type="radio" name="goal_pre"  id="r2"  value="To select bars with greatest combined height, possibly selecting bars more than once" />
       <label for="r2">To select bars with greatest combined height, possibly selecting bars more than once</label><br>
-    <input type="radio" name="describe_goal_pre"  id="r3"  value="To select bars with greatest combined height, selecting each bar only once" />
+    <input type="radio" name="goal_pre"  id="r3"  value="To select bars with greatest combined height, selecting each bar only once" />
       <label for="r3">To select bars with greatest combined height, selecting each bar only once</label><br>
-    <input type="radio" name="describe_goal_pre"  id="r4"  value="To accurately predict what a bar's height will be"/>
+    <input type="radio" name="goal_pre"  id="r4"  value="To accurately predict what a bar's height will be"/>
       <label for="r4">To accurately predict the heights of different bars</label><br>
-    <input type="radio" name="describe_goal_pre"  id="r5"  value="To get the smallest number of points" />
+    <input type="radio" name="goal_pre"  id="r5"  value="To get the smallest number of points" />
       <label for="r5">To get the smallest number of points</label><br>
   </div>
 </form>
 
 <div id="buttondiv">
-  <button onclick="return submitGoal()">Submit and Begin Task</button>
+  <button id="button">Submit and Begin Task</button>
   <p id="goalPrompt" style="display:none; color:red">Please select the goal of the game</p>
 </div>
 
 <script type="text/javascript">
 
+  currentGoalIndex+=1
+
   function checkGoal(){
-      if ($('input[name=describe_goal_pre]:checked').length > 0){
+      if ($('input[name=goal_pre]:checked').length > 0){
           document.getElementById("goalPrompt").style.display='none'
           return true
       }else{
@@ -43,8 +42,12 @@
   function submitGoal(){
       isCheckGoal=checkGoal()
       if (isCheckGoal){
-          document.getElementById("form").submit()
+        results[currentGoalIndex]['goal_pre']=document.querySelector('input[name="goal_pre"]:checked').value;
+        console.log(persistantData)
+        nextPage()
+
       }
   }
 
+document.getElementById("button").addEventListener("click", submitGoal)
 </script>

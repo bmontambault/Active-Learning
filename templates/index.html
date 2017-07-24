@@ -1,0 +1,88 @@
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="../static/init_bars.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/main.css">
+    <link rel="stylesheet" type="text/css" href="../static/bar_style.css">
+
+</head>
+
+<body><div id="contentContainer"></div></body>
+
+<script>
+    function getCookie(cookiename){
+        var cookiestring=RegExp(""+cookiename+"[^;]+").exec(document.cookie);
+        return unescape(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./,"") : "");
+    }
+    
+    function nextPage(){
+        currentPageIndex++;
+        if (currentPageIndex == 1){
+            $.ajax({
+              type: "GET",
+              url: "/",
+              data: {"sessionId":'newid'}
+             })
+        }
+        if(pages.length > currentPageIndex){
+            loadPage(pages[currentPageIndex]);
+        }
+    }
+    
+    function loadPage(location){
+        console.log("attempting to load page: " + location)
+        contentContainer.innerHTML = "";
+        $.ajax({
+            method:"GET",
+            url:"/",
+            data:{"location":location},
+            success:function(resp){
+                contentContainer.innerHTML = resp;
+                var scriptElements = contentContainer.getElementsByTagName('script');
+                for(var i=0; i<scriptElements.length; i++){
+                    eval(scriptElements[i].innerHTML);
+                }
+            },
+            error:function(resp){
+                alert("Error fetching experiment - " + resp);
+            }
+        });
+    }
+</script>
+
+<script>
+    var currentPageIndex = -1;
+    var currentGoalIndex = -1
+    var results = []
+
+    var persistantData = {
+                          'ti':{{ti}},
+                          'fi':{{fi}},
+                          'function':{{function}},
+                          'task':{{task|safe}},
+                          'experiment':'{{experiment}}',
+                          'version':'{{version}}',
+                          'functions':'{{functions}}',
+                          'goals':{{goals|safe}},
+                          'bar_height':{{bar_height}},
+                          'bar_width':{{bar_width}},
+                          'nbars':{{nbars}},
+                          'trials':{{trials}},
+                          'predict_trials':{{predict_trials}},
+                          'se_length':{{se_length}},
+                          'sinc_offset':{{sinc_offset}},
+                          'neg_quad_offset':{{neg_quad_offset}},
+                          'pos_quad_offset':{{pos_quad_offset}}
+                          }
+
+    console.log(persistantData['goals'].length)
+    for (var i=0; i<persistantData['goals'].length; i++){
+        results.push({'goal':persistantData['goals'][i], 'index':i})
+    }
+    var pages = persistantData['task']
+    nextPage()
+</script>
+    
+
+</html>

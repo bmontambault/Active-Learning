@@ -1,0 +1,73 @@
+What was the goal of the game?
+  <br>
+  <input type="radio" name="goal_post"  id="r0"  value="I don't know"/
+    ><label for="r0">I don't know</label><br>
+  <input type="radio" name="goal_post"  id="r1"  value="To find the bar with the greatest height" />
+    <label for="r1">To find the bar with the greatest height</label><br>
+  <input type="radio" name="goal_post"  id="r2"  value="To select bars with greatest combined height, possibly selecting bars more than once" />
+    <label for="r2">To select bars with greatest combined height, possibly selecting bars more than once</label><br>
+  <input type="radio" name="goal_post"  id="r3"  value="To select bars with greatest combined height, selecting each bar only once" />
+    <label for="r3">To select bars with greatest combined height, selecting each bar only once</label><br>
+  <input type="radio" name="goal_post"  id="r4"  value="To accurately predict what a bar's height will be"/>
+    <label for="r4">To accurately predict what a bar's height will be</label><br>
+  <input type="radio" name="goal_post"  id="r5"  value="To get the smallest number of points" />
+    <label for="r5">To get the smallest number of points</label><br>
+
+</div>
+<div id="describe_strategy_div" class="qDiv">
+</div>
+<div id="describe_strategy_predict_div" class="qDiv">
+What was your strategy in playing the second part of the game?
+<br>
+<textarea id="describe_strategy_predict"></textarea>
+</div>
+<div class="qDiv">
+Was anything unclear or confusing about the game?
+<br>
+<textarea id="describe_unclear"></textarea>
+</div>
+</form>
+<div id="buttondiv">
+  <button id="button">Submit</button>
+  <p id="goalPrompt" style="display:none; color:red">Please select the goal of the game</p>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+var describe = document.getElementById('describe_strategy_div')
+if (persistantData['goals'][currentGoalIndex] == 'min_error'){
+  describe.innerHTML = 'What was your strategy in playing the first part of the game?'
+}else{
+  describe.innerHTML = 'What was your strategy in playing the game?'
+  document.getElementById('describe_strategy_predict_div').style.display="none"
+}
+var linebreak = document.createElement("br")
+var input = document.createElement("textarea")
+input.id = 'describe_strategy'
+describe.appendChild(linebreak)
+describe.appendChild(input)
+
+function checkGoal(){
+      if ($('input[name=goal_post]:checked').length > 0){
+          document.getElementById("goalPrompt").style.display='none'
+          return true
+      }else{
+          document.getElementById("goalPrompt").style.display='block'
+          return false
+      }
+}
+
+function Submit(){
+      isCheckGoal=checkGoal()
+      if (isCheckGoal){
+        results[currentGoalIndex]['goal_post']=document.querySelector('input[name="goal_post"]:checked').value;
+        results[currentGoalIndex]['describe_unclear']=document.getElementById("describe_unclear").value
+        results[currentGoalIndex]['describe_strategy']=document.getElementById("describe_strategy").value;
+        results[currentGoalIndex]['describe_strategy_predict']=document.getElementById("describe_strategy_predict").value;
+        console.log(results)
+        nextPage()
+      }
+}
+document.getElementById("button").addEventListener("click", Submit)
+</script>

@@ -68,9 +68,17 @@ Press Space to begin.
 </div>
 
 <script type="text/javascript" src="../../static/init_bars.js"></script>
-<script type="text/javascript" src="../../static/continue.js"></script>
 <script>
-init_bars([100,100,100,200])
+
+function submit(event){
+  if(event.keyCode == 32){
+    document.removeEventListener("keydown", submit);
+    nextPage();
+  }
+}
+
+init_bars([100,100,100,200]);
+document.addEventListener("keydown", submit);
 </script>
 <link rel="stylesheet" type="text/css" href="../../static/bar_style.css">
 

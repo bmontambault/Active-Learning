@@ -1,24 +1,8 @@
 <html>
 <link rel="stylesheet" type="text/css" href="../../static/main.css">
-<form id="form" method="POST">
-	<input type="hidden" value="{{goal}}" name="goal">
-	<input type="hidden" value="{{function_name}}" name="function_name">
-    <input type="hidden" value="exit" name="index">
-    <input type="hidden" id="test_response" name="test_response">
-    <input type="hidden" id="test_response_time" name="test_response_time">
-    <input type="hidden" id="test_start_time" name="test_start_time">
-  	<input type="hidden" id="final_score" name="final_score">
-  	<input type="hidden" value="" name="predict_prompt">
-  	<input type="hidden" value="" name="predict_response">
-  	<input type="hidden" value="" name="predict_response_time">
-  	<input type="hidden" value="" name="predict_start_time">
-  	<input type="hidden" value="{{describe_goal_pre}}" id="describe_goal_pre" name="describe_goal_pre">
-</form>
+
 <body>
 <div id="ui">
-Trials Remaining: {{trials}}
-<br>
-Total Score: 0
 </div>
 <br>
 <div id="help">
@@ -26,28 +10,32 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 </div>
 <br>
 <div id="barContainer">
-{%for i in range(nbars)%}
-{%if i==0%}
-<canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="{{bar_width}}" onmousedown="Click(event)">
-{%elif i==nbars.length%}
-</canvas><canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="{{bar_width}}" onmousedown="Click(event)"></canvas>
-{%else%}
-</canvas><canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="{{bar_width}}" onmousedown="Click(event)">
-{%endif%}
-{% endfor %}
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script type="text/javascript" src="../static/init_bars.js"></script>
 <script>
 
-	init_bars([])
-	var trials={{trials}}
-	var test_response=[]
-	var test_response_time=[]
-	var totalScore=0
+	for (var i; i<persistantData['nbars']; i++){
+		var tmp = document.createElement('canvas')
+		tmp.width=persistantData['bar_width']
+		tmp.height=persistantData['bar_height']
+		tmp.id='bar'+i
+		tmp.className='bar'
+		tmp.addEventListener('click',Click)
+		barContainer.appendChild(tmp)
+	}
 
-	document.getElementById("test_start_time").value=Date.now()
+
+	init_bars([])
+	var trials=persistantData['trials']
+	var response=[]
+	var response_time=[]
+	var totalScore=0
+	var start_time=Date.now()
+
+	document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br>Total Score: "+Math.round(totalScore)
+
 	function Click(event){
 		var bar = event.target
 		/*if(bar.className.indexOf(" active") < 0){*/
@@ -55,7 +43,7 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 		   		document.getElementById("help").innerHTML="Click any of the non-highlighted bars below once to highlight it. Click the same bar again to reveal its value and add it to your total score. Clicking the bar that is currently highlighted once will add its value to your total score."
 		   		bar.className += " active"
 		   		var x=parseInt(bar.id.substring(3))
-		   		var score={{function}}[x]
+		   		var score=persistantData['function'][x]
 		        Move(bar.height-score);
 		        Submit(x,score);
 
@@ -75,20 +63,20 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 	    ctx = bar.getContext("2d");
 	    ctx.fillStyle = "black"
 	    ctx.clearRect(0, 0, bar.width, bar.height);
-	    ctx.fillRect(0, ypos, 15, bar.height);
+	    ctx.fillRect(0, ypos, bar.width, bar.height);
 	}
 
 	function Submit(x,score){
-		test_response.push(x)
-		test_response_time.push(Date.now())
+		response.push(x)
+		response_time.push(Date.now())
 		totalScore+=score
 		trials-=1
 		document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br>Total Score: "+Math.round(totalScore)
 		if(trials<=0){
-			document.getElementById("test_response").value=test_response
-			document.getElementById("test_response_time").value=test_response_time
-			document.getElementById("final_score").value=totalScore
-			document.getElementById("form").submit()
+			results[currentGoalIndex]['response']=response
+			results[currentGoalIndex]['response_time']=response_time
+			results[currentGoalIndex]['total_score']=totalScore
+			nextPage()
 		}
 	}
 	
