@@ -59,13 +59,11 @@ function checkGoal(){
 }
 
 function Submit(){
-      isCheckGoal=checkGoal()
-      if (isCheckGoal){
+      if (checkGoal()){
         results[currentGoalIndex]['goal_post']=document.querySelector('input[name="goal_post"]:checked').value;
         results[currentGoalIndex]['describe_unclear']=document.getElementById("describe_unclear").value
         results[currentGoalIndex]['describe_strategy']=document.getElementById("describe_strategy").value;
         results[currentGoalIndex]['describe_strategy_predict']=document.getElementById("describe_strategy_predict").value;
-        console.log(results)
         nextPage()
       }
 }

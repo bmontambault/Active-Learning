@@ -43,14 +43,13 @@ def start():
     else:
         fi=int(request.args.get('fi'))
         ti=int(request.args.get('ti'))
+        print (fi,file=sys.stderr)
         function_name=function_names[fi]
         goals=tasks[ti]
         function=functions[function_name]
-        task=['start.html']+[a for b in [task_files[t] for t in goals] for a in b]+['goal_describe_prompt.html','exit_survey.html','last_page.html']
+        task=['start.html']+[a for b in [task_files[t] for t in goals] for a in b]+['goal_describe_prompt.html','demographics.html','last_page.html']
         
         all_args={
-                 'fi':fi,
-                 'ti':ti,
                  'function':function,
                  'task':task,
                  'experiment':config.experiment,

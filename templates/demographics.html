@@ -1,0 +1,45 @@
+<html>
+<link rel="stylesheet" type="text/css" href="../../static/main.css">
+
+<div class="qDiv">
+What is your age? Choose "NA" if you prefer not to say.
+<br>
+<select name="age" id="age"></select>
+</div>
+
+<div id="buttondiv">
+  <button id="button">Submit</button>
+  <p id="agePrompt" style="display:none; color:red;">Please select your age</p>
+</div>
+
+<script type="text/javascript">
+
+$(function(){
+    var $select = $("#age");
+    $select.append('<option>--</option>')
+    for (i=18;i<=100;i++){
+        $select.append($('<option></option>').val(i).html(i))
+    }
+    $select.append('<option>NA</option>');
+});
+
+function checkAge(){
+      if (document.getElementById("age").value == '--'){
+        document.getElementById("agePrompt").style.display='block'
+        return false
+      }else{
+        document.getElementById("agePrompt").style.display='none'
+        return true
+      }
+}
+
+function Submit(){
+    if (checkAge()){
+        persistantData['age']=document.getElementById("age").value;
+        nextPage()
+      }
+}
+
+document.getElementById("button").addEventListener("click", Submit)
+
+</script>
