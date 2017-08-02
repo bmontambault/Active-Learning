@@ -1,10 +1,6 @@
 <html>
 <link rel="stylesheet" type="text/css" href="../../static/main.css">
-<form id="form" method="POST">
-	<input type="hidden" value="{{goal}}" name="goal">
-	<input type="hidden" value="{{function_name}}" name="function_name">
-    <input type="hidden" value="goal_prompt" name="index">
-</form>
+
 <div>
 <h1>Instructions</h1>
 <div>
@@ -86,7 +82,16 @@ Press Space to begin
 <script type="text/javascript" src="../../static/init_bars.js"></script>
 <script type="text/javascript" src="../../static/continue.js"></script>
 <script>
+
+function submit(event){
+  if(event.keyCode == 32){
+    document.removeEventListener("keydown", submit);
+    nextPage();
+  }
+}
+
 init_bars([100,100,100,200,100,200,50,100,200])
+document.addEventListener("keydown", submit);
 </script>
 <link rel="stylesheet" type="text/css" href="../../static/bar_style.css">
 </html>

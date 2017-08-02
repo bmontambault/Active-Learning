@@ -16,7 +16,7 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 <script type="text/javascript" src="../static/init_bars.js"></script>
 <script>
 
-	for (var i; i<persistantData['nbars']; i++){
+	for (var i=0; i<persistantData['nbars']; i++){
 		var tmp = document.createElement('canvas')
 		tmp.width=persistantData['bar_width']
 		tmp.height=persistantData['bar_height']

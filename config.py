@@ -1,7 +1,7 @@
 experiment="active-learning"
-version="0.7.3"
+version="0.8.0"
 functions=['pos_linear','neg_quad','sinc_compressed']
-tasks=[['max_score'],['find_max'],['min_error']]
+tasks=[['max_score_last'],['find_max_last'],['min_error_last']]
 
 bar_height=500
 bar_width=15

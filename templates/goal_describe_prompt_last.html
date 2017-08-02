@@ -1,4 +1,10 @@
 <div class="qDiv">
+What is your age? Choose "NA" if you prefer not to say.
+<br>
+<select name="age" id="age"></select>
+</div>
+<br>
+<div class="qDiv">
 What was the goal of the game?
   <br>
   <input type="radio" name="goal_post"  id="r0"  value="I don't know"/
@@ -13,10 +19,12 @@ What was the goal of the game?
     <label for="r4">To accurately predict what a bar's height will be</label><br>
   <input type="radio" name="goal_post"  id="r5"  value="To get the smallest number of points" />
     <label for="r5">To get the smallest number of points</label><br>
-
 </div>
+<br>
+
 <div id="describe_strategy_div" class="qDiv">
 </div>
+<br>
 <div id="describe_strategy_predict_div" class="qDiv">
 What was your strategy in playing the second part of the game?
 <br>
@@ -27,17 +35,19 @@ Was anything unclear or confusing about the game?
 <br>
 <textarea id="describe_unclear"></textarea>
 </div>
-</form>
+
+
 <div id="buttondiv">
   <button id="button">Submit</button>
+  <p id="agePrompt" style="display:none; color:red;">Please select your age</p>
   <p id="goalPrompt" style="display:none; color:red">Please select the goal of the game</p>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
 <script type="text/javascript">
+
 var describe = document.getElementById('describe_strategy_div')
-if (persistantData['goals'][currentGoalIndex].indexOf('min_error') != -1{
+if (persistantData['goals'][currentGoalIndex].indexOf('min_error') != -1){
   describe.innerHTML = 'What was your strategy in playing the first part of the game?'
 }else{
   describe.innerHTML = 'What was your strategy in playing the game?'
@@ -48,6 +58,25 @@ var input = document.createElement("textarea")
 input.id = 'describe_strategy'
 describe.appendChild(linebreak)
 describe.appendChild(input)
+
+$(function(){
+    var $select = $("#age");
+    $select.append('<option>--</option>')
+    for (i=18;i<=100;i++){
+        $select.append($('<option></option>').val(i).html(i))
+    }
+    $select.append('<option>NA</option>');
+});
+
+function checkAge(){
+      if (document.getElementById("age").value == '--'){
+        document.getElementById("agePrompt").style.display='block'
+        return false
+      }else{
+        document.getElementById("agePrompt").style.display='none'
+        return true
+      }
+}
 
 function checkGoal(){
       if ($('input[name=goal_post]:checked').length > 0){
@@ -60,11 +89,14 @@ function checkGoal(){
 }
 
 function Submit(){
-      if (checkGoal()){
+      isCheckGoal=checkGoal()
+      isCheckAge=checkAge()
+      if (isCheckGoal && isCheckAge){
         results[currentGoalIndex]['goal_post']=document.querySelector('input[name="goal_post"]:checked').value;
         results[currentGoalIndex]['describe_unclear']=document.getElementById("describe_unclear").value
         results[currentGoalIndex]['describe_strategy']=document.getElementById("describe_strategy").value;
         results[currentGoalIndex]['describe_strategy_predict']=document.getElementById("describe_strategy_predict").value;
+        persistantData['age']=document.getElementById("age").value;
         nextPage()
       }
 }

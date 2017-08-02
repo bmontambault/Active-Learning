@@ -4,10 +4,11 @@
 from __future__ import print_function
 from flask import Flask,render_template,request,make_response
 import importlib
-import uuid
 import sys
 import os
 import json
+import random
+import ast
 from task_files import task_files
 
 app=Flask(__name__)
@@ -23,8 +24,7 @@ path=os.path.dirname(os.path.realpath(__file__))
 with open(path+'/'+'{0}_{1}_functions.json'.format(config.experiment,config.version)) as json_data:
     functions=json.load(json_data)
     json_data.close()
-
-
+    
 @app.route('/',methods=['GET','POST'])
 def start():
     
@@ -47,14 +47,14 @@ def start():
         function_name=function_names[fi]
         goals=tasks[ti]
         function=functions[function_name]
-        task=['start.html']+[a for b in [task_files[t] for t in goals] for a in b]+['goal_describe_prompt.html','demographics.html','last_page.html']
+        task=['start.html']+[a for b in [task_files[t] for t in goals] for a in b]+['last_page.html']
         
         all_args={
                  'function':function,
                  'task':task,
                  'experiment':config.experiment,
                  'version':config.version,
-                 'functions':function_name,
+                 'function_name':function_name,
                  'goals':goals,
                  'bar_height':config.bar_height,
                  'bar_width':config.bar_width,

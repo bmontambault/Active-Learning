@@ -1,10 +1,6 @@
 <html>
 <link rel="stylesheet" type="text/css" href="../../static/main.css">
-<form id="form" method="POST">
-	<input type="hidden" value="{{goal}}" name="goal">
-	<input type="hidden" value="{{function_name}}" name="function_name">
-    <input type="hidden" value="goal_prompt" name="index">
-</form>
+
 <h1>Instructions</h1>
 <div>
   This is a game where you are trying to get as many points as possible, by <b>predicting the height of vertical bars</b>.
@@ -62,8 +58,6 @@
 Press Space to begin.
 </div>
 
-<script type="text/javascript" src="../../static/init_bars.js"></script>
-<script type="text/javascript" src="../../static/continue.js"></script>
 <script type="text/javascript">
 	var allBars = document.getElementsByClassName("bar")
 	for(var i=0; i<allBars.length; i++){
@@ -90,6 +84,14 @@ Press Space to begin.
 		ctx.fillRect(0, example1Bars[i].height-50, example1Bars[i].width, example1Bars[i].height)
 	}
 
+	function submit(event){
+	  if(event.keyCode == 32){
+	    document.removeEventListener("keydown", submit);
+	    nextPage();
+	  }
+	}
+	
+document.addEventListener("keydown", submit);
 </script>
 <link rel="stylesheet" type="text/css" href="../../static/bar_style.css">
 

@@ -1,24 +1,9 @@
 <html>
 <link rel="stylesheet" type="text/css" href="../../static/main.css">
-<form id="form" method="POST">
-	<input type="hidden" value="{{goal}}" name="goal">
-	<input type="hidden" value="{{function_name}}" name="function_name">
-    <input type="hidden" value="exit" name="index">
-    <input type="hidden" id="predict_response" name="predict_response">
-    <input type="hidden" id="predict_prompt" name="predict_prompt">
-    <input type="hidden" id="predict_start_time" name="predict_start_time">
-    <input type="hidden" id="predict_response_time" name="predict_response_time">
-  	<input type="hidden" id="final_score" name="final_score">
-    <input type="hidden" value="[{{phase1_response}}]" name="test_response">
-    <input type="hidden" value="{{test_response_time}}" id="test_response_time" name="test_response_time">
-    <input type="hidden" value="{{test_start_time}}" id="test_start_time" name="test_start_time">
-    <input type="hidden" value="{{describe_goal_pre}}" id="describe_goal_pre" name="describe_goal_pre">
-</form>
+
 <body>
 <div id="ui">
-Trials Remaining: {{trails}}
 <br>
-Total Score: 0
 </div>
 <br>
 <div id="help">
@@ -26,47 +11,104 @@ Click the bar that has a red outline to record what you think its height is. <b>
 </div>
 <br>
 <div id="barContainer">
-{%for i in range(nbars)%}
-{%if i==0%}
-<canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="{{bar_width}}" onmousedown="Click(event)">
-{%elif i==nbars.length%}
-</canvas><canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="{{bar_width}}" onmousedown="Click(event)"></canvas>
-{%else%}
-</canvas><canvas id="bar{{i}}" class="bar" height="{{bar_height}}" width="{{bar_width}}" onmousedown="Click(event)">
-{%endif%}
-{% endfor %}
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script type="text/javascript" src="../static/init_bars.js"></script>
 <script>
 
-	var phase1_response=[{{phase1_response}}]
-    var predict_prompt={{phase2_prompts}}
-	var trials={{trials}}
-	var predict_response=[]
-	var predict_response_time=[]
-	var totalScore=0
-	clicked=false
+    for (var i=0; i<persistantData['nbars']; i++){
+        var tmp = document.createElement('canvas')
+        tmp.width=persistantData['bar_width']
+        tmp.height=persistantData['bar_height']
+        tmp.id='bar'+i
+        tmp.className='bar'
+        tmp.addEventListener('click',Click)
+        barContainer.appendChild(tmp)
+    }
 
-	document.getElementById("predict_start_time").value=Date.now()
-	document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br> Total Score: "+0
+	init_bars([])
+    var total_predict_trials=persistantData['predict_trials']
+    var predict_trials=persistantData['predict_trials']
+    var predict_response=[]
+    var predict_response_time=[]
+    var predict_totalScore=0
+    var start_time=Date.now()
+    var clicked=false
+    var totalScore=0
+    var predict_prompt=getPredictPrompt()
+
+    document.getElementById("ui").innerHTML="Trials Remaining: "+predict_trials+"<br>Total Score: "+Math.round(totalScore)
 
 	var allBars = document.getElementsByClassName("bar")
 	for(var i=0; i<allBars.length; i++){
 		var ctx = allBars[i].getContext("2d")
-		var score={{function}}[i]
-		if(phase1_response.indexOf(i) < 0){
+		var score=persistantData['function'][i]
+		if(results[currentGoalIndex]['response'].indexOf(i)==-1){
 			ctx.fillStyle = "grey"
 			ctx.fillRect(0, 0, allBars[i].width, allBars[i].height)
 		}else{
-			console.log(i)
 			ctx.fillStyle="red"
 			ctx.fillRect(0, allBars[i].height-score, allBars[i].width, allBars[i].height)
 		}
 	}
 
-	shiftFocus('bar'+predict_prompt[{{trials}}-trials])
+	shiftFocus('bar'+predict_prompt[total_predict_trials-predict_trials])
+
+    function shuffle(array) {
+      var currentIndex = array.length, temporaryValue, randomIndex;
+      while (0 !== currentIndex) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+      }
+
+      return array;
+    }
+
+    function getPredictPrompt(){
+        var response=results[currentGoalIndex]['response']
+        var func=persistantData['function']
+        var responseUnique=response.filter(function(item,pos){
+            return response.indexOf(item)==pos
+        })
+        var predict_prompt=[]
+        var candidates=[]
+        for (var i=0; i<func.length; i++){
+            candidates.push(i)
+        }
+        predict_prompt.push(Math.max.apply(function(x){return func[x]},candidates))
+        predict_prompt.push(Math.min.apply(function(x){return func[x]},candidates))
+        predict_prompt=predict_prompt.filter(function(x){
+            return response.indexOf(x)<0
+        })
+
+        while (predict_prompt.length<predict_trials){
+            var prompt_and_response=predict_prompt.slice(0)
+            for (var i=0; i<responseUnique.length; i++){
+                prompt_and_response.push(responseUnique[i])
+            }
+            var dist=[]
+            for (var i=0; i<candidates.length; i++){
+                var all_dist=[]
+                for (var j=0; j<prompt_and_response.length; j++){
+                    all_dist.push(Math.abs(candidates[i]-prompt_and_response[j]))
+                }
+                dist.push(Math.min(...all_dist))
+            }
+            var max_dist=[]
+            for (var i=0; i<dist.length; i++){
+                if (dist[i]==Math.max(...dist)){
+                    max_dist.push(i)
+                }
+            }
+            var choice=max_dist[Math.floor(Math.random()*max_dist.length)];
+            predict_prompt.push(choice)
+        }
+        return shuffle(predict_prompt)
+    }
 
 	function shiftFocus(bar){
 		bars = document.getElementsByClassName("focus");
@@ -82,7 +124,7 @@ Click the bar that has a red outline to record what you think its height is. <b>
         if(bar.className.indexOf(" focus") > 0){
             clicked = true
         	x=parseInt(bar.id.substring(3))
-		   	score={{function}}[x]
+		   	score=persistantData['function'][x]
 		   	scoreGuess=bar.height-Math.min(Math.max(0, event.clientY-bar.offsetTop),bar.height)
 		   	error=scoreGuess-score
             Move(scoreGuess);
@@ -100,14 +142,12 @@ Click the bar that has a red outline to record what you think its height is. <b>
     function Submit(event){
     	if (event.keyCode==32 && clicked==true){
     		clicked=false
-    		trials-=1
+    		predict_trials-=1
     		predict_response_time.push(Date.now())
     		predict_response.push(scoreGuess)
-            points={{max_score}}-Math.abs(error)
-            console.log("error: "+error)
-            console.log("points: "+points)
+            points=persistantData['function_max']-Math.abs(error)
     		totalScore+=points
-			document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br> Total Score: "+Math.round(totalScore)
+			document.getElementById("ui").innerHTML="Trials Remaining: "+predict_trials+"<br> Total Score: "+Math.round(totalScore)
     		if(error>=0){
     			ctx.fillStyle="red"
         		ctx.fillRect(0, bar.height-score, 15, bar.height);
@@ -119,15 +159,14 @@ Click the bar that has a red outline to record what you think its height is. <b>
         		ctx.fillRect(0, bar.height-scoreGuess, 15, bar.height);
     		}
     	}
-    	if (trials==0){
-    		console.log('submit')
-    		document.getElementById("predict_prompt").value=predict_prompt
-    		document.getElementById("predict_response").value=predict_response
-    		document.getElementById("predict_response_time").value=predict_response_time
-    		document.getElementById("final_score").value=totalScore
-    		document.getElementById("form").submit()
+    	if (predict_trials<=0){
+            results[currentGoalIndex]['predict_prompt']=predict_prompt
+            results[currentGoalIndex]['predict_response']=predict_response
+            results[currentGoalIndex]['predict_response_time']=predict_response_time
+            results[currentGoalIndex]['total_score']=totalScore
+            nextPage()
     	}else{
-    		shiftFocus('bar'+predict_prompt[{{trials}}-trials])
+    		shiftFocus('bar'+predict_prompt[total_predict_trials-predict_trials])
     	}
     }
    	document.addEventListener("keydown", Submit)

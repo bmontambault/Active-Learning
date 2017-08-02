@@ -50,6 +50,21 @@
             }
         });
     }
+
+
+  function getMaxScore(goalIndex){
+      var goal=persistantData['goals'][goalIndex]
+      var functionMax=Math.max(...persistantData['function'])
+      console.log(functionMax)
+      if(goal.indexOf('find_max')!=-1){
+        return functionMax
+      }else if(goal.indexOf('max_score')!=-1){
+        return functionMax*persistantData['trials']
+      }else if(goal.indexOf('min_error')!=-1){
+        console.log(functionMax)
+        return functionMax*persistantData['predict_trials']
+      }
+  }
 </script>
 
 <script>
@@ -62,7 +77,7 @@
                           'task':{{task|safe}},
                           'experiment':'{{experiment}}',
                           'version':'{{version}}',
-                          'functions':'{{functions}}',
+                          'function_name':'{{function_name}}',
                           'goals':{{goals|safe}},
                           'bar_height':{{bar_height}},
                           'bar_width':{{bar_width}},
@@ -75,9 +90,10 @@
                           'pos_quad_offset':{{pos_quad_offset}}
                           }
 
+    persistantData['function_max']=Math.max(...persistantData['function'])
     console.log(persistantData['goals'].length)
     for (var i=0; i<persistantData['goals'].length; i++){
-        results.push({'goal':persistantData['goals'][i], 'index':i})
+        results.push({'goal':persistantData['goals'][i], 'index':i, 'max_score':getMaxScore(i)})
     }
     var pages = persistantData['task']
     nextPage()

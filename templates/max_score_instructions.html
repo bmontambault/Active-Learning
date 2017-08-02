@@ -1,10 +1,6 @@
 <html>
 <link rel="stylesheet" type="text/css" href="../../static/main.css">
-<form id="form" method="POST">
-	<input type="hidden" value="{{goal}}" name="goal">
-	<input type="hidden" value="{{function_name}}" name="function_name">
-  <input type="hidden" value="goal_prompt" name="index">
-</form>
+
 <h1>Instructions</h1>
 <div>
   This is a game where you are trying to get as many points as possible, by <b>selecting vertical bars with the greatest combined height</b>.
@@ -81,5 +77,4 @@ init_bars([100,100,100,200]);
 document.addEventListener("keydown", submit);
 </script>
 <link rel="stylesheet" type="text/css" href="../../static/bar_style.css">
-
 </html>
