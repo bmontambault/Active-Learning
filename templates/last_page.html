@@ -1,7 +1,9 @@
 
 <html>
 <link rel="stylesheet" type="text/css" href="../../static/main.css">
-Thanks! You're all done. Please submit the code 
+<div id="postMessage">
+submitting (If submission doesn't complete in 10 seconds, please inform the requester)
+</div>
 </html>
 
 <script type="text/javascript">
@@ -9,11 +11,22 @@ Thanks! You're all done. Please submit the code
 persistantData['results']=results
 persistantData['complete']=true
 console.log(persistantData)
- $.ajax({
+
+function message(status){
+	document.getElementById("postMessage").innerHTML="Thanks! You're all done. Please submit the code " + status
+}
+
+$.ajax({
         method:"post",
         url:"/",
         dataType:'json',
         data:JSON.stringify(persistantData),
-        contentType:'application/json; charset=utf-8'
+        contentType:'application/json; charset=utf-8',
+        success: function(data, textStatus, jqXHR) {
+        	message(jqXHR.status)
+  		},
+  		error: function(jqXHR, textStatus, errorThrown) {
+			message(jqXHR.status)
+  		}
     });
 </script>
