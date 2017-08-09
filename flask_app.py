@@ -2,13 +2,11 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from flask import Flask,render_template,request,make_response
+from flask import Flask,render_template,request
 import importlib
 import sys
 import os
 import json
-import random
-import ast
 from task_files import task_files
 
 app=Flask(__name__)
@@ -21,6 +19,7 @@ tasks=config.tasks
 data_path='data.json'
 
 path=os.path.dirname(os.path.realpath(__file__))
+data_path=path+'/'+data_path
 with open(path+'/'+'{0}_{1}_functions.json'.format(config.experiment,config.version)) as json_data:
     functions=json.load(json_data)
     json_data.close()
