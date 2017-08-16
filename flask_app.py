@@ -27,6 +27,9 @@ with open(path+'/'+'{0}_{1}_functions.json'.format(config.experiment,config.vers
 @app.route('/',methods=['GET','POST'])
 def start():
     
+    if "location" in request.args:
+        return render_template(request.args["location"])
+    
     data=request.get_json()
     if data!=None:
         with open(data_path) as json_data:
@@ -35,9 +38,7 @@ def start():
         all_data.append(data)
         with open(data_path,'w') as json_data:
             json.dump(all_data,json_data)
-
-    if "location" in request.args:
-        return render_template(request.args["location"])
+        return ''
         
     else:
         fi=int(request.args.get('fi'))
