@@ -12,10 +12,6 @@ persistantData['results']=results
 persistantData['complete']=true
 console.log(persistantData)
 
-function message(status){
-	document.getElementById("postMessage").innerHTML="Thanks! You're all done. Please submit the code " + status
-}
-
 $.ajax({
         method:"post",
         url:"/",
@@ -29,4 +25,9 @@ $.ajax({
 			message(jqXHR.status)
   		}
     });
+
+function message(status){
+  document.getElementById("postMessage").innerHTML="Thanks! You're all done. Please submit the code " + status
+}
+
 </script>
