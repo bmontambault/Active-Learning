@@ -1,0 +1,207 @@
+\begin{thebibliography}{}
+
+\bibitem [\protect \citeauthoryear {%
+Agrawal%
+}{%
+Agrawal%
+}{%
+{\protect \APACyear {1995}}%
+}]{%
+Agrawal}
+\APACinsertmetastar {%
+Agrawal}%
+\begin{APACrefauthors}%
+Agrawal, R.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1995}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Sample Mean Based Index Policies with O(log n) Regret
+  for the Multi-Armed Bandit Problem} {Sample mean based index policies with
+  o(log n) regret for the multi-armed bandit problem}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Advances in Applied Probability}{27}{4}{1054-1078}.
+\newblock
+\begin{APACrefURL} \url{http://www.jstor.org/stable/1427934} \end{APACrefURL}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Bramley%
+, Gerstenberg%
+\BCBL {}\ \BBA {} Tenenbaum%
+}{%
+Bramley%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2016}}%
+}]{%
+BramleyGerstenbergTenenbaum2016a}
+\APACinsertmetastar {%
+BramleyGerstenbergTenenbaum2016a}%
+\begin{APACrefauthors}%
+Bramley, N.%
+, Gerstenberg, T.%
+\BCBL {}\ \BBA {} Tenenbaum, J\BPBI B.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2016}{}{}.
+\newblock
+\APACrefbtitle {Natural science: Active learning in dynamic physical
+  microworlds.} {Natural science: Active learning in dynamic physical
+  microworlds.}
+\newblock
+\APACaddressPublisher{}{38th Annual Meeting of the Cognitive Science Society}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Coulom%
+}{%
+Coulom%
+}{%
+{\protect \APACyear {2007}}%
+}]{%
+Coulom2007}
+\APACinsertmetastar {%
+Coulom2007}%
+\begin{APACrefauthors}%
+Coulom, R.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2007}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Efficient Selectivity and Backup Operators in
+  Monte-Carlo Tree Search} {Efficient selectivity and backup operators in
+  monte-carlo tree search}.{\BBCQ}
+\newblock
+\BIn{} H\BPBI J.~van~den Herik, P.~Ciancarini\BCBL {}\ \BBA {} H\BPBI H\BPBI
+  L\BPBI M\BPBI J.~Donkers\ (\BEDS), \APACrefbtitle {Computers and Games: 5th
+  International Conference, CG 2006, Turin, Italy, May 29-31, 2006. Revised
+  Papers} {Computers and games: 5th international conference, cg 2006, turin,
+  italy, may 29-31, 2006. revised papers}\ (\BPGS\ 72--83).
+\newblock
+\APACaddressPublisher{Berlin, Heidelberg}{Springer Berlin Heidelberg}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Langford%
+\ \BBA {} Zhang%
+}{%
+Langford%
+\ \BBA {} Zhang%
+}{%
+{\protect \APACyear {2008}}%
+}]{%
+Langford}
+\APACinsertmetastar {%
+Langford}%
+\begin{APACrefauthors}%
+Langford, J.%
+\BCBT {}\ \BBA {} Zhang, T.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2008}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {The Epoch-Greedy Algorithm for Multi-armed Bandits with
+  Side Information} {The epoch-greedy algorithm for multi-armed bandits with
+  side information}.{\BBCQ}
+\newblock
+\BIn{} J\BPBI C.~Platt, D.~Koller, Y.~Singer\BCBL {}\ \BBA {} S\BPBI T.~Roweis\
+  (\BEDS), \APACrefbtitle {Advances in Neural Information Processing Systems
+  20} {Advances in neural information processing systems 20}\ (\BPGS\
+  817--824).
+\newblock
+\APACaddressPublisher{}{Curran Associates, Inc.}
+\newblock
+\begin{APACrefURL}
+  \url{http://papers.nips.cc/paper/3178-the-epoch-greedy-algorithm-for-multi-armed-bandits-with-side-information.pdf}
+  \end{APACrefURL}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Rachlin%
+, Battalio%
+, Kagel%
+\BCBL {}\ \BBA {} Green%
+}{%
+Rachlin%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {1981}}%
+}]{%
+Rachlin1981a}
+\APACinsertmetastar {%
+Rachlin1981a}%
+\begin{APACrefauthors}%
+Rachlin, H.%
+, Battalio, R.%
+, Kagel, J.%
+\BCBL {}\ \BBA {} Green, L.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1981}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Maximization theory in behavioral psychology}
+  {Maximization theory in behavioral psychology}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Behavioral and Brain Sciences}{4}{3}{371–388}.
+\newblock
+\begin{APACrefDOI} \doi{10.1017/S0140525X00009407} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Sutton%
+\ \BBA {} Barto%
+}{%
+Sutton%
+\ \BBA {} Barto%
+}{%
+{\protect \APACyear {1998}}%
+}]{%
+Sutton1998a}
+\APACinsertmetastar {%
+Sutton1998a}%
+\begin{APACrefauthors}%
+Sutton, R\BPBI S.%
+\BCBT {}\ \BBA {} Barto, A\BPBI G.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYear{1998}.
+\newblock
+\APACrefbtitle {Introduction to Reinforcement Learning} {Introduction to
+  reinforcement learning}\ (\PrintOrdinal{1st}\ \BEd).
+\newblock
+\APACaddressPublisher{Cambridge, MA, USA}{MIT Press}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Thompson%
+}{%
+Thompson%
+}{%
+{\protect \APACyear {1933}}%
+}]{%
+Thompson}
+\APACinsertmetastar {%
+Thompson}%
+\begin{APACrefauthors}%
+Thompson, W\BPBI R.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1933}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {On the Likelihood that One Unknown Probability Exceeds
+  Another in View of the Evidence of Two Samples} {On the likelihood that one
+  unknown probability exceeds another in view of the evidence of two
+  samples}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Biometrika}{25}{3/4}{285-294}.
+\newblock
+\begin{APACrefURL} \url{http://www.jstor.org/stable/2332286} \end{APACrefURL}
+\PrintBackRefs{\CurrentBib}
+
+\end{thebibliography}

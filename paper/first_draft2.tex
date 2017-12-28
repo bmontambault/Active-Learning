@@ -3,6 +3,7 @@
 \usepackage{cogsci}
 \usepackage{pslatex}
 \usepackage{apacite}
+\usepackage{natbib}
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{subcaption}
@@ -42,11 +43,15 @@
 	where the first term yields the expected reward on trial $t$ and the second term recursively defines the expected reward on all subsequent trials up to $T$. This second term can be evaluated for trial $t+1$ by weighing the expected reward given all possible histories $ \mathcal{ H}_{1:t} = [(a_{1}, r_{1}),...,(a_{t-1},r_{t-1}),(a_{t},r_{t})]$ for $r_{t} \in \mathcal{R}$ by the probability of that history occurring:
 	$$\mathbf{E}[r_{t+1:T} | \tilde{\pi}( h_{1:t})] = \sum_{r_{t} \in \mathcal{R}} p(r_{t} | a_{t}, h_{1:t-1}) \mathbf{E}[r_{1:T} | \tilde{\pi}( h_{1:t})]$$
 
-	If the reward $r$ observed after choosing action $a$ is drawn from the distribution $H(\theta_{a})$, an agent must employ a strategy that balances choosing the action that maximizes the reward on trial $t$, $a_{t}^{*} = \text{argmax}_{a_{t} \in A} \mathbf{E}[H(\theta_{a_{t}})]$, and learning more about $\theta_{A}$ by choosing novel actions to maximize reward on future trials. As the problem of evaluating all possible histories is intractable, one of two general classes of approximations can be used. The first, sample-based methods, involves using a subset of possible histories to evaluate the long-term reward of an action, and includes Thompson sampling and Monte Carlo tree search \cite{Coulom2007} and its variants (e.g., 5035667, Gelly:2007:COO:1273496.1273531). Rather than relying on simulations, myopic strategies define a value function for approximate long-term reward. Common myopic strategies include upper confidence bound (UCB) \cite{10.2307/1427934} and epsilon-greedy \cite{Sutton1998a} algorithms. 
+	If the reward $r$ observed after choosing action $a$ is drawn from the distribution $H(\theta_{a})$, an agent must employ a strategy that balances choosing the action that maximizes the reward on trial $t$, $a_{t}^{*} = \text{argmax}_{a_{t} \in A} \mathbf{E}[H(\theta_{a_{t}})]$, and learning more about $\theta_{A}$ by choosing novel actions to maximize reward on future trials. As the problem of evaluating all possible histories is intractable, one of two general classes of approximations can be used. The first, simulation-based methods, involves using a subset of possible histories to evaluate the long-term reward of an action, and includes Thompson sampling \citep{Thompson} and Monte Carlo tree search \citep{Coulom2007}. Rather than relying on simulations, myopic strategies define a value function for approximating long-term reward. Common myopic strategies include upper confidence bound (UCB) \citep{Agrawal} and epsilon-greedy \citep{Sutton1998a} algorithms.
 	
 	\subsection{CMAB/Function Learning}
 	
-	Contextual multi-armed bandit (CMAB) problems introduce additional information into the standard MAB problem in the form of a set of features associated with each option. By learning a map between these features and reward, an agent can gain information about the expected reward of actions besides the one that it has chosen. (Function Learning)
+	Contextual multi-armed bandit (CMAB) problems introduce additional information into the standard MAB problem by way of a set of features associated with the set of possible examples \citep{Langford}. For example, a standard MAB formulation of the problem of choosing which restaurant to eat at assumes that the reward yielded by any two restaurants will be uncorrelated. However, it might be the case that these restaurants share a set of features (e.g. size, location, menu items) such that choosing similar restaurants can be assumed to yield similar rewards. Rather than having to execute an action to be able to evaluate its expected reward, considering shared features allows one to learn a function, $R: x_{t} \to r_{t}$ that maps features of the action $a_{t}$, $x_{a_{t}}$ to that action's expected reward, $r_{t}$.
+	
+	With the inclusion of context, CMAB problems require the additional step of learning the function $R$ between updating the history, $h_{1:t-1} = [(a_{1}, x_{1}, r_{1}),...,(a_{t-1}, x_{t-1}, r_{t-1})]$, and choosing $a_{t} = \tilde{\pi}(h_{t-1})$. Theories of function learning typically follow either a rule-based or similarity-based approach. In rule-based approaches 
+	
+	
 	
 	\subsection{Basic CMAB Strategies}
 	
@@ -65,13 +70,12 @@
 	That is, on trial if trial $t$ yields an increase in reward over the previous maximum reward, $r'_{t}$ is the difference. If not, $r'_{t}$ is 0. Since active learning is concerned with learning the reward function rather than the magnitude of the rewards themselves, its goal-specific reward can be described as the sum of the decrease in variance across all possible actions:
 	$$\mathbf{E}_{al}[r'_{t}|a_{t}, h_{1:t-1}] = \sum_{a \in A} \mathbf{Var}[r|a,h_{1:t-1}] - \mathbf{Var}[r|a,h_{1:t}]$$
 	
-	
 	\bibliographystyle{apacite}
 	
 	\setlength{\bibleftmargin}{.125in}
 	\setlength{\bibindent}{-\bibleftmargin}
 	
 	\bibliography{first_draft}
-	
+		
 	
 \end{document}
