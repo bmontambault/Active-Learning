@@ -1,4 +1,4 @@
-@Article{SteyversLeeWagenmakers2009a,
+@article{SteyversLeeWagenmakers2009a,
   author =	 {M. Steyvers and M. D. Lee and E. -J. Wagenmakers},
   title =	 {A Bayesian analysis of human decision-making on bandit problems},
   journal =	 {Cognition and Brain Theory},
@@ -61,4 +61,66 @@
 	edition = {1st},
 	publisher = {MIT Press},
 	address = {Cambridge, MA, USA},
+}
+
+@Inbook{Coulom2007,
+	author="Coulom, R{\'e}mi",
+	editor="van den Herik, H. Jaap
+	and Ciancarini, Paolo
+	and Donkers, H. H. L. M. (Jeroen)",
+	title="Efficient Selectivity and Backup Operators in Monte-Carlo Tree Search",
+	bookTitle="Computers and Games: 5th International Conference, CG 2006, Turin, Italy, May 29-31, 2006. Revised Papers",
+	year="2007",
+	publisher="Springer Berlin Heidelberg",
+	address="Berlin, Heidelberg",
+	pages="72--83",
+	abstract="A Monte-Carlo evaluation consists in estimating a position by averaging the outcome of several random continuations. The method can serve as an evaluation function at the leaves of a min-max tree. This paper presents a new framework to combine tree search with Monte-Carlo evaluation, that does not separate between a min-max phase and a Monte-Carlo phase. Instead of backing-up the min-max value close to the root, and the average value at some depth, a more general backup operator is defined that progressively changes from averaging to min-max as the number of simulations grows. This approach provides a fine-grained control of the tree growth, at the level of individual simulations, and allows efficient selectivity. The resulting algorithm was implemented in a 9{\texttimes}9 Go-playing program, Crazy Stone, that won the 10th KGS computer-Go tournament.",
+	isbn="978-3-540-75538-8",
+	doi="10.1007/978-3-540-75538-8_7",
+	url="https://doi.org/10.1007/978-3-540-75538-8_7"
+}
+
+
+@INPROCEEDINGS{5035667, 
+	author={B. E. Childs and J. H. Brodeur and L. Kocsis}, 
+	booktitle={2008 IEEE Symposium On Computational Intelligence and Games}, 
+	title={Transpositions and move groups in Monte Carlo tree search}, 
+	year={2008}, 
+	volume={}, 
+	number={}, 
+	pages={389-395}, 
+	keywords={Monte Carlo methods;computer games;trees (mathematics);Monte Carlo tree search;artificial trees;effective branching factor;game programs;graph structure;upper confidence bounds;Algorithm design and analysis;Automation;Computer science;Electronic mail;History;Monte Carlo methods;Statistics;Tree data structures;Tree graphs}, 
+	doi={10.1109/CIG.2008.5035667}, 
+	ISSN={2325-4270}, 
+	month={Dec},}
+
+@inproceedings{Gelly:2007:COO:1273496.1273531,
+	author = {Gelly, Sylvain and Silver, David},
+	title = {Combining Online and Offline Knowledge in UCT},
+	booktitle = {Proceedings of the 24th International Conference on Machine Learning},
+	series = {ICML '07},
+	year = {2007},
+	isbn = {978-1-59593-793-3},
+	location = {Corvalis, Oregon, USA},
+	pages = {273--280},
+	numpages = {8},
+	url = {http://doi.acm.org/10.1145/1273496.1273531},
+	doi = {10.1145/1273496.1273531},
+	acmid = {1273531},
+	publisher = {ACM},
+	address = {New York, NY, USA},
 } 
+
+@article{10.2307/1427934,
+	ISSN = {00018678},
+	URL = {http://www.jstor.org/stable/1427934},
+	abstract = {We consider a non-Bayesian infinite horizon version of the multi-armed bandit problem with the objective of designing simple policies whose regret increases slowly with time. In their seminal work on this problem, Lai and Robbins had obtained a O(log n) lower bound on the regret with a constant that depends on the Kullback-Leibler number. They also constructed policies for some specific families of probability distributions (including exponential families) that achieved the lower bound. In this paper we construct index policies that depend on the rewards from each arm only through their sample mean. These policies are computationally much simpler and are also applicable much more generally. They achieve a O(log n) regret with a constant that is also based on the Kullback-Leibler number. This constant turns out to be optimal for one-parameter exponential families; however, in general it is derived from the optimal one via a 'contraction' principle. Our results rely entirely on a few key lemmas from the theory of large deviations.},
+	author = {Rajeev Agrawal},
+	journal = {Advances in Applied Probability},
+	number = {4},
+	pages = {1054-1078},
+	publisher = {Applied Probability Trust},
+	title = {Sample Mean Based Index Policies with O(log n) Regret for the Multi-Armed Bandit Problem},
+	volume = {27},
+	year = {1995}
+}

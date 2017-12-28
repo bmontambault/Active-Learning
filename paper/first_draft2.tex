@@ -1,0 +1,77 @@
+\documentclass[10pt,letterpaper]{article}
+
+\usepackage{cogsci}
+\usepackage{pslatex}
+\usepackage{apacite}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath}
+
+
+
+
+\title{}
+
+\author{}
+
+
+\begin{document}
+	
+	\maketitle
+	
+	
+	\begin{abstract}
+		
+		
+
+		
+	\end{abstract}
+	
+	
+	\section{Introduction}
+	
+	\subsection{Explore/Exploit}
+	
+	Many decisions that people are faced with require finding a balance between exploiting known information for short-term gain and exploring new sources of information that may lead to future reward. For example, a person might choose to go to a restaurant that they know well and have had multiple satisfying meals at, or choose to try a new restaurant that could result in a better or worse experience. This is known as the explore-exploit trade-off.
+	
+	\subsection{MAB}
+	
+	Many tasks requiring this kind of trade-off can be characterized as multi-arm bandit (MAB) problems. A MAB problem consists of $A$ possible actions, where the $a$-th action yields the random reward $r_{t}$ drawn from an unknown distribution. Over $T$ trials, the agent must choose $a_{t:T}$ such that $\sum r_{t:T}$ is maximized. The policy $\tilde{\pi}$ maps the observed history of actions and rewards $h_{1:t-1} = [(a_{1}, r_{1}),...,(a_{t-1}, r_{t-1})]$ to the next action $a_{t}$ for all possible histories $h_{1:t-1} \in \mathcal{H}$. The goal in a MAB problem is to find the optimal policy such that the expected reward over $T$ trials, $\mathbf{E}[r_{1:T} | \tilde{\pi}( h_{1:t-1})]$, is maximized. This is the solution to the Bellman equation
+	$$\mathbf{E}[r_{1:T} | \tilde{\pi}( h_{1:t-1})] = \mathbf{E}[r_{t} | \tilde{\pi}(h_{1:t-1})] + \mathbf{E}[r_{t+1:T} | \tilde{\pi}( h_{1:t})]$$
+	where the first term yields the expected reward on trial $t$ and the second term recursively defines the expected reward on all subsequent trials up to $T$. This second term can be evaluated for trial $t+1$ by weighing the expected reward given all possible histories $ \mathcal{ H}_{1:t} = [(a_{1}, r_{1}),...,(a_{t-1},r_{t-1}),(a_{t},r_{t})]$ for $r_{t} \in \mathcal{R}$ by the probability of that history occurring:
+	$$\mathbf{E}[r_{t+1:T} | \tilde{\pi}( h_{1:t})] = \sum_{r_{t} \in \mathcal{R}} p(r_{t} | a_{t}, h_{1:t-1}) \mathbf{E}[r_{1:T} | \tilde{\pi}( h_{1:t})]$$
+
+	If the reward $r$ observed after choosing action $a$ is drawn from the distribution $H(\theta_{a})$, an agent must employ a strategy that balances choosing the action that maximizes the reward on trial $t$, $a_{t}^{*} = \text{argmax}_{a_{t} \in A} \mathbf{E}[H(\theta_{a_{t}})]$, and learning more about $\theta_{A}$ by choosing novel actions to maximize reward on future trials. As the problem of evaluating all possible histories is intractable, one of two general classes of approximations can be used. The first, sample-based methods, involves using a subset of possible histories to evaluate the long-term reward of an action, and includes Thompson sampling and Monte Carlo tree search \cite{Coulom2007} and its variants (e.g., 5035667, Gelly:2007:COO:1273496.1273531). Rather than relying on simulations, myopic strategies define a value function for approximate long-term reward. Common myopic strategies include upper confidence bound (UCB) \cite{10.2307/1427934} and epsilon-greedy \cite{Sutton1998a} algorithms. 
+	
+	\subsection{CMAB/Function Learning}
+	
+	Contextual multi-armed bandit (CMAB) problems introduce additional information into the standard MAB problem in the form of a set of features associated with each option. By learning a map between these features and reward, an agent can gain information about the expected reward of actions besides the one that it has chosen. (Function Learning)
+	
+	\subsection{Basic CMAB Strategies}
+	
+	(eps greedy, mean/var greedy, ucb/pmi/mi, entropy search)
+	
+	Once an agent has a mapping between features and reward, the policy $\tilde{\pi}$ must be selected that chooses the action $a_{t}$ given the history of observed actions, features, and rewards $h_{1:t-1}$. Given that this policy does not take into account all possible trajectories, it must include a value function that approximates the long-term reward of any given action.
+	
+	\subsection{Alternative Goals}
+	
+	In addition to CMABs, the explore/exploit tradeoff can also be observed in other common context-dependent problems. In active learning (AL) \cite{BramleyGerstenbergTenenbaum2016a}, participants assume some degree of control over the contexts that they observe, rather than passively observing a predetermined set of examples. Optimization problems \cite{Rachlin1981a} require finding the set of features $x$ that maximizes some reward $f(x)$; for example, finding the number of hours to dedicate to work and to leisure respectively that maximizes satisfaction.
+	
+	While these tasks might all share the same mapping between action and reward, their goal-specific reward, and thus the function used to approximate long-term reward, are distinct. For any particular action reward pair $(a_{t}, r_{t})$, there exists the goal-specific action reward pair $(a_{t}, r'_{t})$. Since the goal in the CMAB task is to maximize cumulative reward over time, the goal-specific reward is the same as the reward, that is:
+	$$\mathbf{E}_{cmab}[r'_{t}|a_{t}, h_{1:t-1}] = \mathbf{E}[r_{t}|a_{t}, h_{1:t-1}]$$
+	In contrast, the goal of the optimization problem is simply to find the maximum possible reward withing $T$ steps. As such, the goal specific reward is defined as:
+	$$\mathbf{E}_{opt}[r'_{t}|a_{t}, h_{1:t-1}] = max(\mathbf{E}[r_{t}|a_{t}, h_{1:t-1}] - \sum_{i=1}^{t-1}r'_{i}, 0)$$
+	That is, on trial if trial $t$ yields an increase in reward over the previous maximum reward, $r'_{t}$ is the difference. If not, $r'_{t}$ is 0. Since active learning is concerned with learning the reward function rather than the magnitude of the rewards themselves, its goal-specific reward can be described as the sum of the decrease in variance across all possible actions:
+	$$\mathbf{E}_{al}[r'_{t}|a_{t}, h_{1:t-1}] = \sum_{a \in A} \mathbf{Var}[r|a,h_{1:t-1}] - \mathbf{Var}[r|a,h_{1:t}]$$
+	
+	
+	\bibliographystyle{apacite}
+	
+	\setlength{\bibleftmargin}{.125in}
+	\setlength{\bibindent}{-\bibleftmargin}
+	
+	\bibliography{first_draft}
+	
+	
+\end{document}
