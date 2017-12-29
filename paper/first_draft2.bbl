@@ -55,6 +55,63 @@ Bramley, N.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
+Busemeyer%
+, Byun%
+\BCBL {}\ \BBA {} McDaniel%
+}{%
+Busemeyer%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2005}}%
+}]{%
+Busemeyer2005LearningFR}
+\APACinsertmetastar {%
+Busemeyer2005LearningFR}%
+\begin{APACrefauthors}%
+Busemeyer, J\BPBI R.%
+, Byun, E.%
+\BCBL {}\ \BBA {} McDaniel, M\BPBI A.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2005}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Learning Functional Relations Based on Experience With
+  Input-Output Pairs by Humans and Artificial Neural Networks} {Learning
+  functional relations based on experience with input-output pairs by humans
+  and artificial neural networks}.{\BBCQ}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Carroll%
+}{%
+Carroll%
+}{%
+{\protect \APACyear {1963}}%
+}]{%
+Carroll}
+\APACinsertmetastar {%
+Carroll}%
+\begin{APACrefauthors}%
+Carroll, J\BPBI D.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1963}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {FUNCTIONAL LEARNING: THE LEARNING OF CONTINUOUS
+  FUNCTIONAL MAPPINGS RELATING STIMULUS AND RESPONSE CONTINUA} {Functional
+  learning: The learning of continuous functional mappings relating stimulus
+  and response continua}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{ETS Research Bulletin Series}{1963}{2}{i--144}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1002/j.2333-8504.1963.tb00958.x}
+  \end{APACrefURL}
+\newblock
+\begin{APACrefDOI} \doi{10.1002/j.2333-8504.1963.tb00958.x} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
 Coulom%
 }{%
 Coulom%
@@ -82,6 +139,33 @@ Coulom, R.%
   italy, may 29-31, 2006. revised papers}\ (\BPGS\ 72--83).
 \newblock
 \APACaddressPublisher{Berlin, Heidelberg}{Springer Berlin Heidelberg}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Koh%
+\ \BBA {} Meyer%
+}{%
+Koh%
+\ \BBA {} Meyer%
+}{%
+{\protect \APACyear {1991}}%
+}]{%
+Koh}
+\APACinsertmetastar {%
+Koh}%
+\begin{APACrefauthors}%
+Koh, K.%
+\BCBT {}\ \BBA {} Meyer, D.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1991}{10}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Function Learning: Induction of Continuous
+  Stimulus-Response Relations} {Function learning: Induction of continuous
+  stimulus-response relations}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{}{17}{}{811-36}.
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%

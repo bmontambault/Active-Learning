@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (MiKTeX 2.9.6350 64-bit) (preloaded format=pdflatex 2017.8.13)  28 DEC 2017 17:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (MiKTeX 2.9.6350 64-bit) (preloaded format=pdflatex 2017.8.13)  29 DEC 2017 03:40
 entering extended mode
 **./first_draft2.tex
 (first_draft2.tex
@@ -350,13 +350,40 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
 
 {C:/Users/bmontambault/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}] (fir
 st_draft2.bbl
-Overfull \hbox (321.98608pt too wide) in paragraph at lines 100--122
+Underfull \hbox (badness 3312) in paragraph at lines 95--113
+[]\OT1/ptm/m/n/10 Carroll, J. D.  (1963).  Func-tional learn-ing: The
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 95--113
+\OT1/ptm/m/n/10 learn-ing of con-tin-u-ous func-tional map-pings re-lat-
+ []
+
+
+Underfull \hbox (badness 1661) in paragraph at lines 95--113
+\OT1/ptm/m/n/10 ing stim-u-lus and re-sponse con-tinua.  \OT1/ptm/m/it/10 ETS R
+e-search
+ []
+
+
+Underfull \hbox (badness 5652) in paragraph at lines 95--113
+\OT1/ptm/m/it/10 Bul-letin Se-ries\OT1/ptm/m/n/10 , \OT1/ptm/m/it/10 1963\OT1/p
+tm/m/n/10 (2), i--144.  Re-trieved from
+ []
+
+
+Overfull \hbox (31.28748pt too wide) in paragraph at lines 95--113
+\OT1/pcr/m/n/10 http://dx.doi.org/10.1002/j.2333-8504.1963.tb00958.x
+ []
+
+
+Overfull \hbox (321.98608pt too wide) in paragraph at lines 184--206
 \OT1/pcr/m/n/10 http://papers.nips.cc/paper/3178-the-epoch-greedy-algorithm-for
 -multi-armed-bandits-with-side-information.pdf
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 100--122
+Underfull \hbox (badness 10000) in paragraph at lines 184--206
 
  []
 
@@ -364,42 +391,40 @@ Missing character: There is no â in font ptmr7t!
 Missing character: There is no € in font ptmr7t!
 Missing character: There is no “ in font ptmr7t!
 
-Underfull \hbox (badness 1565) in paragraph at lines 137--153
+Underfull \hbox (badness 1565) in paragraph at lines 221--237
 \OT1/ptm/m/n/10 Max-i-miza-tion the-ory in be-hav-ioral psy-chol-ogy.  \OT1/ptm
 /m/it/10 Be-
  []
 
 
-Underfull \hbox (badness 3396) in paragraph at lines 137--153
+Underfull \hbox (badness 3396) in paragraph at lines 221--237
 \OT1/ptm/m/it/10 hav-ioral and Brain Sci-ences\OT1/ptm/m/n/10 , \OT1/ptm/m/it/1
 0 4\OT1/ptm/m/n/10 (3), 371388.  doi:
  []
 
-) [2
-
-] (first_draft2.aux) ) 
+) [2] (first_draft2.aux) ) 
 Here is how much of TeX's memory you used:
- 4258 strings out of 493323
- 63933 string characters out of 3141226
- 135287 words of memory out of 3000000
- 7732 multiletter control sequences out of 15000+200000
+ 4270 strings out of 493323
+ 64164 string characters out of 3141226
+ 135445 words of memory out of 3000000
+ 7744 multiletter control sequences out of 15000+200000
  30708 words of font info for 63 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 39i,6n,38p,1012b,188s stack positions out of 5000i,500n,10000p,200000b,50000s
-{C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/
-fonts/enc/dvips/base/8r.enc}<C:/Users/bmontambault/AppData/Local/Programs/MiKTe
-X 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/bmontambault/AppData/
-Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/bm
-ontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cms
-y10.pfb><C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/ur
-w/courier/ucrr8a.pfb><C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/f
-onts/type1/urw/symbol/usyr.pfb><C:/Users/bmontambault/AppData/Local/Programs/Mi
-KTeX 2.9/fonts/type1/urw/times/utmb8a.pfb><C:/Users/bmontambault/AppData/Local/
-Programs/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb><C:/Users/bmontambault/App
-Data/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.pfb><C:/Users/bmon
-tambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/zapfchan/uzcmi8a.pfb
->
-Output written on first_draft2.pdf (2 pages, 101976 bytes).
+ 39i,6n,38p,1261b,192s stack positions out of 5000i,500n,10000p,200000b,50000s
+{C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 
+2.9/fonts/enc/dvips/base/8r.enc}<C:/Users/bmontambault/AppData/Local/Programs/M
+iKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/bmontambault/AppD
+ata/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/User
+s/bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm
+/cmsy10.pfb><C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type
+1/urw/courier/ucrr8a.pfb><C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2
+.9/fonts/type1/urw/symbol/usyr.pfb><C:/Users/bmontambault/AppData/Local/Program
+s/MiKTeX 2.9/fonts/type1/urw/times/utmb8a.pfb><C:/Users/bmontambault/AppData/Lo
+cal/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb><C:/Users/bmontambault
+/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.pfb><C:/Users/
+bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/zapfchan/uzcmi8a
+.pfb>
+Output written on first_draft2.pdf (2 pages, 103852 bytes).
 PDF statistics:
  46 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
