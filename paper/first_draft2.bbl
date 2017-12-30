@@ -205,6 +205,63 @@ Langford, J.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
+Lucas%
+, L~Griffiths%
+, Williams%
+\BCBL {}\ \BBA {} Kalish%
+}{%
+Lucas%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2015}}%
+}]{%
+Lucas}
+\APACinsertmetastar {%
+Lucas}%
+\begin{APACrefauthors}%
+Lucas, C.%
+, L~Griffiths, T.%
+, Williams, J.%
+\BCBL {}\ \BBA {} Kalish, M.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2015}{03}{}.
+\newblock
+{\BBOQ}\APACrefatitle {A rational model of function learning} {A rational model
+  of function learning}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{}{22}{}{}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+McDaniel%
+\ \BBA {} Busemeyer%
+}{%
+McDaniel%
+\ \BBA {} Busemeyer%
+}{%
+{\protect \APACyear {2005}}%
+}]{%
+McDaniel2005TheCB}
+\APACinsertmetastar {%
+McDaniel2005TheCB}%
+\begin{APACrefauthors}%
+McDaniel, M\BPBI A.%
+\BCBT {}\ \BBA {} Busemeyer, J\BPBI R.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2005}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {The conceptual basis of function learning and
+  extrapolation: comparison of rule-based and associative-based models.} {The
+  conceptual basis of function learning and extrapolation: comparison of
+  rule-based and associative-based models.}{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Psychonomic bulletin \& review}{12}{}{24-42}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
 Rachlin%
 , Battalio%
 , Kagel%
