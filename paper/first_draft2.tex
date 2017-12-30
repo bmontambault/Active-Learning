@@ -64,6 +64,19 @@
 	\end{equation}
 	 where $\mathbf{k}(x^{*}) = [k(x_{1},x^{*}),...,k(x_{N},x^{*})]$ and $\mathbf{K} = k(\mathbf{x}_{N}, \mathbf{x}_{N})$.
 	
+	Bayesian optimization \citep{Snoek} provides a framework for solving CMAB problems when the reward function is assumed to be drawn from a Gaussian process. On each trial, the acquisition function $\text{acq}(a) = \text{acq}(m(a|h_{1:t-1}), v(a|h_{1:t-1}))$ is used to approximate the expected long-term reward of each action, and the next action is chosen according to the policy $\tilde{\pi}(h_{1:t-1}) = \text{argmax}_{a \in A}\text{acq}(a)$. Once the action/reward pair has been observed, the mean and variance functions at each action are updated. Of the commonly used acquisition functions, most follow the heuristic of favoring actions where both the mean and variance of the associated distribution over rewards are high; that is, where there is opportunity to either exploit a known reward or explore an unknown area of the reward function. The Gaussian process UCB acquisition function directly weighs exploration and exploitation by taking a weighted sum of the mean and variance of the reward function at $a$ 
+	\begin{equation}
+	\text{acq}_{UCB}(a) = m(a|h_{1:t-1}) + \beta \sqrt{v(a|h_{1:t-1})}
+	\end{equation}
+	where $\beta$ determines the preference for exploration. Another strategy is to maximize the probability of improving the current best reward:
+	\begin{equation}
+	\text{acq}_{PoI}(a) = \Phi \bigg( \frac{m(a|h_{1:t-1}) -  m(a*|h_{1:t-1})}{\sqrt{v(a|h_{1:t-1})}} \bigg)
+	\end{equation}
+	where $a*$ is the action that is believed to maximize reward and $\Phi$ is the cumulative distribution function of the standard normal. A similar strategy is to maximize the expected improvement:
+	\begin{equation}
+	\text{acq}_{EI}(a) = (m(a|h_{1:t-1}) -  m(a*|h_{1:t-1})) \Phi(z) + \sqrt{v(a|h_{1:t-1})}
+	\end{equation}
+	where $z = \frac{m(a|h_{1:t-1}) -  m(a*|h_{1:t-1})}{\sqrt{v(a|h_{1:t-1})}}$.
 	
 	\subsection{Basic CMAB Strategies}
 	

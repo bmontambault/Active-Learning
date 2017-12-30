@@ -293,6 +293,42 @@ Rachlin, H.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
+Snoek%
+, Larochelle%
+\BCBL {}\ \BBA {} Adams%
+}{%
+Snoek%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2012}}%
+}]{%
+Snoek}
+\APACinsertmetastar {%
+Snoek}%
+\begin{APACrefauthors}%
+Snoek, J.%
+, Larochelle, H.%
+\BCBL {}\ \BBA {} Adams, R\BPBI P.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2012}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Practical Bayesian Optimization of Machine Learning
+  Algorithms} {Practical bayesian optimization of machine learning
+  algorithms}.{\BBCQ}
+\newblock
+\BIn{} \APACrefbtitle {Proceedings of the 25th International Conference on
+  Neural Information Processing Systems - Volume 2} {Proceedings of the 25th
+  international conference on neural information processing systems - volume
+  2}\ (\BPGS\ 2951--2959).
+\newblock
+\APACaddressPublisher{USA}{Curran Associates Inc.}
+\newblock
+\begin{APACrefURL} \url{http://dl.acm.org/citation.cfm?id=2999325.2999464}
+  \end{APACrefURL}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
 Sutton%
 \ \BBA {} Barto%
 }{%

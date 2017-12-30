@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (MiKTeX 2.9.6350 64-bit) (preloaded format=pdflatex 2017.8.13)  30 DEC 2017 03:31
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (MiKTeX 2.9.6350 64-bit) (preloaded format=pdflatex 2017.8.13)  30 DEC 2017 06:14
 entering extended mode
 **./first_draft2.tex
 (first_draft2.tex
@@ -376,7 +376,7 @@ Overfull \hbox (31.28748pt too wide) in paragraph at lines 95--113
 \OT1/pcr/m/n/10 http://dx.doi.org/10.1002/j.2333-8504.1963.tb00958.x
  []
 
-
+[2]
 Overfull \hbox (321.98608pt too wide) in paragraph at lines 184--206
 \OT1/pcr/m/n/10 http://papers.nips.cc/paper/3178-the-epoch-greedy-algorithm-for
 -multi-armed-bandits-with-side-information.pdf
@@ -402,33 +402,44 @@ Underfull \hbox (badness 3396) in paragraph at lines 278--294
 0 4\OT1/ptm/m/n/10 (3), 371388.  doi:
  []
 
-[2]) [3
+
+Overfull \hbox (15.98755pt too wide) in paragraph at lines 308--330
+\OT1/pcr/m/n/10 http://dl.acm.org/citation.cfm?id=2999325.2999464
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--330
+
+ []
+
+) [3
 
 ] (first_draft2.aux) ) 
 Here is how much of TeX's memory you used:
- 4280 strings out of 493323
- 64329 string characters out of 3141226
- 137591 words of memory out of 3000000
- 7752 multiletter control sequences out of 15000+200000
- 32086 words of font info for 65 fonts, out of 3000000 for 9000
+ 4286 strings out of 493323
+ 64395 string characters out of 3141226
+ 137656 words of memory out of 3000000
+ 7756 multiletter control sequences out of 15000+200000
+ 33199 words of font info for 67 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 39i,15n,38p,1977b,260s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 39i,15n,38p,1977b,234s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/
 fonts/enc/dvips/base/8r.enc}<C:/Users/bmontambault/AppData/Local/Programs/MiKTe
-X 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/bmontambault/AppData/
-Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/bm
-ontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cms
-y10.pfb><C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/ur
-w/courier/ucrr8a.pfb><C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/f
-onts/type1/urw/symbol/usyr.pfb><C:/Users/bmontambault/AppData/Local/Programs/Mi
-KTeX 2.9/fonts/type1/urw/times/utmb8a.pfb><C:/Users/bmontambault/AppData/Local/
-Programs/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb><C:/Users/bmontambault/App
-Data/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmri8a.pfb><C:/Users/bmon
-tambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/zapfchan/uzcmi8a.pfb
->
-Output written on first_draft2.pdf (3 pages, 109005 bytes).
+X 2.9/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/bmontambault/AppData/
+Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/b
+montambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cm
+r10.pfb><C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/pu
+blic/amsfonts/cm/cmsy10.pfb><C:/Users/bmontambault/AppData/Local/Programs/MiKTe
+X 2.9/fonts/type1/urw/courier/ucrr8a.pfb><C:/Users/bmontambault/AppData/Local/P
+rograms/MiKTeX 2.9/fonts/type1/urw/symbol/usyr.pfb><C:/Users/bmontambault/AppDa
+ta/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmb8a.pfb><C:/Users/bmontam
+bault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb><C:/Us
+ers/bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmri8
+a.pfb><C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/
+zapfchan/uzcmi8a.pfb>
+Output written on first_draft2.pdf (3 pages, 121852 bytes).
 PDF statistics:
- 49 PDF objects out of 1000 (max. 8388607)
+ 53 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
