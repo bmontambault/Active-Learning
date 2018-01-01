@@ -27,11 +27,69 @@ Agrawal, R.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
-Bramley%
+Bechara%
+, Damasio%
+, Tranel%
+\BCBL {}\ \BBA {} Damasio%
+}{%
+Bechara%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2005}}%
+}]{%
+Bechara2005}
+\APACinsertmetastar {%
+Bechara2005}%
+\begin{APACrefauthors}%
+Bechara, A.%
+, Damasio, H.%
+, Tranel, D.%
+\BCBL {}\ \BBA {} Damasio, A\BPBI R.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2005}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {The Iowa Gambling Task and the Somatic Marker
+  Hypothesis: Some Questions and Answers} {The iowa gambling task and the
+  somatic marker hypothesis: Some questions and answers}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Trends in Cognitive Sciences}{9}{4}{159--162}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+L.~Bramley%
+\ \BBA {} Speekenbrink%
+}{%
+L.~Bramley%
+\ \BBA {} Speekenbrink%
+}{%
+{\protect \APACyear {2015}}%
+}]{%
+Bramley}
+\APACinsertmetastar {%
+Bramley}%
+\begin{APACrefauthors}%
+Bramley, L.%
+\BCBT {}\ \BBA {} Speekenbrink.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2015}{5}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Conservative forgetful scholars: How people learn causal
+  structure through sequences of interventions} {Conservative forgetful
+  scholars: How people learn causal structure through sequences of
+  interventions}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{}{41}{}{708-31}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+N.~Bramley%
 , Gerstenberg%
 \BCBL {}\ \BBA {} Tenenbaum%
 }{%
-Bramley%
+N.~Bramley%
 \ \protect \BOthers {.}}{%
 {\protect \APACyear {2016}}%
 }]{%
@@ -139,6 +197,72 @@ Coulom, R.%
   italy, may 29-31, 2006. revised papers}\ (\BPGS\ 72--83).
 \newblock
 \APACaddressPublisher{Berlin, Heidelberg}{Springer Berlin Heidelberg}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Hennig%
+\ \BBA {} Schuler%
+}{%
+Hennig%
+\ \BBA {} Schuler%
+}{%
+{\protect \APACyear {2012}}%
+}]{%
+Hennig}
+\APACinsertmetastar {%
+Hennig}%
+\begin{APACrefauthors}%
+Hennig, P.%
+\BCBT {}\ \BBA {} Schuler, C\BPBI J.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2012}{{\APACmonth{06}}}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Entropy Search for Information-efficient Global
+  Optimization} {Entropy search for information-efficient global
+  optimization}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{J. Mach. Learn. Res.}{13}{1}{1809--1837}.
+\newblock
+\begin{APACrefURL} \url{http://dl.acm.org/citation.cfm?id=2503308.2343701}
+  \end{APACrefURL}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Henr\'{a}ndez-Lobato%
+, Hoffman%
+\BCBL {}\ \BBA {} Ghahramani%
+}{%
+Henr\'{a}ndez-Lobato%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2014}}%
+}]{%
+Henrandez-Lobato}
+\APACinsertmetastar {%
+Henrandez-Lobato}%
+\begin{APACrefauthors}%
+Henr\'{a}ndez-Lobato, J\BPBI M.%
+, Hoffman, M\BPBI W.%
+\BCBL {}\ \BBA {} Ghahramani, Z.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2014}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Predictive Entropy Search for Efficient Global
+  Optimization of Black-box Functions} {Predictive entropy search for efficient
+  global optimization of black-box functions}.{\BBCQ}
+\newblock
+\BIn{} \APACrefbtitle {Proceedings of the 27th International Conference on
+  Neural Information Processing Systems - Volume 1} {Proceedings of the 27th
+  international conference on neural information processing systems - volume
+  1}\ (\BPGS\ 918--926).
+\newblock
+\APACaddressPublisher{Cambridge, MA, USA}{MIT Press}.
+\newblock
+\begin{APACrefURL} \url{http://dl.acm.org/citation.cfm?id=2968826.2968929}
+  \end{APACrefURL}
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
@@ -293,6 +417,39 @@ Rachlin, H.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
+Schulz%
+, Konstantinidis%
+\BCBL {}\ \BBA {} Speekenbrink%
+}{%
+Schulz%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2017}}%
+}]{%
+SchulzEmmanouilSpeekenbrink2017a}
+\APACinsertmetastar {%
+SchulzEmmanouilSpeekenbrink2017a}%
+\begin{APACrefauthors}%
+Schulz, E.%
+, Konstantinidis, E.%
+\BCBL {}\ \BBA {} Speekenbrink, M.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2017}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Putting bandits into context: How function learning
+  supports decision making} {Putting bandits into context: How function
+  learning supports decision making}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{bioRxiv}{}{}{}.
+\newblock
+\begin{APACrefURL} \url{http://www.biorxiv.org/content/early/2017/06/15/081091}
+  \end{APACrefURL}
+\newblock
+\begin{APACrefDOI} \doi{10.1101/081091} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
 Snoek%
 , Larochelle%
 \BCBL {}\ \BBA {} Adams%
@@ -326,6 +483,34 @@ Snoek, J.%
 \newblock
 \begin{APACrefURL} \url{http://dl.acm.org/citation.cfm?id=2999325.2999464}
   \end{APACrefURL}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Steyvers%
+, Lee%
+\BCBL {}\ \BBA {} Wagenmakers%
+}{%
+Steyvers%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2009}}%
+}]{%
+SteyversLeeWagenmakers2009a}
+\APACinsertmetastar {%
+SteyversLeeWagenmakers2009a}%
+\begin{APACrefauthors}%
+Steyvers, M.%
+, Lee, M\BPBI D.%
+\BCBL {}\ \BBA {} Wagenmakers, E\BPBI J.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2009}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {A Bayesian analysis of human decision-making on bandit
+  problems} {A bayesian analysis of human decision-making on bandit
+  problems}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Cognition and Brain Theory}{53}{}{168--179}.
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
@@ -379,6 +564,42 @@ Thompson, W\BPBI R.%
 \APACjournalVolNumPages{Biometrika}{25}{3/4}{285-294}.
 \newblock
 \begin{APACrefURL} \url{http://www.jstor.org/stable/2332286} \end{APACrefURL}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Wang%
+\ \BBA {} Jegelka%
+}{%
+Wang%
+\ \BBA {} Jegelka%
+}{%
+{\protect \APACyear {2017}}%
+}]{%
+Wang}
+\APACinsertmetastar {%
+Wang}%
+\begin{APACrefauthors}%
+Wang, Z.%
+\BCBT {}\ \BBA {} Jegelka, S.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2017}{06--11 Aug}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Max-value Entropy Search for Efficient {B}ayesian
+  Optimization} {Max-value entropy search for efficient {B}ayesian
+  optimization}.{\BBCQ}
+\newblock
+\BIn{} D.~Precup\ \BBA {} Y\BPBI W.~Teh\ (\BEDS), \APACrefbtitle {Proceedings
+  of the 34th International Conference on Machine Learning} {Proceedings of the
+  34th international conference on machine learning}\ (\BVOL~70, \BPGS\
+  3627--3635).
+\newblock
+\APACaddressPublisher{International Convention Centre, Sydney,
+  Australia}{PMLR}.
+\newblock
+\begin{APACrefURL} \url{http://proceedings.mlr.press/v70/wang17e.html}
+  \end{APACrefURL}
 \PrintBackRefs{\CurrentBib}
 
 \end{thebibliography}

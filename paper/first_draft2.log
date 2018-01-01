@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (MiKTeX 2.9.6350 64-bit) (preloaded format=pdflatex 2017.8.13)  30 DEC 2017 06:14
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (MiKTeX 2.9.6350 64-bit) (preloaded format=pdflatex 2017.8.13)  31 DEC 2017 15:46
 entering extended mode
 **./first_draft2.tex
 (first_draft2.tex
@@ -342,69 +342,80 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 22.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 33.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 35.
  [1
 
 
 
-{C:/Users/bmontambault/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}] (fir
-st_draft2.bbl
-Underfull \hbox (badness 3312) in paragraph at lines 95--113
+{C:/Users/bmontambault/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}]
+Underfull \hbox (badness 1297) in paragraph at lines 78--80
+\OT1/ptm/m/n/10 and pre-dic-tive en-tropy search (Henr[]andez-Lobato et al.[],
+ []
+
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 91.
+[2] (first_draft2.bbl
+Underfull \hbox (badness 3312) in paragraph at lines 153--171
 []\OT1/ptm/m/n/10 Carroll, J. D.  (1963).  Func-tional learn-ing: The
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 95--113
+Underfull \hbox (badness 10000) in paragraph at lines 153--171
 \OT1/ptm/m/n/10 learn-ing of con-tin-u-ous func-tional map-pings re-lat-
  []
 
 
-Underfull \hbox (badness 1661) in paragraph at lines 95--113
+Underfull \hbox (badness 1661) in paragraph at lines 153--171
 \OT1/ptm/m/n/10 ing stim-u-lus and re-sponse con-tinua.  \OT1/ptm/m/it/10 ETS R
 e-search
  []
 
 
-Underfull \hbox (badness 5652) in paragraph at lines 95--113
+Underfull \hbox (badness 5652) in paragraph at lines 153--171
 \OT1/ptm/m/it/10 Bul-letin Se-ries\OT1/ptm/m/n/10 , \OT1/ptm/m/it/10 1963\OT1/p
 tm/m/n/10 (2), i--144.  Re-trieved from
  []
 
 
-Overfull \hbox (31.28748pt too wide) in paragraph at lines 95--113
+Overfull \hbox (31.28748pt too wide) in paragraph at lines 153--171
 \OT1/pcr/m/n/10 http://dx.doi.org/10.1002/j.2333-8504.1963.tb00958.x
  []
 
-[2]
-Overfull \hbox (321.98608pt too wide) in paragraph at lines 184--206
+
+Overfull \hbox (15.98755pt too wide) in paragraph at lines 215--231
+\OT1/pcr/m/n/10 http://dl.acm.org/citation.cfm?id=2503308.2343701
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 215--231
+
+ []
+
+
+Underfull \hbox (badness 1178) in paragraph at lines 245--267
+\OT1/ptm/m/n/10 global op-ti-miza-tion of black-box func-tions.  In \OT1/ptm/m/
+it/10 Pro-
+ []
+
+
+Underfull \hbox (badness 1009) in paragraph at lines 245--267
+\OT1/ptm/m/it/10 in-for-ma-tion pro-cess-ing sys-tems - vol-ume 1 \OT1/ptm/m/n/
+10 (pp.[] 918--
+ []
+
+
+Overfull \hbox (15.98755pt too wide) in paragraph at lines 245--267
+\OT1/pcr/m/n/10 http://dl.acm.org/citation.cfm?id=2968826.2968929
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 245--267
+
+ []
+
+
+Overfull \hbox (321.98608pt too wide) in paragraph at lines 308--330
 \OT1/pcr/m/n/10 http://papers.nips.cc/paper/3178-the-epoch-greedy-algorithm-for
 -multi-armed-bandits-with-side-information.pdf
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 184--206
-
- []
-
-Missing character: There is no â in font ptmr7t!
-Missing character: There is no € in font ptmr7t!
-Missing character: There is no “ in font ptmr7t!
-
-Underfull \hbox (badness 1565) in paragraph at lines 278--294
-\OT1/ptm/m/n/10 Max-i-miza-tion the-ory in be-hav-ioral psy-chol-ogy.  \OT1/ptm
-/m/it/10 Be-
- []
-
-
-Underfull \hbox (badness 3396) in paragraph at lines 278--294
-\OT1/ptm/m/it/10 hav-ioral and Brain Sci-ences\OT1/ptm/m/n/10 , \OT1/ptm/m/it/1
-0 4\OT1/ptm/m/n/10 (3), 371388.  doi:
- []
-
-
-Overfull \hbox (15.98755pt too wide) in paragraph at lines 308--330
-\OT1/pcr/m/n/10 http://dl.acm.org/citation.cfm?id=2999325.2999464
  []
 
 
@@ -412,32 +423,70 @@ Underfull \hbox (badness 10000) in paragraph at lines 308--330
 
  []
 
-) [3
+Missing character: There is no â in font ptmr7t!
+Missing character: There is no € in font ptmr7t!
+Missing character: There is no “ in font ptmr7t!
 
-] (first_draft2.aux) ) 
+Underfull \hbox (badness 1565) in paragraph at lines 402--418
+\OT1/ptm/m/n/10 Max-i-miza-tion the-ory in be-hav-ioral psy-chol-ogy.  \OT1/ptm
+/m/it/10 Be-
+ []
+
+
+Underfull \hbox (badness 3396) in paragraph at lines 402--418
+\OT1/ptm/m/it/10 hav-ioral and Brain Sci-ences\OT1/ptm/m/n/10 , \OT1/ptm/m/it/1
+0 4\OT1/ptm/m/n/10 (3), 371388.  doi:
+ []
+
+
+Underfull \hbox (badness 4391) in paragraph at lines 432--451
+\OT1/ptm/m/n/10 Putting ban-dits into con-text: How func-tion learn-
+ []
+
+
+Overfull \hbox (41.48743pt too wide) in paragraph at lines 432--451
+\OT1/pcr/m/n/10 http://www.biorxiv.org/content/early/2017/06/15/081091
+ []
+
+
+Overfull \hbox (15.98755pt too wide) in paragraph at lines 465--487
+\OT1/pcr/m/n/10 http://dl.acm.org/citation.cfm?id=2999325.2999464
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 465--487
+
+ []
+
+
+Underfull \hbox (badness 1527) in paragraph at lines 582--604
+\OT1/ptm/m/n/10 value en-tropy search for ef-fi-cient Bayesian op-ti-miza-
+ []
+
+) [3] (first_draft2.aux) ) 
 Here is how much of TeX's memory you used:
- 4286 strings out of 493323
- 64395 string characters out of 3141226
- 137656 words of memory out of 3000000
- 7756 multiletter control sequences out of 15000+200000
+ 4315 strings out of 493323
+ 65046 string characters out of 3141226
+ 138178 words of memory out of 3000000
+ 7785 multiletter control sequences out of 15000+200000
  33199 words of font info for 67 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 39i,15n,38p,1977b,234s stack positions out of 5000i,500n,10000p,200000b,50000s
-{C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/
-fonts/enc/dvips/base/8r.enc}<C:/Users/bmontambault/AppData/Local/Programs/MiKTe
-X 2.9/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/bmontambault/AppData/
-Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/b
-montambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cm
-r10.pfb><C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/pu
-blic/amsfonts/cm/cmsy10.pfb><C:/Users/bmontambault/AppData/Local/Programs/MiKTe
-X 2.9/fonts/type1/urw/courier/ucrr8a.pfb><C:/Users/bmontambault/AppData/Local/P
-rograms/MiKTeX 2.9/fonts/type1/urw/symbol/usyr.pfb><C:/Users/bmontambault/AppDa
-ta/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmb8a.pfb><C:/Users/bmontam
-bault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb><C:/Us
-ers/bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmri8
-a.pfb><C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/
-zapfchan/uzcmi8a.pfb>
-Output written on first_draft2.pdf (3 pages, 121852 bytes).
+ 39i,15n,38p,1977b,222s stack positions out of 5000i,500n,10000p,200000b,50000s
+{C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 
+2.9/fonts/enc/dvips/base/8r.enc}<C:/Users/bmontambault/AppData/Local/Programs/M
+iKTeX 2.9/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/bmontambault/AppD
+ata/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Use
+rs/bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/public/amsfonts/c
+m/cmr10.pfb><C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type
+1/public/amsfonts/cm/cmsy10.pfb><C:/Users/bmontambault/AppData/Local/Programs/M
+iKTeX 2.9/fonts/type1/urw/courier/ucrr8a.pfb><C:/Users/bmontambault/AppData/Loc
+al/Programs/MiKTeX 2.9/fonts/type1/urw/symbol/usyr.pfb><C:/Users/bmontambault/A
+ppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmb8a.pfb><C:/Users/bmo
+ntambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/utmr8a.pfb><C
+:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/urw/times/ut
+mri8a.pfb><C:/Users/bmontambault/AppData/Local/Programs/MiKTeX 2.9/fonts/type1/
+urw/zapfchan/uzcmi8a.pfb>
+Output written on first_draft2.pdf (3 pages, 123785 bytes).
 PDF statistics:
  53 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

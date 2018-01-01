@@ -32,13 +32,9 @@
 	
 	\section{Introduction}
 	
-	\subsection{Explore/Exploit}
-	
 	Many decisions that people are faced with require finding a balance between exploiting known information for short-term gain and exploring new sources of information that may lead to future reward. For example, a person might choose to go to a restaurant that they know well and have had multiple satisfying meals at, or choose to try a new restaurant that could result in a better or worse experience. This is known as the explore-exploit trade-off.
 	
-	\subsection{MAB}
-	
-	Many tasks requiring this kind of trade-off can be characterized as multi-arm bandit (MAB) problems. A MAB problem consists of $A$ possible actions, where the $a$-th action yields the random reward $r_{t}$ drawn from an unknown distribution. Over $T$ trials, the agent must choose $a_{t:T}$ such that $\sum r_{t:T}$ is maximized. The policy $\tilde{\pi}$ maps the observed history of actions and rewards $h_{1:t-1} = [(a_{1}, r_{1}),...,(a_{t-1}, r_{t-1})]$ to the next action $a_{t}$ for all possible histories $h_{1:t-1} \in \mathcal{H}$. The goal in a MAB problem is to find the optimal policy such that the expected reward over $T$ trials, $\mathbf{E}[r_{1:T} | \tilde{\pi}( h_{1:t-1})]$, is maximized. This is the solution to the Bellman equation
+	Tasks requiring this kind of trade-off can be often be interpreted as multi-arm bandit (MAB) problems. A MAB problem consists of $A$ possible actions, where the $a$-th action yields the random reward $r_{t}$ drawn from an unknown distribution. Over $T$ trials, the agent must choose $a_{t:T}$ such that $\sum r_{t:T}$ is maximized. The policy $\tilde{\pi}$ maps the observed history of actions and rewards $h_{1:t-1} = [(a_{1}, r_{1}),...,(a_{t-1}, r_{t-1})]$ to the next action $a_{t}$ for all possible histories $h_{1:t-1} \in \mathcal{H}$. The goal in a MAB problem is to find the optimal policy such that the expected reward over $T$ trials, $\mathbf{E}[r_{1:T} | \tilde{\pi}( h_{1:t-1})]$, is maximized. This is the solution to the Bellman equation
 	\begin{equation}
 	\mathbf{E}[r_{1:T} | \tilde{\pi}( h_{1:t-1})] = \mathbf{E}[r_{t} | \tilde{\pi}(h_{1:t-1})] + \mathbf{E}[r_{t+1:T} | \tilde{\pi}( h_{1:t})]
 	\end{equation}
@@ -48,8 +44,6 @@
 	\end{equation}
 
 	If the reward $r$ observed after choosing action $a$ is drawn from the distribution $H(\theta_{a})$, an agent must employ a strategy that balances choosing the action that maximizes the reward on trial $t$, $a_{t}^{*} = \text{argmax}_{a_{t} \in A} \mathbf{E}[H(\theta_{a_{t}})]$, and learning more about $\theta_{A}$ by choosing novel actions to maximize reward on future trials. As the problem of evaluating all possible histories is intractable, one of two general classes of approximations can be used. The first, simulation-based methods, involves using a subset of possible histories to evaluate the long-term reward of an action, and includes Thompson sampling \citep{Thompson} and Monte Carlo tree search \citep{Coulom2007}. Rather than relying on simulations, myopic strategies define a value function for approximating long-term reward. Common myopic strategies include upper confidence bound (UCB) \citep{Agrawal} and epsilon-greedy \citep{Sutton1998a} algorithms.
-	
-	\subsection{CMAB/Function Learning}
 	
 	Contextual multi-armed bandit (CMAB) problems introduce additional information into the standard MAB problem by way of a set of features associated with the set of possible examples \citep{Langford}. For example, a standard MAB formulation of the problem of choosing which restaurant to eat at assumes that the reward yielded by any two restaurants will be uncorrelated. However, it might be the case that these restaurants share a set of features (e.g. size, location, menu items) such that choosing similar restaurants can be assumed to yield similar rewards. Rather than having to execute an action to be able to evaluate its expected reward, considering shared features allows one to learn a function, $R: x_{t} \to r_{t}$ that maps features of the action $a_{t}$, $x_{a_{t}}$ to that action's expected reward, $r_{t}$.
 	
@@ -72,17 +66,27 @@
 	\begin{equation}
 	\text{acq}_{PoI}(a) = \Phi \bigg( \frac{m(a|h_{1:t-1}) -  m(a*|h_{1:t-1})}{\sqrt{v(a|h_{1:t-1})}} \bigg)
 	\end{equation}
-	where $a*$ is the action that is believed to maximize reward and $\Phi$ is the cumulative distribution function of the standard normal. A similar strategy is to maximize the expected improvement:
+	where $a^{*}$ is the action that is believed to maximize reward and $\Phi$ is the cumulative distribution function of the standard normal. A similar strategy is to maximize the expected improvement:
 	\begin{equation}
-	\text{acq}_{EI}(a) = (m(a|h_{1:t-1}) -  m(a*|h_{1:t-1})) \Phi(z) + \sqrt{v(a|h_{1:t-1})}
+	\text{acq}_{EI}(a) = (m(a|h_{1:t-1}) -  m(a^{*}|h_{1:t-1})) \Phi(z) + \sqrt{v(a|h_{1:t-1})}
 	\end{equation}
-	where $z = \frac{m(a|h_{1:t-1}) -  m(a*|h_{1:t-1})}{\sqrt{v(a|h_{1:t-1})}}$.
+	where $z = \frac{m(a|h_{1:t-1}) -  m(a^{*}|h_{1:t-1})}{\sqrt{v(a|h_{1:t-1})}}$.
 	
-	\subsection{Basic CMAB Strategies}
+	An alternative approach to maximizing this heuristic is to work directly with the distribution that describes the maximum of the function. Entropy search \citep{Hennig} achieves this by maximizing the expected change in entropy about $p(x^{*})$, where $x^{*} = \text{argmax}_{x \in X} R(x)$, yielded after choosing the action $a$:
+	\begin{equation}
+	\text{acq}_{ES}(a) = H(p(x^{*}|h_{1:t-1})) - \mathbf{E}[H(p(x^{*}|h_{1:t}))]
+	\end{equation}
+	and predictive entropy search \citep{Henrandez-Lobato} maximizes an equivalent value: 
+	\begin{equation}
+	\text{acq}_{PES}(a) = H(p(y|h_{1:t-1}, x)) - \mathbf{E}[H(p(y|h_{1:t-1}, x, x^{*}))]
+	\end{equation}
+	Max-value entropy search \cite{Wang} takes a slightly different approach, instead working to minimize entropy about $p(y^{*})$:
+	\begin{equation}
+	\text{acq}_{MES}(a) = H(p(y|h_{1:t-1}, x)) - \mathbf{E}[H(p(y|h_{1:t-1}, x, y^{*}))]
+	\end{equation}
+	While each of these strategies has the advantage of working with a global distribution over features and their associated rewards rather than a local heuristic, none of the required entropies can be computed analytically. However, a number of approximations have been proposed.
 	
-	(eps greedy, mean/var greedy, ucb/pmi/mi, entropy search)
-	
-	Once an agent has a mapping between features and reward, the policy $\tilde{\pi}$ must be selected that chooses the action $a_{t}$ given the history of observed actions, features, and rewards $h_{1:t-1}$. Given that this policy does not take into account all possible trajectories, it must include a value function that approximates the long-term reward of any given action.
+	Human learners' approach to the explore/exploit trade-off has typically been studied in tasks where the goal is to maximize cumulative reward \citep[e.g.][]{Bechara2005, SteyversLeeWagenmakers2009a, SchulzEmmanouilSpeekenbrink2017a}. However, the need for this trade-off can be observed in a number of other tasks. For instance, an agent might instead be interested in learning the the reward function across all actions. These cases are described by active learning (AL) \citep[e.g][]{Bramley, BramleyGerstenbergTenenbaum2016a} 
 	
 	\subsection{Alternative Goals}
 	
