@@ -86,18 +86,32 @@
 	\end{equation}
 	While each of these strategies has the advantage of working with a global distribution over features and their associated rewards rather than a local heuristic, none of the required entropies can be computed analytically. However, a number of approximations have been proposed.
 	
-	Human learners' approach to the explore/exploit trade-off has typically been studied in tasks where the goal is to maximize cumulative reward \citep[e.g.][]{Bechara2005, SteyversLeeWagenmakers2009a, SchulzEmmanouilSpeekenbrink2017a}. However, the need for this trade-off can be observed in a number of other tasks. For instance, an agent might instead be interested in learning the the reward function across all actions. These cases are described by active learning (AL) \citep[e.g][]{Bramley, BramleyGerstenbergTenenbaum2016a} 
+	Human learners' approach to the explore/exploit trade-off has typically been studied in tasks where the goal is to maximize cumulative reward \citep[e.g.][]{Bechara2005, SteyversLeeWagenmakers2009a, SchulzEmmanouilSpeekenbrink2017a}. However, the need for this trade-off can be observed in a number of other tasks. For instance, an agent might be instead interested in finding the maximum possible reward after $T$ trials. This problem is known as \textit{optimization} \citep[e.g.][]{}. In these cases, earning a high reward on any particular task $t$ is not important, as long as the actions lead to finding the global maximum. Another example is when an agent might instead be interested in learning the the reward function across all actions. These cases are described by \textit{active learning} (AL) \citep[e.g.][]{Bramley, BramleyGerstenbergTenenbaum2016a}. In typical learning paradigms learners are asked to make judgments based on evidence that has been preselected for them. In contrast, AL describes tasks where the learner plays a role in selecting the evidence to observe.
 	
-	\subsection{Alternative Goals}
+	While reinforcement learning, optimization, and active learning are often studied in isolation, there are cases where different tasks might rely on the same mapping between features and rewards. \textit{Multi-task learning} \citep[e.g.][]{} involves exploiting common structure among distinct tasks in order to learn each task more effectively.
 	
-	In addition to CMABs, the explore/exploit tradeoff can also be observed in other common context-dependent problems. In active learning (AL) \cite{BramleyGerstenbergTenenbaum2016a}, participants assume some degree of control over the contexts that they observe, rather than passively observing a predetermined set of examples. Optimization problems \cite{Rachlin1981a} require finding the set of features $x$ that maximizes some reward $f(x)$; for example, finding the number of hours to dedicate to work and to leisure respectively that maximizes satisfaction.
+	\section{Modeling the Explore/Exploit Trade-Off}
 	
-	While these tasks might all share the same mapping between action and reward, their goal-specific reward, and thus the function used to approximate long-term reward, are distinct. For any particular action reward pair $(a_{t}, r_{t})$, there exists the goal-specific action reward pair $(a_{t}, r'_{t})$. Since the goal in the CMAB task is to maximize cumulative reward over time, the goal-specific reward is the same as the reward, that is:
-	$$\mathbf{E}_{cmab}[r'_{t}|a_{t}, h_{1:t-1}] = \mathbf{E}[r_{t}|a_{t}, h_{1:t-1}]$$
+	We consider models of the three types of task requiring an explore/exploit trade-off that were described above. While the mapping from features to rewards, $R: x_{N} \to \mathcal{R}$, can be described in similar terms for all three tasks, their goal-specific reward, and thus the function used to approximate long-term reward, are distinct.
+	
+	Since the goal in RL tasks is to maximize cumulative reward over time, the goal-specific reward is the same as the reward, that is:
+	\begin{equation}
+	\mathbf{E}_{rl}[r'_{t}|a_{t}, h_{1:t-1}] = \mathbf{E}[r_{t}|a_{t}, h_{1:t-1}]
+	\end{equation}
 	In contrast, the goal of the optimization problem is simply to find the maximum possible reward withing $T$ steps. As such, the goal specific reward is defined as:
-	$$\mathbf{E}_{opt}[r'_{t}|a_{t}, h_{1:t-1}] = max(\mathbf{E}[r_{t}|a_{t}, h_{1:t-1}] - \sum_{i=1}^{t-1}r'_{i}, 0)$$
+	\begin{equation}
+	\mathbf{E}_{opt}[r'_{t}|a_{t}, h_{1:t-1}] = max(\mathbf{E}[r_{t}|a_{t}, h_{1:t-1}] - \sum_{i=1}^{t-1}r'_{i}, 0)
+	\end{equation}
 	That is, on trial if trial $t$ yields an increase in reward over the previous maximum reward, $r'_{t}$ is the difference. If not, $r'_{t}$ is 0. Since active learning is concerned with learning the reward function rather than the magnitude of the rewards themselves, its goal-specific reward can be described as the sum of the decrease in variance across all possible actions:
-	$$\mathbf{E}_{al}[r'_{t}|a_{t}, h_{1:t-1}] = \sum_{a \in A} \mathbf{Var}[r|a,h_{1:t-1}] - \mathbf{Var}[r|a,h_{1:t}]$$
+	\begin{equation}
+	\mathbf{E}_{al}[r'_{t}|a_{t}, h_{1:t-1}] = \sum_{a \in A} \mathbf{Var}[r|a,h_{1:t-1}] - \mathbf{Var}[r|a,h_{1:t}]
+	\end{equation}
+	
+	We hope to address three questions through the comparison of a number of models and there abilities to capture human performance on these tasks. First, we ask whether human learners act rationally with respect to information about the underlying reward function; that is, are people explicitly modeling the underlying reward function as an intermediate step in their decision making process, or relying on a less costly heuristic? To answer this question, we compare the class of Gaussian process-based strategies (e.g. GP UCB, probability of improvement, expected improvement, entropy search) with a model based on gradient descent. Second, we ask whether human learners act rationally with respect to their task-specific goal. In other words, do people use different strategies depending on their current goal, or rely on a more general measure of utility (e.g. choose actions with high expected reward and high uncertainty). We compare three task specific strategies with the general strategies of GP UCB, probability of improvement, expected improvement, and epsilon greedy. Third, we ask whether people adopt strategies that take into account higher-order information about the underlying reward function across multiple distinct tasks. We compare both strategies that include information about $R$ in their estimation of long-term reward across tasks and with those that consider only the long-term reward of the current task.
+	
+	\section{Experiments}
+	
+	In the following experiments, we consider sets of tasks where each relies on a similar mapping from features to rewards.
 	
 	\bibliographystyle{apacite}
 	
