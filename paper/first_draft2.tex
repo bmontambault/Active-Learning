@@ -111,7 +111,19 @@
 	
 	\section{Experiments}
 	
-	In the following experiments, we consider sets of tasks where each relies on a similar mapping from features to rewards.
+	In the following experiments, we consider sets of tasks where each relies on a similar mapping from features to rewards. For each task, a set of 80 vertical bars appear on the screen. At the beginning of the task, each bar appears uniformly gray and 500 pixels tall. On each trial participants were invited to click on of the bars, after which its height is revealed to be between 0 and 500 pixels according to an unknown reward function. In the RL and optimization tasks the participant's score after their most recent action is revealed. In the RL task scores increased by the height of the bar that was selected on the most recent trial. In the optimization task scores where determined by the height of the highest bar of all those chosen on previous trials. In the AL task participants are not scored on the initial task. Instead, they are given a second task during which they are asked to indicate the correct height of a subset of the bars whose heights were not revealed during the preceding trials. On each of these trials scores were increased by the maximum height (500) minus the mean absolute error of the participants judgment (0 to 500).
+	
+	\subsection{Experiment 1A}
+	
+	Are people rational with respect to their goal (goal specific strategies) or do they rely on a general heuristic (high mean high variance)?
+	
+	\subsection{Experiment 1B}
+	
+	Are people rational with respect to information they are given about the underlying reward function (GP strategies) or do they rely on model-free strategies (gradient descent)?
+	
+	\subsection{Experiment 2}
+	
+	Are people rational with respect to shared structure across different tasks? Do people act to improve higher-order knowledge across multiple tasks with different goals or act to maximize reward on only the current task?
 	
 	\bibliographystyle{apacite}
 	
