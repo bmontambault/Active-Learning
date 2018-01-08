@@ -1,8 +1,16 @@
 import numpy as np
 import GPy
-import matplotlib.pyplot as plt
-import seaborn as sns
-plt.style.use('seaborn-bright')
+
+
+def get_args(acq, **kwargs):
+    return {arg: kwargs[arg] for arg in acq.__code__.co_varnames}
+
+
+def z_score(y, mean, std):
+    
+    if type(y) == list:
+        y = np.array(y)[None,:]
+    return (y - mean)/std    
 
 
 def soft_max(utility, temp):
@@ -10,9 +18,16 @@ def soft_max(utility, temp):
     centered_utility = utility - utility.max()
     exp_u = np.exp(centered_utility / temp)
     return exp_u / exp_u.sum()
-    
 
-def get_next_gp(observed_x, observed_y, function, kern, acq, params):
+
+def get_next(observed_x, observed_y, function, acq, isGP, kern = None, args = None):
+    if isGP:
+       return get_next_gp(observed_x, observed_y, function, kern, acq, args)
+    else:
+        return acq(observed_x, observed_y, *args)
+        
+
+def get_next_gp(observed_x, observed_y, function, kern, acq, args):
     
     n = len(function)
     domain = range(n)
@@ -20,16 +35,16 @@ def get_next_gp(observed_x, observed_y, function, kern, acq, params):
         mean = np.zeros(n)
         std = np.ones(n)
         utility = np.zeros(n)
-        params = np.NaN
         next_x = np.random.choice(domain)
+        {'utility':utility, 'mean':mean, 'std':std}
         
     else:
         mean, var = gp(observed_x, observed_y, kern, domain)
         std = np.sqrt(var)
-        params, utility = acq(mean, std, *params)
-        next_x = np.argmax(utility)
+        params, p = acq(mean, std, *args)
+        next_x = np.random.choice(range(len(function)), p = p)
         
-    return mean, std, next_x, utility, params
+    return params, p, next_x
 
 
 def fit_kern(functions):

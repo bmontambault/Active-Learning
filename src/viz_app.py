@@ -5,14 +5,35 @@ import json
 import ast
 import mpld3
 
-from utils import fit_kern, gp, plot_gp, scale, get_next_gp
-from mes import mes, plot_mes
-from sgd import sgd, plot_sgd
+from utils import fit_kern, gp, scale, get_next, get_args
+from acquisition_functions import ucb_acq
 
 upper_bound = 600
-functions = pd.read_json('active-learning_0.8.0_functions.json')
-kern = fit_kern(functions)
+rewardFunctions = pd.read_json('active-learning_0.8.0_functions.json')
+kern = fit_kern(rewardFunctions)
+acquisitionFunctions = {'ucb':ucb_acq}
 app=Flask(__name__)
+
+@app.route('/', methods=['GET', 'POST'])
+def main():
+    
+    data = request.args
+    print (data)
+    if len(data) == 0:
+        return render_template("main.html", acq = None)
+    
+
+@app.route('/<acq>', methods=['GET', 'POST'])
+def acqFunction(acq):   
+    
+    data = request.args
+    if 'action' not in data:
+        return render_template('{}.html'.format(acq), acq = acq)
+    
+    elif data['action'] == 'next':
+        acquisitionFunction = acquisitionFunctions[acq]
+        args = get_args(acquisitionFunction, data)
+        params, next_x = get_next(args)
 
 @app.route('/MES', methods=['GET', 'POST'])
 def MES():

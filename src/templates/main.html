@@ -9,11 +9,18 @@
 			<div style="margin:2px">Arms: <input id="datapointsInput" class="INPUT" value="80" style="width:50px"></input></div>
 			<div style="margin:2px">Trials: <input id="trialsInput" class="INPUT" value="15" style="width:50px"></input></div><br>
 
-			<form id="functionSelector" style="float:left;">
-				<div>Functions:</div>
-				<input class="function" name = "function" type="radio" onmousedown="selectFunction(this)" value="pos_linear" checked> Linear<br>
-				<input class="function" name = "function" type="radio" onmousedown="selectFunction(this)" value="neg_quad"> Quadratic<br>
-				<input class="function" name = "function" type="radio" onmousedown="selectFunction(this)" value="sinc_compressed"> Sinc<br>
+			<form id="acquisitionSelector" style="float:left;">
+				<div>Acquisition Function:</div>
+				<input id = "ucb" class="acquisition" name = "acquisition" type="radio" onmousedown="selectAcquisition(this)" value="ucb"> UCB<br>
+				<input class="acquisition" name = "acquisition" type="radio" onmousedown="selectAcquisition(this)" value="neg_quad"> Quadratic<br>
+				<input class="acquisition" name = "acquisition" type="radio" onmousedown="selectAcquisition(this)" value="sinc_compressed"> Sinc<br>
+			</form><br><br>
+
+			<form id="rewardSelector" style="float:left;">
+				<div>Reward Function:</div>
+				<input class="reward" name = "reward" type="radio" onmousedown="selectReward(this)" value="pos_linear" checked> Linear<br>
+				<input class="reward" name = "reward" type="radio" onmousedown="selectReward(this)" value="neg_quad"> Quadratic<br>
+				<input class="reward" name = "reward" type="radio" onmousedown="selectReward(this)" value="sinc_compressed"> Sinc<br>
 			</form><br><br>
 			
 			<div id = "main">
@@ -34,11 +41,31 @@
 
 
 <script>
+
+	checkAcq();
+
 	var observedX = "[]";
 	var observedY = "[]";
 	
 	var selectedFunction = "pos_linear";
 	var remainingTrials = undefined;
+
+
+	function checkAcq(){
+		var acq = "{{acq}}"
+		if (acq == "None"){
+			nextButton.disabled = true;
+			resetButton.disabled = true;
+		}else{
+			document.getElementById(acq).checked = true;
+		}
+	}
+
+	function selectAcquisition(e){
+		console.log(e.value);
+		document.location.href="/" + e.value;
+	}
+
 
 	function selectFunction(e){
 		selectedFunction = e.value;

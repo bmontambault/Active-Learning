@@ -1,10 +1,6 @@
 import numpy as np
 import scipy.stats as st
-
-def z_score(y, mean, std):
-    if type(y) == list:
-        y = np.array(y)[None,:]
-    return (y - mean)/std    
+from utils import z_score
 
 
 def ymax_cdf(y, mean, std):
