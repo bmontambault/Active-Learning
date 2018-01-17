@@ -1,8 +1,13 @@
 {% extends "main.html" %}
-{% block main %}
-
+{% block acqParams %}
+	
 	<div style="margin:2px; clear:left">CDF Precision: <input class="INPUT" name="cdfPrecision" id="cdfPrecision" value=".001" style="width:50px"></div>
 	<div style="margin:2px; clear:left">Gumbel Samples: <input class="INPUT" name="gumbelSamples" id="gumbelSamples" value="1000" style="width:50px"></div>
 	<br>
+
+	<form id="DecisionSelector" style="float:left;">
+		<div>Decision Function:</div>
+		<input id = "softmax" class="decision" name = "decision" type="radio" onmousedown="selectDecision(this)" value="softmax"> Softmax<br>
+	</form>
 
 {% endblock %}

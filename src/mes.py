@@ -32,12 +32,12 @@ def fit_gumbel(mean, std, precision, upper_bound):
 
 
 def sample_gumbel(a, b, nsamples):
-    return [a - (b * np.log(-np.log(r))) for r in np.random.uniform(0, 1, nsamples)]
+    return [a - (b * np.log(-np.log(r))) for r in np.random.uniform(0, 1, int(nsamples))]
 
 
 def gumbel_pdf(a, b, y):
     z = (y - a) / b
-    return 1 - ((1 / b) * np.exp(-(z + np.exp(-z))))
+    return - ((1 / b) * np.exp(-(z + np.exp(-z))))
 
 
 def maxval_entropy(mean, std, ymax_samples):

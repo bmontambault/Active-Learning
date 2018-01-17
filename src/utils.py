@@ -1,10 +1,7 @@
 import numpy as np
+from scipy.stats import rv_discrete
 import GPy
-
-
-def get_args(acq, **kwargs):
-    return {arg: kwargs[arg] for arg in acq.__code__.co_varnames}
-
+    
 
 def z_score(y, mean, std):
     
@@ -13,19 +10,34 @@ def z_score(y, mean, std):
     return (y - mean)/std    
 
 
-def soft_max(utility, temp):
+def softmax(utility, temp):
     
     centered_utility = utility - utility.max()
     exp_u = np.exp(centered_utility / temp)
     return exp_u / exp_u.sum()
 
 
-def get_next(observed_x, observed_y, function, acq, isGP, kern = None, args = None):
-    if isGP:
-       return get_next_gp(observed_x, observed_y, function, kern, acq, args)
+def deterministic(utility):
+    
+    p = np.array([1. if r == np.max(utility) else 0. for r in utility])
+    return p / p.sum()
+
+def get_next(observed_x, observed_y, function, upper_bound, acq, acqArgs, dec = None, decArgs = None, isGP = False):
+    
+    n = len(function)
+    domain = range(n)
+    if not isGP or len(observed_x) > 0:
+        params, p = acq(observed_x, observed_y, domain, *acqArgs, dec, decArgs)
     else:
-        return acq(observed_x, observed_y, *args)
-        
+        if len(observed_x) == 0:
+            mean = np.ones(n) * (upper_bound / 2.)
+            std = np.ones(n) * (upper_bound / 2.)
+            utility = np.zeros(n)
+            p = np.ones(n) / n
+            params = {'utility':utility, 'mean':mean, 'std':std}
+    next_x = rv_discrete(values = (domain, p)).rvs()
+    return params, p, next_x
+
 
 def get_next_gp(observed_x, observed_y, function, kern, acq, args):
     

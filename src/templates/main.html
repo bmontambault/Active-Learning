@@ -9,26 +9,26 @@
 			<div style="margin:2px">Arms: <input id="datapointsInput" class="INPUT" value="80" style="width:50px"></input></div>
 			<div style="margin:2px">Trials: <input id="trialsInput" class="INPUT" value="15" style="width:50px"></input></div><br>
 
-			<form id="acquisitionSelector" style="float:left;">
-				<div>Acquisition Function:</div>
-				<input id = "ucb" class="acquisition" name = "acquisition" type="radio" onmousedown="selectAcquisition(this)" value="ucb"> UCB<br>
-				<input class="acquisition" name = "acquisition" type="radio" onmousedown="selectAcquisition(this)" value="neg_quad"> Quadratic<br>
-				<input class="acquisition" name = "acquisition" type="radio" onmousedown="selectAcquisition(this)" value="sinc_compressed"> Sinc<br>
-			</form><br><br>
-
 			<form id="rewardSelector" style="float:left;">
 				<div>Reward Function:</div>
 				<input class="reward" name = "reward" type="radio" onmousedown="selectReward(this)" value="pos_linear" checked> Linear<br>
 				<input class="reward" name = "reward" type="radio" onmousedown="selectReward(this)" value="neg_quad"> Quadratic<br>
 				<input class="reward" name = "reward" type="radio" onmousedown="selectReward(this)" value="sinc_compressed"> Sinc<br>
 			</form><br><br>
+
+			<form id="acquisitionSelector" style="float:left;">
+				<div>Acquisition Function:</div>
+				<input id = "ucb" class="acquisition" name = "acquisition" type="radio" onmousedown="selectAcquisition(this)" value="ucb"> UCB<br>
+			</form>
 			
-			<div id = "main">
-				{% block main %}{% endblock %}
+			<div id = "acqParams">
+				{% block acqParams %}{% endblock %}
+			</div>
+			<div id = "decParams">
+				{% block decParams %}{% endblock %}
 			</div>
 
 			<button id="nextButton" onmousedown="next()">Next</button>
-
 			<button id="resetButton" style="margin-left:30px" onmousedown="reset()">Reset</button>
 		</div>
 
@@ -44,8 +44,8 @@
 
 	checkAcq();
 
-	var observedX = "[]";
-	var observedY = "[]";
+	var observed_x = "[]";
+	var observed_y = "[]";
 	
 	var selectedFunction = "pos_linear";
 	var remainingTrials = undefined;
@@ -65,7 +65,6 @@
 		console.log(e.value);
 		document.location.href="/" + e.value;
 	}
-
 
 	function selectFunction(e){
 		selectedFunction = e.value;
@@ -89,8 +88,8 @@
 			"trials":trialsInput.value,
 			"remainingTrials":remainingTrials,
 			"function":selectedFunction,
-			"observedX":("\"[" + observedX + "]\"").replace("[]", ""),
-			"observedY":("\"[" + observedY + "]\"").replace("[]", "")
+			"observed_x":("\"[" + observed_x + "]\"").replace("[]", ""),
+			"observed_y":("\"[" + observed_y + "]\"").replace("[]", "")
 		}
 
 		Info.style.visibility = "visible";
@@ -109,12 +108,12 @@
 
 		$.ajax({
 			method:"GET",
-			url:"/{{strategy}}",
+			url:"/{{acq}}",
 			data:data,
 			success:function(resp, data){
 				var response = JSON.parse(resp);
-				observedX = response['observedX'];
-				observedY = response['observedY'];
+				observed_x = response['observed_x'];
+				observed_y = response['observed_y'];
 
 				var html = response['plot'];
 				plot(html);
@@ -145,8 +144,8 @@
 			data:{"action":"reset"},
 			success:function(resp, data){
 				Graph.innerHTML = "";
-				observedX = "[]";
-				observedY = "[]";
+				observed_x = "[]";
+				observed_y = "[]";
 			}
 		});
 	}

@@ -25,15 +25,15 @@ Parameters:
     float weight: [0, inf], determines preference for exploration
 """
 
-def ucb_acq(observed_x, observed_y, domain, kern, weight, decision, decision_params, trials_remaining):
-    mean, var = gp(observed_x, observed_y, kern, domain)    
+def ucb_acq(observed_x, observed_y, domain, weight, kern, decision, decision_params):
+    mean, var = gp(observed_x, observed_y, kern, domain)
     std = np.sqrt(var)
     utility = mean + weight * std
-    p = decision(mean, *decision_params)
+    p = decision(utility, *decision_params)
     return {'utility':utility, 'mean':mean, 'std':std}, p
 
 
-def sgd_acq(observed_x, observed_y, domain, gamma_loc, gamma_shape, initial_var, eps, trials_remaining):
+def sgd_acq(observed_x, observed_y, domain, gamma_loc, gamma_shape, initial_var, eps):
     n = len(observed_x)
     domain_range = len(domain)
     if n == 0:
@@ -49,7 +49,8 @@ def sgd_acq(observed_x, observed_y, domain, gamma_loc, gamma_shape, initial_var,
     return {}, p / p.sum()
 
 
-def mes_acq(observed_x, observed_y, domain, kern, precision, upper_bound, nsamples, decision, decision_params, trials_remaining):
+def mes_acq(observed_x, observed_y, domain, precision, nsamples, kern, upper_bound, decision, decision_params):
+    
     mean, var = gp(observed_x, observed_y, kern, domain)    
     std = np.sqrt(var)
     gumbel_params, utility = mes(mean, std, precision, upper_bound, nsamples)
@@ -59,7 +60,7 @@ def mes_acq(observed_x, observed_y, domain, kern, precision, upper_bound, nsampl
     return {'pymax':pymax, 'utility':utility, 'mean':mean, 'std':std}, p
 
 
-def var_greedy_acq(observed_x, observed_y, domain, kern, decision, decision_params, trials_remaining):
+def var_greedy_acq(observed_x, observed_y, domain, kern, decision, decision_params):
     mean, var = gp(observed_x, observed_y, kern, domain)    
     std = np.sqrt(var)
     p = decision(std, *decision_params)
@@ -74,7 +75,7 @@ def mean_greedy_acq(observed_x, observed_y, domain, kern, decision, decision_par
     return {'utility':mean, 'mean':mean, 'std':std}, p
 
 
-def eps_greedy_acq(observed_x, observed_y, domain, kern, eps, decision, decision_params, trials_remaining):
+def eps_greedy_acq(observed_x, observed_y, domain, kern, eps, decision, decision_params):
     r = np.random.binomial(1, eps)
     mean, var = gp(observed_x, observed_y, kern, domain)
     std = np.sqrt(var)
@@ -87,7 +88,7 @@ def eps_greedy_acq(observed_x, observed_y, domain, kern, eps, decision, decision
     return {'utility':utility, 'mean':mean, 'std':std}, p
     
 
-def weighted_mes_mean_greedy(observed_x, observed_y, domain, kern, precision, upper_bound, nsamples, weight, decision, decision_params, trials_remaining):
+def weighted_mes_mean_greedy(observed_x, observed_y, domain, kern, trials_remaining, precision, upper_bound, nsamples, weight, decision, decision_params):
     mean, var = gp(observed_x, observed_y, kern, domain)    
     std = np.sqrt(var)
     gumbel_params, mes_utility = mes(mean, std, precision, upper_bound, nsamples)
@@ -97,7 +98,7 @@ def weighted_mes_mean_greedy(observed_x, observed_y, domain, kern, precision, up
     return {'pymax':pymax, 'utility':utility, 'mean':mean, 'std':std}, decision(utility, *decision_params)
 
 
-def mes_mean_greedy_last(observed_x, observed_y, domain, kern, precision, upper_bound, nsamples, decision, decision_params, trials_remaining):
+def mes_mean_greedy_last(observed_x, observed_y, domain, kern, trials_remaining, precision, upper_bound, nsamples, decision, decision_params):
     if trials_remaining > 0:
         return mes_acq(observed_x, observed_y, domain, kern, precision, upper_bound, nsamples, decision, decision_params, trials_remaining)
     else:

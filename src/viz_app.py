@@ -2,39 +2,93 @@ from flask import Flask, render_template, request
 import pandas as pd
 import numpy as np
 import json
-import ast
-import mpld3
 
-from utils import fit_kern, gp, scale, get_next, get_args
-from acquisition_functions import ucb_acq
+from utils import fit_kern, gp, scale, get_next, softmax, deterministic
+from acquisition_functions import ucb_acq, mes_acq
+
 
 upper_bound = 600
 rewardFunctions = pd.read_json('active-learning_0.8.0_functions.json')
 kern = fit_kern(rewardFunctions)
-acquisitionFunctions = {'ucb':ucb_acq}
+acqFunctions = {'ucb':[ucb_acq, 1, True, False, False], 'mes':[mes_acq, 2, True, False, True]}
+decFunctions = {'softmax':softmax, 'deterministic':deterministic}
 app=Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def main():
     
     data = request.args
-    print (data)
-    if len(data) == 0:
-        return render_template("main.html", acq = None)
+    if 'action' not in data:
+        return render_template("main2.html", upper_bound = upper_bound)
     
-
+    elif data['action'] == 'next':
+        observed_x = [float(x) for x in data['observed_x'].split(',') if len(x) > 0]
+        observed_y = [float(y) for y in data['observed_y'].split(',') if len(y) > 0]
+        
+        trials_remaining = int(data['trials']) - int(data['trialsPassed'])
+        function = rewardFunctions[data['rewardFunction']]
+        acqFunction, acqArgCount, isGP, takesRemaining, takesUpperBound = acqFunctions[data['acq']]
+        if 'dec' in data:
+            decFunction = decFunctions[data['dec']]
+        else:
+            decFunction = None
+        acqArgs = [float(data[d]) for d in list(data)[9:9 + acqArgCount]]
+        decArgs = [float(data[d]) for d in list(data)[9 + acqArgCount:]]
+        
+        if isGP:
+            acqArgs.append(kern)
+        if takesRemaining:
+            acqArgs.append(trials_remaining)
+        if takesUpperBound:
+            acqArgs.append(upper_bound)
+        
+        params, p, next_x = get_next(observed_x, observed_y, function, upper_bound, acqFunction, acqArgs, dec = decFunction, decArgs = decArgs, isGP = isGP)
+        next_y = function[next_x]
+        observed_x.append(next_x)
+        observed_y.append(next_y)
+        params = {key: params[key].ravel().tolist() if isinstance(params[key], np.ndarray) else params[key]  for key in params.keys()}
+        return json.dumps({'function':function.tolist(), 'next_x':next_x, 'next_y':next_y, 'params':params, 'prob':p.ravel().tolist()})
+  
+'''    
 @app.route('/<acq>', methods=['GET', 'POST'])
 def acqFunction(acq):   
     
     data = request.args
-    if 'action' not in data:
+    if acq not in acquisitionFunctions:
+        return render_template("main.html", acq = None)
+    
+    elif 'action' not in data:
         return render_template('{}.html'.format(acq), acq = acq)
     
     elif data['action'] == 'next':
-        acquisitionFunction = acquisitionFunctions[acq]
-        args = get_args(acquisitionFunction, data)
-        params, next_x = get_next(args)
+        
+        decisionFunction = decisionFunctions['softmax']
+        
+        #acquisitionFunction, isGP, needsDecFunc = acquisitionFunctions[acq]
+        #decArgCount = len(signature(decisionFunction).parameters) - 1
+        #decArgs = [data[d] for d in list(data)[8:9 + decArgCount - 1]]
+        #acqArgs = [data[d] for d in list(data)[9 + decArgCount - 1:]]
+        
+        #observed_x = ast.literal_eval(data['observed_x'])
+        #observed_y = ast.literal_eval(data['observed_y'])
+        #trials_remaining = int(data['remaining_trials'])
+        #function = rewardFunctions[data['function']]
+        
+        #params, next_x = get_next(acquisitionFunction, observed_x, observed_y, function, , isGP)
+        
+        
+        #args = get_args(acquisitionFunction, **data)
+        #args['domain'] = range(data['datapoints'])
+        
 
+        #print (data)
+        #args = get_args(acquisitionFunction, **data)
+        #print (args)
+        #return json.dumps({'observedX':[], 'observedY':[], 'plot':''})
+        #params, next_x = get_next(acquisitionFunction, *args)
+        '''
+
+'''
 @app.route('/MES', methods=['GET', 'POST'])
 def MES():
     
@@ -107,7 +161,7 @@ def SGD():
     
     else:
         return json.dumps({'observedX': [], 'observedY':[], 'plot':''})
-        
+'''
         
 if __name__=="__main__":
     app.run() 

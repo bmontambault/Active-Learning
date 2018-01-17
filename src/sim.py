@@ -1,10 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import platform
 from scipy.stats import rv_discrete
 from utils import scale
-from matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-rc('text', usetex=True)
     
     
 def choose_next(observed_x, observed_y, domain, acq, acq_params):
@@ -14,9 +12,9 @@ def choose_next(observed_x, observed_y, domain, acq, acq_params):
     return next_x, prob, vals
 
 
-def plot(function, upper_bound ,observed_x, observed_y, next_x, next_y, prob, trials, running_regret, max_regret, mean = None, std = None, utility = None, pymax = None):
+def plot(function, upper_bound ,observed_x, observed_y, next_x, next_y, prob, mean = None, std = None, utility = None, pymax = None):
     
-    subplots = 3
+    subplots = 2
     if not utility is None:
         subplots += 1
     if not pymax is None:
@@ -41,7 +39,11 @@ def plot(function, upper_bound ,observed_x, observed_y, next_x, next_y, prob, tr
     
     if not mean is None:
         plot_mean, = main_ax.plot(domain, mean.tolist(), color = 'r')
-        plot_var = main_ax.fill_between(domain, (mean - 2 * std).ravel().tolist(), (mean + 2 * std).ravel().tolist(), color = 'blue', alpha = .5)
+        python_version = platform.python_version().split('.')[0]
+        if python_version == '2':
+            plot_var = main_ax.fill_between(domain, (mean - 2 * std).ravel().tolist(), (mean + 2 * std).ravel().tolist(), color = 'blue', alpha = .5)
+        else:
+            plot_var, = main_ax.plot(domain, (mean + 2 * std).ravel().tolist(), color = 'blue', alpha = .5)
         handles.insert(2, plot_mean)
         handles.insert(3, plot_var)
         labels.insert(2, 'Mean')
@@ -58,7 +60,8 @@ def plot(function, upper_bound ,observed_x, observed_y, next_x, next_y, prob, tr
         pymax_plot, = pymax_ax.plot(pymax.tolist(), np.linspace(0, upper_bound), color = 'orange')
         handles.append(pymax_plot)
         labels.append('p(y = y*)')
-        
+    
+    '''
     if len([x for x in running_regret if x !=None]) > 0:
         regret_ax = fig.add_subplot(rows, cols, subplots)
         r = running_regret + list(np.full(trials - len(running_regret), None))
@@ -67,7 +70,7 @@ def plot(function, upper_bound ,observed_x, observed_y, next_x, next_y, prob, tr
         regret_ax.set_ylim(0, max_regret)
         handles.append(regret_plot)
         labels.append('Regret')
-    
+    '''
     main_ax.set_ylim(0, upper_bound)
     fig.subplots_adjust(bottom = 0.3, wspace = 0.33)
     if subplots > 4:
