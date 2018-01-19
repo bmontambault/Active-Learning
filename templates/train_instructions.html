@@ -1,0 +1,53 @@
+<html>
+<link rel="stylesheet" type="text/css" href="../../static/main.css">
+
+<div>
+<h1>Instructions</h1>
+<div>
+  This is a game where you will earn points based on the heights of a set of vertical bars. You will now be shown {{training_trials}} sets of bars, each representing a unique relationship. After you have seen each of the example sets you will begin the game. The set of bars used in the game will have a relationship similar to the training sets that you will now view.
+  <div id="text">
+  <b>Press space to view the first training set.</b>
+  </div>
+</div>
+
+<div id="barContainer">
+</div>
+
+<script type="text/javascript" src="../static/init_bars.js"></script>
+<script>
+
+
+function make_bars(){
+  for (var i = 0; i < persistantData['nbars']; i++){
+    var tmp = document.createElement('canvas')
+    tmp.width=persistantData['bar_width']
+    tmp.height=persistantData['bar_height']
+    tmp.id='bar'+i
+    tmp.className='bar'
+    tmp.className += ' selected'
+    barContainer.appendChild(tmp)
+  }
+}
+
+function submit(event){
+  document.getElementById("text").innerHTML = "<b> Press space to view the next training set. </b>"
+  if(event.keyCode == 32){
+    if (trial == persistantData['training_trials']){
+        document.removeEventListener("keydown", submit);
+        nextPage();
+    } else {
+      if (trial == 0){
+        make_bars();
+      }
+      init_bars(persistantData['train_sinc'][trial])
+      trial +=1
+    }
+  }
+}
+
+
+var trial = 0
+document.addEventListener("keydown", submit);
+</script>
+
+</html>
