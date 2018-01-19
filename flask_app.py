@@ -24,6 +24,11 @@ with open(path+'/'+'{0}_{1}_functions.json'.format(config.experiment,config.vers
     functions=json.load(json_data)
     json_data.close()
     
+with open(path+'/sinc_samples.json') as f:
+    train_sinc = json.load(f)
+    f.close()
+training_trials = 10
+    
 @app.route('/',methods=['GET','POST'])
 def start():
     
@@ -47,9 +52,11 @@ def start():
         function_name=function_names[fi]
         goals=tasks[ti]
         function=functions[function_name]
-        task=['start.html']+[a for b in [task_files[t] for t in goals] for a in b]+['last_page.html']
+        task=['start.html', 'train_instructions.html']+[a for b in [task_files[t] for t in goals] for a in b]+['last_page.html']
         
         all_args={
+                 'training_trials':training_trials,
+                 'train_sinc':train_sinc,
                  'function':function,
                  'task':task,
                  'experiment':config.experiment,

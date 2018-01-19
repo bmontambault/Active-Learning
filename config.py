@@ -6,7 +6,7 @@ tasks=[['max_score_last'],['find_max_last'],['min_error_last']]
 bar_height=500
 bar_width=15
 nbars=80
-trials=1
+trials=10
 predict_trials=25
 
 se_length=5
