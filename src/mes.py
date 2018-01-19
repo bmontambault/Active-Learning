@@ -25,6 +25,8 @@ def fit_gumbel(mean, std, precision, upper_bound):
     r2 = .75
     y1 = inv_ymax_cdf(r1, mean, std, precision, upper_bound)
     y2 = inv_ymax_cdf(r2, mean, std, precision, upper_bound)
+    if y1 == y2:
+        y1 -= precision
     R = np.array([[1., np.log(-np.log(r1))], [1., np.log(-np.log(r2))]])
     Y = np.array([y1, y2])
     a, b = np.linalg.solve(R, Y)

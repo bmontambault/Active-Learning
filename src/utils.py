@@ -31,7 +31,7 @@ def get_next(observed_x, observed_y, function, upper_bound, acq, acqArgs, dec = 
     else:
         if len(observed_x) == 0:
             mean = np.ones(n) * (upper_bound / 2.)
-            std = np.ones(n) * (upper_bound / 2.)
+            std = np.ones(n) * (upper_bound / 4.)
             utility = np.zeros(n)
             p = np.ones(n) / n
             params = {'utility':utility, 'mean':mean, 'std':std}

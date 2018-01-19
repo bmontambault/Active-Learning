@@ -173,6 +173,7 @@ containers for plots
 
 	function plot(rewardFunction, next_x, params, prob){
 
+		var domain = rewardFunction.length;
 		indexRewardFunction = [];
 		for (var i = 0; i < rewardFunction.length; i++){
 			if (i == next_x){
@@ -188,7 +189,9 @@ containers for plots
 		var historyXAxis = [{
 			title: {
 				text: 'Arm'
-			}
+			},
+			min: 0,
+			max: domain
 		}]
 
 
@@ -261,7 +264,6 @@ containers for plots
 		if('pymax' in params){
 			var indexPymax = [];
 			var pymax = params['pymax'];
-			console.log(pymax)
 			var step  = upper_bound / pymax.length;
 			for (var i = 0; i < pymax.length; i++){
 				indexPymax.push([pymax[i] * 100, (i + 1) * step])
@@ -270,7 +272,9 @@ containers for plots
 			historyXAxis.push({
 				title: {
 					text: 'p(y = y*)e2'
-				}
+				},
+				min: 0,
+				max: domain
 			});
 
 			historySeries.push({
@@ -322,9 +326,9 @@ containers for plots
 		}, {
 			title: {
 				text: 'p(next a = a)',
-				min: 0,
-				max: 1
-			}
+			},
+			min: 0,
+			max: 1
 		}]
 
 		var utilitySeries = [{
