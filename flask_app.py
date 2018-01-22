@@ -10,7 +10,7 @@ import json
 from task_files import task_files
 
 app=Flask(__name__)
-app.secret_key='key'
+app.secret_key=''
 app.config['SESSION_TYPE']='filesystem'
 config_file='config'
 config=importlib.import_module(config_file)
@@ -23,11 +23,19 @@ data_path=path+'/'+data_path
 with open(path+'/'+'{0}_{1}_functions.json'.format(config.experiment,config.version)) as json_data:
     functions=json.load(json_data)
     json_data.close()
-    
+
+with open(path+'/linear_samples.json') as f:
+    train_lin = json.load(f)
+    f.close()
+with open(path+'/negquad_samples.json') as f:
+    train_negquad = json.load(f)
+    f.close()
 with open(path+'/sinc_samples.json') as f:
     train_sinc = json.load(f)
     f.close()
 training_trials = 10
+function_samples = {'pos_linear':train_lin, 'neg_quad':train_negquad, 'sinc_compressed':train_sinc}
+
     
 @app.route('/',methods=['GET','POST'])
 def start():
@@ -48,15 +56,14 @@ def start():
     else:
         fi=int(request.args.get('fi'))
         ti=int(request.args.get('ti'))
-        print (fi,file=sys.stderr)
         function_name=function_names[fi]
         goals=tasks[ti]
-        function=functions[function_name]
-        task=['start.html', 'train_instructions.html']+[a for b in [task_files[t] for t in goals] for a in b]+['last_page.html']
+        function=function_samples[function_name][str(training_trials)]
+        task=['start.html']+[a for b in [task_files[t] for t in goals] for a in b]+['last_page.html']
         
         all_args={
                  'training_trials':training_trials,
-                 'train_sinc':train_sinc,
+                 'function_samples':{i: function_samples[function_name][str(i)] for i in range(training_trials)},
                  'function':function,
                  'task':task,
                  'experiment':config.experiment,

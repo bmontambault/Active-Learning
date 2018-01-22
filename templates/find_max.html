@@ -73,6 +73,7 @@ Click one of the bars below once to highlight it. Click the same bar again to re
 		trials-=1
 		document.getElementById("ui").innerHTML="Trials Remaining: "+trials+"<br>Total Score: "+Math.round(totalScore)
 		if(trials<=0){
+			results[currentGoalIndex]['start_time']=start_time
 			results[currentGoalIndex]['response']=response
 			results[currentGoalIndex]['response_time']=response_time
 			results[currentGoalIndex]['total_score']=totalScore

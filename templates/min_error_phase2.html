@@ -160,6 +160,7 @@ Click the bar that has a red outline to record what you think its height is. <b>
     		}
     	}
     	if (predict_trials<=0){
+            results[currentGoalIndex]['predict_start_time']=start_time
             results[currentGoalIndex]['predict_prompt']=predict_prompt
             results[currentGoalIndex]['predict_response']=predict_response
             results[currentGoalIndex]['predict_response_time']=predict_response_time

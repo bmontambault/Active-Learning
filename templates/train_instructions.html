@@ -4,9 +4,9 @@
 <div>
 <h1>Instructions</h1>
 <div>
-  This is a game where you will earn points based on the heights of a set of vertical bars. You will now be shown {{training_trials}} sets of bars, each representing a unique relationship. After you have seen each of the example sets you will begin the game. The set of bars used in the game will have a relationship similar to the training sets that you will now view.
+  To help you achieve your goal, we will show you some examples of relationships, The relationship in the game will be similar to these examples
   <div id="text">
-  <b>Press space to view the first training set.</b>
+  <b>Press space to see the first Example.</b>
   </div>
 </div>
 
@@ -30,7 +30,6 @@ function make_bars(){
 }
 
 function submit(event){
-  document.getElementById("text").innerHTML = "<b> Press space to view the next training set. </b>"
   if(event.keyCode == 32){
     if (trial == persistantData['training_trials']){
         document.removeEventListener("keydown", submit);
@@ -38,8 +37,16 @@ function submit(event){
     } else {
       if (trial == 0){
         make_bars();
+        persistantData['training_start_time'] = Date.now()
+      } else {
+        persistantData['training_response_times'].push(Date.now())
       }
-      init_bars(persistantData['train_sinc'][trial])
+      init_bars(persistantData['function_samples'][trial])
+      if (trial < persistantData['training_trials'] - 1){
+        document.getElementById("text").innerHTML = "This is example " + (trial+1) + " of " + persistantData['training_trials'] + ". <b> Press space to view the next training set. </b>"
+      } else {
+        document.getElementById("text").innerHTML = "This is example " + (trial+1) + " of " + persistantData['training_trials'] + ". <b> Press space to start the game. </b>"
+      }
       trial +=1
     }
   }

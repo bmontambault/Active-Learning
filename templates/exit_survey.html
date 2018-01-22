@@ -24,7 +24,7 @@ var dataToSave = {
   experiment:"{{experiment}}",
   experimentVersion:"{{version}}",
   se_function_lengthscale:{{se_function_lengthscale}},
-  describe_goal_pre:"{{describe_goal_pre}}"
+  describe_goal_pre:"{{describe_goal_pre}}",
 };
 console.log(dataToSave);
 </script>
@@ -168,7 +168,7 @@ function log(){
       if (isCheckAge && isCheckGoal){
           var formArray=$("#data").serializeArray()
           for (var i = 0; i < formArray.length; i++){
-    	dataToSave[formArray[i]['name']] = formArray[i]['value'];
+    	       dataToSave[formArray[i]['name']] = formArray[i]['value'];
           }
           sendData(dataToSave);
       }

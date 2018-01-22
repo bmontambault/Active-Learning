@@ -74,7 +74,9 @@
 
     var persistantData = {
                           'training_trials':{{training_trials}},
-                          'train_sinc':{{train_sinc|safe}},
+                          'function_samples':{{function_samples|safe}},
+                          'training_start_time':0,
+                          'training_response_times':[],
                           'function':{{function}},
                           'task':{{task|safe}},
                           'experiment':'{{experiment}}',
