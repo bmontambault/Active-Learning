@@ -56,12 +56,17 @@ def start():
     else:
         fi=int(request.args.get('fi'))
         ti=int(request.args.get('ti'))
+        if 'sessionId' in request.args:
+            somataSessionId = request.args.get('sessionId')
+        else:
+            somataSessionId = ''
         function_name=function_names[fi]
         goals=tasks[ti]
         function=function_samples[function_name][str(training_trials)]
         task=['start.html']+[a for b in [task_files[t] for t in goals] for a in b]+['last_page.html']
         
         all_args={
+                 'somataSessionId':somataSessionId,
                  'training_trials':training_trials,
                  'function_samples':{i: function_samples[function_name][str(i)] for i in range(training_trials)},
                  'function':function,
