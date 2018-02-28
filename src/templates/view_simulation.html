@@ -1,0 +1,170 @@
+<head>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/highcharts-more.js"></script>
+	<script src="https://code.highcharts.com/modules/exporting.js"></script>
+</head>
+
+<div class="topnav">
+  <a href="/">New Simulation</a>
+  <a class="active" href= "/view_simulation">View Simulation</a>
+  <a href="/participants">Participants</a>
+</div>
+
+<div id = "simulation">
+<select id = "simulationSelector" onchange = "selectSim(this)">
+	<option selected disabled>Simulation</option>
+</select>
+</div>
+
+<div id="utilityPlot"></div>
+<div id="probabilityPlot"></div>
+
+
+<script>
+	
+	$.getJSON('static/simulations.json', function(json){
+
+		simMenu(json);
+
+		var data = json[0];
+		var rewardFunction = data.function;
+		var domain = rewardFunction.length;
+		var response = data.responses[3];
+
+		var history = getHistory(rewardFunction, response.observed_x, response.observed_y, response.next_x, response.next_y);
+		var functionSeries = getFunction(response.mean, response.std, response.utility);
+		var meanSeries = functionSeries[0];
+		var rangeSeries = functionSeries[1];
+		var utilitySeries = functionSeries[2];
+
+		var utilityPlotOptions = plotUtility(domain, history, meanSeries, rangeSeries, utilitySeries);
+		Highcharts.chart('utilityPlot', utilityPlotOptions);
+	});
+
+
+	function simMenu(json){
+
+		selector = document.getElementById('simulationSelector');
+		for (var i = 0; i < json.length; i++){
+
+			var data = json[i]
+			var newOpt = document.createElement('option');
+			newOpt.value = i;
+			var name = formatSimname(data.function_name, data.acquisition, data.decision, data.acquisition_params, data.decision_params);
+			nameDiv = document.createElement('div');
+			nameDiv.innerHTML = name;
+			console.log(nameDiv);
+		    newOpt.append(nameDiv);
+			selector.append(newOpt);
+		}
+	}
+
+
+	function selectSim(i){
+
+		data = json[i]
+	}
+
+
+	function formatSimname(f, acquisition, decision, acquisition_params, decision_params){
+
+		var function_name = 'Function: ' + f + '\n';
+		var acquisition_name = 'Acquisition: ' + acquisition + '\n';
+		var decision_name = 'Decision: ' + decision + '\n';
+
+		var acquisition_params_name = ''
+		var acq_keys = Object.keys(acquisition_params);
+		for (var i = 0; i < acq_keys.length; i++){
+			var name = acq_keys[i];
+			var value = acquisition_params[name];
+			acquisition_params_name = acquisition_params_name + '   ' + name + ': ' + value + '\n';
+		}
+
+		var decision_params_name = ''
+		var dec_keys = Object.keys(decision_params);
+		for (var i = 0; i < dec_keys.length; i++){
+			var name = dec_keys[i];
+			var value = decision_params[name];
+			decision_params_name = decision_params_name + '   ' + name + ': ' + value + '\n';
+		}
+
+		var final_name = function_name + acquisition_name + acquisition_params_name + decision_name + decision_params_name;
+		console.log(final_name);
+		return final_name
+	}
+
+
+	function plotUtility(domain, history, meanSeries, rangeSeries, utilitySeries){
+
+		var utilityXAxis = [{
+			title: {
+				text: 'Arm'
+			},
+			min: 1,
+			max: domain
+		}]
+
+
+		var utilityYAxis = [{
+			title: {
+				text: 'Reward'
+			},
+			min: 1		
+		}]
+
+		var utilityPlotOptions = {
+			title : {
+				text: 'title'
+			},
+			xAxis: utilityXAxis,
+			yAxis: utilityYAxis,
+			credits: false,
+			tooltip: {
+        		crosshairs: true,
+        		shared: true,
+    		},
+
+			series: [{name: 'Ground Truth', data: history, animation: false, color: '#b7b7b7'},
+					 {name: 'Posterior Mean', data: meanSeries, animation: false, color: '#0052f7', marker: {enabled: false}},
+					 {name: 'Confidence Bounds', data: rangeSeries, animation: false, color: '#0052f7', lineWidth: 0, fillOpacity: 0.3, marker: {enabled: false}},
+					 {name: 'Utility', data: utilitySeries, animation: false, color: '#22c95f', marker: {enabled: false}}]
+		};
+
+		return utilityPlotOptions;
+	}
+
+
+	function getHistory(rewardFunction, observed_x, observed_y, next_x, next_y){
+
+		var domain = rewardFunction.length;
+		var history = [];
+		for (var i = 0; i < rewardFunction.length; i++){
+			if (i == next_x){
+				history.push({marker:{fillColor:'#FF6666'}, x: i + 1 , y: rewardFunction[i], color:'#FF6666'})
+			} else if (observed_x.indexOf(i) > -1){
+				history.push({marker:{fillColor:'#6dff66'}, x: i + 1 , y: rewardFunction[i], color:'#6dff66'})
+			} else {
+				history.push([i + 1, rewardFunction[i]]);
+			}
+		};
+		return history
+	};
+
+
+	function getFunction(mean, std, utility){
+
+		var meanSeries = [];
+		var rangeSeries = [];
+		var utilitySeries = [];
+
+		for (var i = 0; i < mean.length; i++){
+			meanSeries.push([i + 1, mean[i]]);
+			rangeSeries.push([i + 1, mean[i] - std[i], mean[i] + std[i]]);
+			utilitySeries.push([i + 1, utility[i]]);
+		}
+		return [meanSeries, rangeSeries, utilitySeries];
+	}
+		
+
+</script>

@@ -1,0 +1,111 @@
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+
+<div class = "topnav">
+  <a class = "active" href = "/">New Simulation</a>
+  <a href= "/view_simulation">View Simulation</a>
+  <a href = "/participants">Participants</a>
+</div>
+
+<div id = "simParams">
+	<div>Trials: <input name = "trials" id = "trials" class = "param" value = "15"></input></div>
+</div>
+
+<div id = "rewards">
+<select id = "rewardSelector" onchange = "selectFunction(this, 'rewardParamsSelector')">
+	<option selected disabled>Reward Function</option>
+	<option value = "pos_linear">Positive Linear</option>
+	<option value = "neg_quad">Negative Quadratic</option>
+	<option value = "sinc_compressed">Compressed Sinc</option>
+</select>
+</div>
+
+<div id = "acquisition">
+<select id = "acqSelector" onchange = "selectFunction(this, 'acqParamsSelector')">
+	<option selected disabled>Acquisition Function</option>
+	<option value = "ucb">UCB</option>
+	<option value = "mes">MES</option>
+</select>
+
+<div id = "ucbParams" class = "acqParamsSelector" style = "display:none">
+	<div>Explore Preference: <input class="param" name="explore" id="explore" value="1"></div>
+</div>
+
+<div id="mesParams" class = "acqParamsSelector" style="display:none">
+	<div>CDF Precision: <input class = "param" name = "cdfPrecision" id = "cdfPrecision" value = ".001"></div>
+	<div>Gumbel Samples: <input class = "param" name = "gumbelSamples" id = "gumbelSamples" value = "1000"></div>
+</div>
+</div>
+
+<div id = "decision">
+<select id = "decSelector" onchange = "selectFunction(this, 'decParamsSelector')">
+	<option selected disabled>Decision Function</option>
+	<option value = "deterministic">Deterministic </option>
+	<option value = "softmax">Softmax</option>
+</select>
+
+<div id = "softmaxParams" class = "decParamsSelector" style = "display:none">
+	<div>Temperature: <input class="param" name="temperature" id="temperature" value="1"></div>
+</div>
+</div>
+
+<div id = "buttons">
+	<button id = "simButton" onmousedown = "simulate()" disabled>Simulate</button>
+</div>
+
+<script type="text/javascript">
+	
+	var acqSelected = false;
+	var decSelected = false;
+	var rewardSelected = false;
+
+	function selectFunction(e, className){
+		var name = e.value;
+		var acqParamsDivs = document.getElementsByClassName(className);
+		for (var i = 0; i < acqParamsDivs.length; i++){
+			acqParamsDivs[i].style.display = 'None';
+		};
+
+		var paramsDiv = document.getElementById(name + "Params")
+		if (paramsDiv){
+			paramsDiv.style.display = 'block';
+		}
+
+		if (className == 'acqParamsSelector'){
+			acqSelected = true;
+		} else if (className == 'decParamsSelector'){
+			decSelected = true;
+		} else if (className == 'rewardParamsSelector'){
+			rewardSelected = true;
+		};
+
+		if (acqSelected && decSelected && rewardSelected){
+			simButton.disabled = false;
+		}
+	}
+
+
+	function simulate(){
+		var params = document.getElementsByClassName("param");
+		var paramVals = {};
+		for (var i = 0; i < params.length; i++){
+			if (params[i].parentNode.parentNode.style.display != "none"){
+				paramVals[params[i].name] = params[i].value;
+			}
+		}
+		paramVals['acquisition'] = document.getElementById("acqSelector").value;
+		paramVals['decision'] = document.getElementById("decSelector").value;
+		paramVals['reward'] = document.getElementById("rewardSelector").value;
+
+		console.log(paramVals)
+
+
+		$.ajax({
+			method: "GET",
+			url: "/",
+			data: paramVals
+		});
+	}
+
+</script>
