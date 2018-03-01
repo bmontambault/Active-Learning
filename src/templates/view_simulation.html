@@ -11,10 +11,21 @@
   <a href="/participants">Participants</a>
 </div>
 
+<!--
 <div id = "simulation">
 <select id = "simulationSelector" onchange = "selectSim(this)">
 	<option selected disabled>Simulation</option>
 </select>
+</div>
+-->
+
+<div id = "simulation" style="overflow-y: scroll; height:300px; width:300px">
+</div>
+
+<div id = "trials" style = "display:none">
+<button id = "backButton" onmousedown = "back()" disabled>Back</button>
+<div id = "trialText"></div>
+<button id = "nextButton" onmousedown = "next()" >Next</button>
 </div>
 
 <div id="utilityPlot"></div>
@@ -22,15 +33,55 @@
 
 
 <script>
+
+	var trial = 1;
 	
 	$.getJSON('static/simulations.json', function(json){
 
-		simMenu(json);
+		simMenu2(json);
+	});
 
-		var data = json[0];
+
+	function next(){
+
+		trial += 1;
+		getTrial();
+	}
+
+
+	function back(){
+
+		trial -= 1;
+		getTrial();
+	}
+
+
+	function getTrial(){
+
+		document.getElementById("trialText").innerHTML = "Trial: " + trial + " of " + trials;
+		nextButton = document.getElementById("nextButton");
+		backButton = document.getElementById("backButton");
+		if (trial > 1){
+			backButton.disabled = false;
+		} else {
+			backButton.disabled = true;
+		}
+
+		if (trial == trials){
+			nextButton.disabled = true;
+		} else {
+			nextButton.disabled = false;
+		}
+
+		plotSim(data, trial - 1);
+	}
+ 	
+
+	function plotSim(data, index){
+
 		var rewardFunction = data.function;
 		var domain = rewardFunction.length;
-		var response = data.responses[3];
+		var response = data.responses[index];
 
 		var history = getHistory(rewardFunction, response.observed_x, response.observed_y, response.next_x, response.next_y);
 		var functionSeries = getFunction(response.mean, response.std, response.utility);
@@ -39,8 +90,42 @@
 		var utilitySeries = functionSeries[2];
 
 		var utilityPlotOptions = plotUtility(domain, history, meanSeries, rangeSeries, utilitySeries);
+		document.getElementById("trials").style.display = 'block';
 		Highcharts.chart('utilityPlot', utilityPlotOptions);
-	});
+	}
+
+
+	function showSim(data){
+
+		plotSim(data, 0);
+		trials = data.Trials;
+		document.getElementById("trialText").innerHTML = "Trial 1 of " + trials;
+		window.trials = trials;
+		window.data = data;
+
+	}
+
+
+	function simMenu2(json){
+
+		radio = document.getElementById('simulation');
+		for (var i = 0; i < json.length; i++){
+
+			var data = json[i];
+			var newButton = document.createElement('input');
+			newButton.type = 'radio';
+			newButton.value = i;
+			newButton.id = i;
+			newButton.onclick = function () {showSim(json[newButton.value])};
+			var newLabel = document.createElement('label');
+			newLabel.for = i;
+			newLabel.style.display = "inline-block"
+			var name = formatSimname(data.function_name, data.acquisition, data.decision, data.acquisition_params, data.decision_params);
+			newLabel.innerHTML = name;
+			radio.append(newLabel);
+			radio.append(newButton);
+		}
+	}
 
 
 	function simMenu(json){
@@ -58,12 +143,6 @@
 		    newOpt.append(nameDiv);
 			selector.append(newOpt);
 		}
-	}
-
-
-	function selectSim(i){
-
-		data = json[i]
 	}
 
 
@@ -91,7 +170,7 @@
 
 		var final_name = function_name + acquisition_name + acquisition_params_name + decision_name + decision_params_name;
 		console.log(final_name);
-		return final_name
+		return "<pre>" + final_name + "</pre>"
 	}
 
 
