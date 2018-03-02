@@ -11,14 +11,6 @@
   <a href="/participants">Participants</a>
 </div>
 
-<!--
-<div id = "simulation">
-<select id = "simulationSelector" onchange = "selectSim(this)">
-	<option selected disabled>Simulation</option>
-</select>
-</div>
--->
-
 <div id = "simulation" style="overflow-y: scroll; height:300px; width:300px">
 </div>
 
@@ -38,7 +30,7 @@
 	
 	$.getJSON('static/simulations.json', function(json){
 
-		simMenu2(json);
+		makeMenu(json);
 	});
 
 
@@ -73,40 +65,156 @@
 			nextButton.disabled = false;
 		}
 
-		plotSim(data, trial - 1);
+		plotTrial();
 	}
  	
 
-	function plotSim(data, index){
+ 	function plotTrial(){
 
-		var rewardFunction = data.function;
-		var domain = rewardFunction.length;
-		var response = data.responses[index];
+ 		var index = trial - 1;
+ 		var rewardFunction = data.function;
+ 		var domain = rewardFunction.length;
+ 		var response = data.responses[index];
 
-		var history = getHistory(rewardFunction, response.observed_x, response.observed_y, response.next_x, response.next_y);
+ 		var historySeries = getHistory(rewardFunction, response.observed_x, response.observed_y, response.next_x, response.next_y);
 		var functionSeries = getFunction(response.mean, response.std, response.utility);
 		var meanSeries = functionSeries[0];
 		var rangeSeries = functionSeries[1];
 		var utilitySeries = functionSeries[2];
+		var utilityPlotOptions = plotUtility(domain, historySeries, meanSeries, rangeSeries, utilitySeries);
 
-		var utilityPlotOptions = plotUtility(domain, history, meanSeries, rangeSeries, utilitySeries);
-		document.getElementById("trials").style.display = 'block';
+		var probabilitySeries = getProbability(response.p);
+		var probabilityPlotOptions = plotProbability(domain, response.next_x, probabilitySeries);
+
 		Highcharts.chart('utilityPlot', utilityPlotOptions);
+		Highcharts.chart('probabilityPlot', probabilityPlotOptions);
+ 	}
+
+
+ 	function getHistory(rewardFunction, observed_x, observed_y, next_x, next_y){
+
+		var domain = rewardFunction.length;
+		var history = [];
+		for (var i = 0; i < rewardFunction.length; i++){
+			if (i == next_x){
+				history.push({marker:{fillColor:'#FF6666'}, x: i, y: rewardFunction[i], color:'#FF6666'})
+			} else if (observed_x.indexOf(i) > -1){
+				history.push({marker:{fillColor:'#6dff66'}, x: i, y: rewardFunction[i], color:'#6dff66'})
+			} else {
+				history.push([i, rewardFunction[i]]);
+			}
+		};
+		return history
+	};
+
+
+	function getFunction(mean, std, utility){
+
+		var meanSeries = [];
+		var rangeSeries = [];
+		var utilitySeries = [];
+
+		for (var i = 0; i < mean.length; i++){
+			meanSeries.push([i, mean[i]]);
+			rangeSeries.push([i, mean[i] - std[i], mean[i] + std[i]]);
+			utilitySeries.push([i, utility[i]]);
+		}
+		return [meanSeries, rangeSeries, utilitySeries];
 	}
 
 
-	function showSim(data){
+	function plotUtility(domain, history, meanSeries, rangeSeries, utilitySeries){
 
-		plotSim(data, 0);
-		trials = data.Trials;
-		document.getElementById("trialText").innerHTML = "Trial 1 of " + trials;
-		window.trials = trials;
-		window.data = data;
+		var utilityXAxis = [{
+			title: {
+				text: 'Arm'
+			},
+			min: 0,
+			max: domain
+		}]
 
+
+		var utilityYAxis = [{
+			title: {
+				text: 'Reward'
+			},
+			min: 0		
+		}]
+
+		var utilityPlotOptions = {
+			title: {
+				text: 'title'
+			},
+			xAxis: utilityXAxis,
+			yAxis: utilityYAxis,
+			credits: false,
+			tooltip: {
+        		crosshairs: true,
+        		shared: true,
+    		},
+
+			series: [{name: 'Ground Truth', data: history, animation: false, color: '#b7b7b7'},
+					 {name: 'Posterior Mean', data: meanSeries, animation: false, color: '#0052f7', marker: {enabled: false}},
+					 {name: 'Confidence Bounds', data: rangeSeries, type: 'arearange', animation: false, color: '#0052f7', lineWidth: 0, fillOpacity: 0.3, marker: {enabled: false}},
+					 {name: 'Utility', data: utilitySeries, animation: false, color: '#22c95f', marker: {enabled: false}}]
+		};
+
+		return utilityPlotOptions;
 	}
 
 
-	function simMenu2(json){
+	function getProbability(probability){
+
+		var probabilitySeries = [];
+
+		for (var i = 0; i < probability.length; i++){
+			probabilitySeries.push([i, probability[i]]);
+		}
+		return probabilitySeries;
+	}
+
+
+	function plotProbability(domain, next_x, probabilitySeries){
+
+		var probabilityXAxis = [{
+			title: {
+				text: 'Arm'
+			},
+			min: 0,
+			max: domain,
+			plotLines: [{
+				color: '#FF6666',
+				width: 1,
+				value: next_x
+			}]
+		}]
+
+		var probabilityYAxis = [{
+			title: {
+				text: 'P(next = a)'
+			},
+			min: 0,
+		}]
+
+		var probabilityPlotOptions = {
+			title: {
+				text: 'title'
+			},
+			xAxis: probabilityXAxis,
+			yAxis: probabilityYAxis,
+			credits: false,
+			tooltip: {
+				crosshairs: true,
+				shared: true
+			},
+
+			series: [{name: 'Probability', data: probabilitySeries, animation: false, color: '#0052f7', marker: {enabled: false}}]
+		}
+		return probabilityPlotOptions;
+	}
+
+
+	function makeMenu(json){
 
 		radio = document.getElementById('simulation');
 		for (var i = 0; i < json.length; i++){
@@ -116,11 +224,11 @@
 			newButton.type = 'radio';
 			newButton.value = i;
 			newButton.id = i;
-			newButton.onclick = function () {showSim(json[newButton.value])};
+			newButton.onclick = function () {startSim(json[newButton.value])};
 			var newLabel = document.createElement('label');
 			newLabel.for = i;
 			newLabel.style.display = "inline-block"
-			var name = formatSimname(data.function_name, data.acquisition, data.decision, data.acquisition_params, data.decision_params);
+			var name = formatName(data.function_name, data.acquisition, data.decision, data.acquisition_params, data.decision_params);
 			newLabel.innerHTML = name;
 			radio.append(newLabel);
 			radio.append(newButton);
@@ -128,25 +236,7 @@
 	}
 
 
-	function simMenu(json){
-
-		selector = document.getElementById('simulationSelector');
-		for (var i = 0; i < json.length; i++){
-
-			var data = json[i]
-			var newOpt = document.createElement('option');
-			newOpt.value = i;
-			var name = formatSimname(data.function_name, data.acquisition, data.decision, data.acquisition_params, data.decision_params);
-			nameDiv = document.createElement('div');
-			nameDiv.innerHTML = name;
-			console.log(nameDiv);
-		    newOpt.append(nameDiv);
-			selector.append(newOpt);
-		}
-	}
-
-
-	function formatSimname(f, acquisition, decision, acquisition_params, decision_params){
+	function formatName(f, acquisition, decision, acquisition_params, decision_params){
 
 		var function_name = 'Function: ' + f + '\n';
 		var acquisition_name = 'Acquisition: ' + acquisition + '\n';
@@ -174,76 +264,14 @@
 	}
 
 
-	function plotUtility(domain, history, meanSeries, rangeSeries, utilitySeries){
+	function startSim(data){
 
-		var utilityXAxis = [{
-			title: {
-				text: 'Arm'
-			},
-			min: 1,
-			max: domain
-		}]
-
-
-		var utilityYAxis = [{
-			title: {
-				text: 'Reward'
-			},
-			min: 1		
-		}]
-
-		var utilityPlotOptions = {
-			title : {
-				text: 'title'
-			},
-			xAxis: utilityXAxis,
-			yAxis: utilityYAxis,
-			credits: false,
-			tooltip: {
-        		crosshairs: true,
-        		shared: true,
-    		},
-
-			series: [{name: 'Ground Truth', data: history, animation: false, color: '#b7b7b7'},
-					 {name: 'Posterior Mean', data: meanSeries, animation: false, color: '#0052f7', marker: {enabled: false}},
-					 {name: 'Confidence Bounds', data: rangeSeries, animation: false, color: '#0052f7', lineWidth: 0, fillOpacity: 0.3, marker: {enabled: false}},
-					 {name: 'Utility', data: utilitySeries, animation: false, color: '#22c95f', marker: {enabled: false}}]
-		};
-
-		return utilityPlotOptions;
+		window.data = data;
+		window.trials = data.Trials;
+		plotTrial();
+		document.getElementById("trialText").innerHTML = "Trial 1 of " + trials;
+		document.getElementById("trials").style.display = "inline-block";
 	}
 
-
-	function getHistory(rewardFunction, observed_x, observed_y, next_x, next_y){
-
-		var domain = rewardFunction.length;
-		var history = [];
-		for (var i = 0; i < rewardFunction.length; i++){
-			if (i == next_x){
-				history.push({marker:{fillColor:'#FF6666'}, x: i + 1 , y: rewardFunction[i], color:'#FF6666'})
-			} else if (observed_x.indexOf(i) > -1){
-				history.push({marker:{fillColor:'#6dff66'}, x: i + 1 , y: rewardFunction[i], color:'#6dff66'})
-			} else {
-				history.push([i + 1, rewardFunction[i]]);
-			}
-		};
-		return history
-	};
-
-
-	function getFunction(mean, std, utility){
-
-		var meanSeries = [];
-		var rangeSeries = [];
-		var utilitySeries = [];
-
-		for (var i = 0; i < mean.length; i++){
-			meanSeries.push([i + 1, mean[i]]);
-			rangeSeries.push([i + 1, mean[i] - std[i], mean[i] + std[i]]);
-			utilitySeries.push([i + 1, utility[i]]);
-		}
-		return [meanSeries, rangeSeries, utilitySeries];
-	}
-		
 
 </script>
