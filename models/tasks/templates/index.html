@@ -1,0 +1,313 @@
+<head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+
+<div id = "header" class = "container">
+	<h5>ID: {{id}} </h5>
+	<h5>Goal: {{goal}} </h5>
+	<h5>Kernel: {{kernel_name}} </h5>
+
+
+	<div class = "row">
+		<button id = "back" class="btn" onclick = "back()" disabled>Previous</button>
+		<div id = "trialCounter" class = "card-header">Trial 1 of {{ntrials}} </div>
+		<button id = "next" class="btn" onclick = "next()">Next</button>
+	</div>
+	<hr class="my-4">
+</div>
+
+<div class = "container">
+	<table id = "table" class="table table-hover table-striped text-left">
+	  <thead class = "thead-dark">
+	    <tr class = "headRow">
+	      <th scope="col"><input type="checkbox" id = "toggle" onclick = "toggleAll()"/></th>
+	      <th scope="col">Acquisition</th>
+	      <th scope="col">Acquisition Parameters</th>
+	      <th scope="col">Decision</th>
+	      <th scope="col">Decision Parameters</th>
+	      <th scope="col">Label</th>
+	      <th scope="col">Log Posterior Probability of Next</th>
+	      <th scope="col">Total Log Posterior Probability</th>
+	    </tr>
+	  </thead>
+	  <tbody id = "tableBody">
+	  </tbody>
+	</table>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class = "plot" id = "acqPlot"></div>
+        <div class = "plot" id = "decPlot"></div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+
+<script type="text/javascript">
+
+	var acquisition = {{acquisition|safe}};
+	var decision = {{decision|safe}};
+	var acq_params = {{acq_params|safe}};
+	var dec_params = {{dec_params|safe}};
+	var colors = {{colors|safe}};
+	var mean = {{mean|safe}};
+	var v = {{var|safe}};
+	var utility = {{utility|safe}};
+	var probability = {{probability|safe}};
+	var total_probability = {{total_probability|safe}}
+	var actions = {{actions|safe}};
+	var ntrials = {{ntrials}};
+	var f = {{function|safe}}
+
+	var trial = 1;
+	var first = true;
+	var toggle = true;
+	createAll();
+
+
+function createAll(){
+
+	createTable();
+	createPlot('utility', 'acqPlot', 'Utility/Expected Reward', true);
+	createPlot('probability', 'decPlot', 'Likelihood', false);
+}
+	
+
+function createTable(){
+
+		document.getElementById("toggle").checked = toggle;
+		var all_checked = [];
+		var table = document.getElementById("table");
+		var old_body = document.getElementById("tableBody");
+		var new_body = document.createElement('tbody');
+		new_body.id = "tableBody";
+
+		for (var i = 0; i < acquisition.length; i++){
+			var row = new_body.insertRow(-1);
+			var checkCell = row.insertCell(-1);
+
+			if (first || document.getElementById(i).checked){
+				checked = true;
+			} else{
+				checked = false;
+			}
+			all_checked.push(checked)
+			checkCell.innerHTML = '<input id=' + i + ' type="checkbox"/>'
+			var formatted_acq_params = "";
+			var formatted_dec_params = "";
+			for (var j = 0; j < acq_params[i][0].length; j++){
+				if (j > 0){
+					formatted_acq_params += ", ";
+				}
+				formatted_acq_params += acq_params[i][trial - 1][j].toFixed(2);
+			}
+			for (var j = 0; j < dec_params[i][0].length; j++){
+				if (j > 0){
+					formatted_dec_params += ", ";
+				}
+				formatted_dec_params += dec_params[i][trial - 1][j].toFixed(2);
+			}
+
+			var acqCell = row.insertCell(-1);
+			acqCell.innerHTML = acquisition[i];
+			var acqParamCell = row.insertCell(-1);
+			acqParamCell.innerHTML = formatted_acq_params;
+			var decCell = row.insertCell(-1);
+			var decParamCell = row.insertCell(-1);
+			decParamCell.innerHTML = formatted_dec_params;
+			decCell.innerHTML = decision[i];
+			var labelCell = row.insertCell(-1);
+			labelCell.innerHTML = '<p style="background-color:{}">.</p>'.replace('{}', colors[i]);
+			var likeCell = row.insertCell(-1);
+			likeCell.innerHTML = getLikelihoodNext(i);
+			var totalLikeCell = row.insertCell(-1);
+			totalLikeCell.innerHTML = total_probability[i];
+		}
+		table.replaceChild(new_body, old_body);
+		first = false;
+
+		for (var i = 0; i < all_checked.length; i++){
+			document.getElementById(i).checked = all_checked[i];
+		}
+	}
+
+
+function toggleAll(){
+
+	if (toggle){
+		toggle = false;
+	} else {
+		toggle = true;
+	}
+	for (var i = 0; i < acquisition.length; i++){
+		document.getElementById(i).checked = toggle;
+	}
+}
+
+
+function createPlot(val, plot, title, addModel){
+
+	allSeries = []
+	for (var i = 0; i < acquisition.length; i++){
+		if (document.getElementById(i).checked == true){
+			var data = getSeries(getValue(val, i));
+			var series = {data: data, animation: false, color: colors[i], marker: {enabled: false}, showInLegend: false}
+			allSeries.push(series)
+		}
+	}
+
+	var nextAction = getNext();
+	if (addModel){
+		var mean = getMean();
+		var v = getVar();
+		var bounds = getBounds(mean, v);
+		var boundsSeries = {data: bounds, animation: false, color: '#0052f7', lineWidth: 0, fillOpacity: 0.3, type: 'arearange', marker: {enabled: false}, showInLegend: false}
+		var meanSeries = {data: mean, animation: false, color: '#0052f7', marker: {enabled: false}, showInLegend: false}
+		var functionSeries = {data: f, animation: false, color: '#000000', marker: {enabled: false}, showInLegend: false}
+		allSeries.push(boundsSeries);
+		allSeries.push(meanSeries);
+		allSeries.push(functionSeries);
+	}
+
+	var xAxis = [{
+		title: {
+			text: 'Arm'
+		},
+		min: 0,
+		max: f.length - 1,
+		plotLines: [{
+			color: '#000000',
+			width: 1,
+			value: nextAction
+		}]
+	}]
+
+	var options = {
+		title: {
+			text: title
+		},
+		xAxis: xAxis,
+		credits: false,
+		tooltip: {
+        	crosshairs: true,
+        	shared: true,
+    	},
+
+		series: allSeries
+	};
+
+	Highcharts.chart(plot, options);
+}
+
+
+function getSeries(data){
+
+	var series = []
+	for (var i = 0; i < data.length; i++){
+		series.push([i, data[i]]);
+	}
+	return series;
+}
+
+
+function getBounds(mean, v){
+
+	var series = [];
+	for (var i = 0; i < mean.length; i++){
+		series.push([i, mean[i] - Math.sqrt(v[i]), mean[i] + Math.sqrt(v[i])])
+	}
+	return series
+}
+
+
+function getMean(){
+
+	return mean[trial - 1];
+}
+
+
+function getVar(){
+
+	return v[trial - 1];
+}
+
+
+function getUtility(i){
+
+	return utility[i][trial - 1];
+}
+
+
+function getLikelihood(i){
+
+	return probability[i][trial - 1];
+}
+
+
+function getValue(val, i){
+
+	if (val == 'utility'){
+		return getUtility(i)
+	} else if (val == 'probability'){
+		return getLikelihood(i);
+	}
+}
+
+
+function getLikelihoodNext(i){
+
+	var next = actions[trial - 1];
+	return probability[i][trial - 1][next].toFixed(5);
+}
+
+
+function getNext(){
+
+	return actions[trial - 1];
+}
+
+
+function next(){
+
+	trial += 1;
+	if (trial == ntrials){
+		document.getElementById("next").disabled = true;
+	}
+	document.getElementById("back").disabled = false;
+	document.getElementById("trialCounter").innerHTML = "Trial " + trial + " of {{ntrials}}"
+	createAll();
+}
+
+
+function back(){
+
+	trial -= 1;
+	if (trial == 1){
+		document.getElementById("back").disabled = true;
+	}
+	document.getElementById("next").disabled = false;
+	document.getElementById("trialCounter").innerHTML = "Trial " + trial + " of {{ntrials}}"
+	createAll();
+}
+
+
+</script>
+
+<style>
+	.plot {
+	    display: inline-block;
+	    width: 50%;
+	}
+</style>
+
+</body>
