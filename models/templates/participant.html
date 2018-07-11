@@ -1,0 +1,84 @@
+<html>
+
+<head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<link
+    href="https://cdn.pydata.org/bokeh/release/bokeh-0.12.16.min.css"
+    rel="stylesheet" type="text/css">
+	<link
+    href="https://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.16.min.css"
+    rel="stylesheet" type="text/css">
+	<link
+    href="https://cdn.pydata.org/bokeh/release/bokeh-tables-0.12.16.min.css"
+    rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <div id = "controls" class = "container">
+        <div class = "row">
+            <button id = "back" class="btn" onclick = "back()" disabled>Previous</button>
+            <div id = "trialCounter" class = "card-header">Trial 1 of {{ntrials}}</div>
+            <button id = "next" class="btn" onclick = "next()">Next</button>
+        </div>
+    </div>
+    <div id = "plots" class = "container">
+        <div id = "utilityPlot" class = "container"></div>
+    </div>
+</body>
+
+
+<script src="https://cdn.pydata.org/bokeh/release/bokeh-0.12.16.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+var trial = 1
+render_plot(trial - 1);
+
+function render_plot(trial){
+
+    var data = {'trial': trial}
+    $.ajax({
+        method:"GET",
+        url:"/{{participant_id}}",
+        data: data,
+        success:function(resp, data){
+            var response = JSON.parse(resp);
+            document.getElementById("utilityPlot").innerHTML = response['div'];
+            var script = response['script'];
+            script = script.replace('<script type="text/javascript">', '');
+            script = script.replace('<\/script>', '');
+            eval(script);
+        },
+    });
+}
+
+
+function next(){
+
+    trial += 1;
+    if (trial == {{ntrials}}){
+        document.getElementById("next").disabled = true;
+    }
+    document.getElementById("back").disabled = false;
+    document.getElementById("trialCounter").innerHTML = "Trial " + trial + " of {{ntrials}}"
+    render_plot(trial - 1);
+}
+
+
+function back(){
+
+    trial -= 1;
+    if (trial == 1){
+        document.getElementById("back").disabled = true;
+    }
+    document.getElementById("next").disabled = false;
+    document.getElementById("trialCounter").innerHTML = "Trial " + trial + " of {{ntrials}}"
+    render_plot(trial - 1)
+}
+
+
+</script>
+
+
+
+</html>

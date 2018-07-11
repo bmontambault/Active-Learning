@@ -1,0 +1,55 @@
+Good Linear Max Score
+_____________________
+loc: 27
+models:
+    SGD(99.97, .001): -8.76
+    Phase/RBF(1, .001): -8.58
+    Phase/Lin(2, .001): -8.76 
+    UCB/RBF(.001, .001): -8.74
+    UCB/Lin(.001, .013): -9.33
+Fits SGD exactly on one trial. UCB/RBF makes all actions around function model max. UCB/Linear has a
+low probability on the second action, as the argmax would have been infered after the first action.
+UCB/RBF barely beats out SGD by having only one random trial jinstead of two.
+
+loc: 33
+models:
+    SGD(14.44, .12): -28.99
+    Phase/RBF(6, .0016): -26.29
+    Phase/Lin(6, .0013): -26.29
+    UCB/RBF(.001, .178): -70.34
+    UCB/Lin(.001, .184): -71.00
+First four actions are 0, probably as a result of not being familiar with the task. The next two actions
+are 1 and 2, and then all following actions are 79. The jump from 2 to 79 makes gradient descent an
+unlikely strategy, and the initial actions are too close together for any kind of directed exploration.
+One strategy that might fit is one with an explore phase (0, 0, 0, 0, 1, 2) and exploit phase (79, 79...).
+With 6 explore trials RBF and linear models are identical. SGD beats Phase because the second two actions
+(0) are highly likely given the first three actions were 0, that is, the gradient for all of these
+trials is 0 so the most likely action is the previous action. Making SGD random until at least two
+UNIQUE actions have been made makes it slightly less likely than Phase.
+
+loc: 5
+models:
+    SGD(404.52, .008): -8.76
+    Phase/RBF(1, .001): -8.23
+    Phase/Lin(1, .001): -4.38
+    UCB/RBF(.001, .001): -8.46
+    UCB/Lin(1.5, .001): -4.38
+After trial 2 all strategies identically choose the argmax (79). On the second trial,
+Phase/Lin and UCB/Lin choose 79 while the rest are random, so these models have a slight
+advantage.
+
+loc: 55
+models:
+    Phase/RBF(3, .001): -13.15
+    UCB/RBF(.001, .072): -43.87 
+    Phase/Lin(3, .001): -13.15
+    UCB/Lin(.001, .072): -43.60
+    SGD(773.71, .001): -9.66
+Moving incrementally from left to right looks most like SGD. However, an explore phase
+of 3 also explains the data well. As with previous participants, the likelihood for this
+strategy is equal with both RBF and linear kernels since the lengthscale of the RBF was
+optimized on linear training samples.
+    
+    
+Bad Linear Max Score
+____________________
