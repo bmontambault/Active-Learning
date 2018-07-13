@@ -5,10 +5,13 @@ import GPy
 import scipy.optimize as opt
 import bokeh.plotting as bp
 from bokeh.embed import components
+from bokeh.models import Legend
+from bokeh.layouts import widgetbox
+
 import seaborn as sns
 
-from test_acq import SGD_MaxScore, SGD_FindMax, SGD, Phase, UCB, EI, ParameterizedEI
-from test_dec import Propto, Softmax
+from acquisitions import RandomMove, SGD_MaxScore, SGD_FindMax, SGD, Phase, UCB, EI, ParameterizedEI
+from decisions import Propto, Softmax
 
 """
 Get mean/variances of GP posterior predictive given a kernel and observations
@@ -256,8 +259,8 @@ def fit_participant(participant_id, goal, actions, function, function_samples, k
     for i in range(len(kernels)):
         kernel = kernels[i]
         m = GPy.models.GPRegression(X = stacked_function_samples_x, Y = stacked_function_samples_y, kernel = kernel)
-        m.Gaussian_noise.variance = .0001
-        m.Gaussian_noise.variance.constrain_fixed()
+        #m.Gaussian_noise.variance = .0001
+        #m.Gaussian_noise.variance.constrain_fixed()
         m.optimize()
         all_means, all_vars = get_mean_var(kernel, function, actions)
         for acquisition_type, decision_type in gp_strategies:
@@ -282,30 +285,75 @@ def add_viz_data(data):
         participant = data[i]
         colormap = np.array(sns.color_palette("hls", len(participant['models']) + 1).as_hex())
         plots = []
-        for trial in range(1, len(participant['models'][0]['all_utilities'].keys()) + 1):
-            plot = bp.figure(title = "Utility of Next Action")
+        for trial in range(1, 2):#len(participant['models'][0]['all_utilities'].keys()) + 1):
+            u_plot = bp.figure(title = "Utility of Next Action", plot_width = 400, plot_height = 400, tools = "")
+            u_plot.toolbar.logo = None
+            l_plot = bp.figure(title = "Log Likelihood of Next Action", plot_width = 400, plot_height = 400, tools = "")
+            l_plot.toolbar.logo = None
+            legend_items = []
+            
             actions = participant['actions'][:trial - 1]
             rewards = participant['rewards'][:trial - 1]
+            if len(rewards) == 0:
+                min_reward = 0
+                max_reward = 0
+            else:
+                min_reward = np.min(rewards)
+                max_reward = np.max(rewards)
             next_action = participant['actions'][trial - 1]
             if len(actions) > 0:
-                pass
-                plot.circle(actions, rewards, color = colormap[-1], legend = "Actions")
+                a = u_plot.circle(actions, rewards, color = colormap[-1], legend = "Actions")
+                legend_items.append(('Actions', [a]))
             utilities = [[model['all_utilities']['trial_' + str(trial)][k] for k in range(len(model['all_utilities']['trial_' + str(trial)]))] for model in participant['models']]
             likelihoods = [[model['all_likelihoods']['trial_' + str(trial)][k] for k in range(len(model['all_likelihoods']['trial_' + str(trial)]))] for model in participant['models']]
-            plot.vbar(x = next_action, width = 0.1, bottom = np.nanmin(np.array(utilities).ravel()), top = np.nanmax(np.array(utilities).ravel()), color = "black", legend = 'Next Action')
+            valmin = min(np.nanmin(np.array(utilities).ravel()), min_reward)
+            valmax = max(np.nanmax(np.array(utilities).ravel()), max_reward)
+            
+            b = u_plot.vbar(x = next_action, width = 0.1, bottom = valmin, top = valmax, color = "black", legend = 'Next Action')
+            l_plot.vbar(x = next_action, width = 0.1, bottom = np.nanmin(np.array(likelihoods).ravel()), top = np.nanmax(np.array(likelihoods).ravel()), color = "black")
+            legend_items.append(('Next Action', [b]))
             for j in range(len(utilities)):
                 utility = utilities[j]
+                likelihood = likelihoods[j]
                 index = [utility[k] for k in range(len(utility)) if not np.isnan(utility[k])]
                 utility = [u if not np.isnan(u) else np.nanmin(utility) for u in utility]
+                likelihood = [l if not np.isnan(l) else np.nanmin(likelihood) for l in likelihood]
                 acq = participant['models'][j]['acquisition']
                 if 'kernel' in participant['models'][j]:
                     kern = ' (' + participant['models'][j]['kernel'] + ')'
                 else:
                     kern = ''
-                plot.line(list(range(len(utility))), utility, color = colormap[j], legend = acq + kern)
-            plot.legend.location = "top_left"
-            script, div = components(plot)
-            plots.append({'script': script, 'div': div})
+                c = u_plot.line(list(range(len(utility))), utility, color = colormap[j], legend = acq + kern)
+                l_plot.line(list(range(len(likelihood))), likelihood, color = colormap[j])
+                legend_items.append((acq + kern, [c]))
+            u_plot.legend.location = "top_left"
+            u_script, u_div = components(u_plot)
+            l_script, l_div = components(l_plot)
+            legend = Legend(items = legend_items)
+            bp.show(widgetbox(legend))
+            #u_plot.add_layout(legend, 'right')
+            
+            gp_plot = bp.figure(title = "Expected Reward", plot_width = 400, plot_height = 400, tools = "")
+            gp_plot.toolbar.logo = None
+            gp_plot.circle(actions, rewards, color = colormap[-1], legend = "Actions")
+            for j in range(len(data[i]['models'])):
+                if 'kernel' in data[i]['models'][j].keys():
+                    kernel = data[i]['models'][j]['kernel']
+                    mean = data[i]['models'][j]['all_means']['trial_' + str(trial)]
+                    var = data[i]['models'][j]['all_vars']['trial_' + str(trial)]
+                    std = np.sqrt(np.array(var))
+                    upper = np.array(mean) + 2 * std
+                    lower = np.array(mean) - 2 * std
+                    index = np.arange(len(mean))
+                    gp_plot.line(index, mean, color = colormap[j], legend = kernel)
+                    
+                    band_x = np.append(index, index[::-1])
+                    band_y = np.append(lower, upper[::-1])
+                    gp_plot.patch(band_x, band_y, color = colormap[j], fill_alpha = 0.2)
+            gp_plot.legend.location = "top_left"
+            f_script, f_div = components(gp_plot)
+            
+            plots.append({'u_script': u_script, 'u_div': u_div, 'l_script': l_script, 'l_div': l_div, 'f_script': f_script, 'f_div': f_div})
         data[i]['plots'] = plots
     return data
             
@@ -330,7 +378,8 @@ def fit_all_participants(results, method = 'DE', restarts = 5):
             kernels = [GPy.kern.RBF(1), GPy.kern.Poly(1, order = 2)]
         elif function_name == 'sinc_compressed':
             kernels = [GPy.kern.RBF(1), GPy.kern.StdPeriodic(1) + GPy.kern.RBF(1)]
-        strategies = [(SGD, Softmax), (Phase, Softmax), (UCB, Softmax)]
+        strategies = [(RandomMove, Softmax), (SGD, Softmax), (Phase, Softmax), (UCB, Softmax)]
+        kernels = [GPy.kern.RBF(1)]
         
         participant_data = fit_participant(participant_id, goal, actions, function_n, function_samples_n, kernels, strategies, method = method, restarts = restarts)
         participant_data['function_name'] = function_name

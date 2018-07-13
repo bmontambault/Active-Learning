@@ -28,6 +28,23 @@ class Random(Acq):
     def __call__(self):
         return np.zeros(len(self.all_x))
     
+
+class RandomMove(Acq):
+    
+    init_params = []
+    bounds = []
+    
+    def __init__(self, all_x, last_x):
+        super().__init__(all_x)
+        self.last_x = last_x
+    
+    def __call__(self):
+        if self.last_x == None:
+            return np.ones(len(self.all_x)) / len(self.all_x)
+        else:
+            return np.array([np.exp(-abs(self.last_x - x)) for x in self.all_x]).ravel()
+        
+    
     
 class FixedSGD(Acq):
     

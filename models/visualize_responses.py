@@ -6,7 +6,7 @@ app=Flask(__name__)
 app.secret_key=''
 app.config['SESSION_TYPE']='filesystem'
 
-with open('model_results.json', 'r') as f:
+with open('test_model_results.json', 'r') as f:
     model_results = json.load(f)
     
 

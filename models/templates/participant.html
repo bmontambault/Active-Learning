@@ -21,8 +21,16 @@
             <button id = "next" class="btn" onclick = "next()">Next</button>
         </div>
     </div>
-    <div id = "plots" class = "container">
-        <div id = "utilityPlot" class = "container"></div>
+    <div id = "plots1" class = "container">
+        <div class = "row">
+            <div id = "functionPlot"></div>
+            <div id = "utilityPlot"></div>
+        </div>
+    </div>
+    <div id = "plots2" class = "container">
+        <div class = "row">
+            <div id = "likelihoodPlot"></div>
+        </div>
     </div>
 </body>
 
@@ -43,13 +51,23 @@ function render_plot(trial){
         data: data,
         success:function(resp, data){
             var response = JSON.parse(resp);
-            document.getElementById("utilityPlot").innerHTML = response['div'];
-            var script = response['script'];
-            script = script.replace('<script type="text/javascript">', '');
-            script = script.replace('<\/script>', '');
-            eval(script);
+            document.getElementById("utilityPlot").innerHTML = response['u_div'];
+            document.getElementById("functionPlot").innerHTML = response['f_div'];
+            document.getElementById("likelihoodPlot").innerHTML = response['l_div'];
+
+            run_script(response['u_script']);
+            run_script(response['f_script']);
+            run_script(response['l_script']);
         },
     });
+}
+
+
+function run_script(script){
+
+    script = script.replace('<script type="text/javascript">', '');
+    script = script.replace('<\/script>', '');
+    eval(script);
 }
 
 
