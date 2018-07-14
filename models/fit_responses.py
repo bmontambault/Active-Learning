@@ -7,10 +7,11 @@ import bokeh.plotting as bp
 from bokeh.embed import components
 from bokeh.models import Legend
 from bokeh.layouts import widgetbox
+from bokeh.layouts import gridplot
 
 import seaborn as sns
 
-from acquisitions import RandomMove, SGD_MaxScore, SGD_FindMax, SGD, Phase, UCB, EI, ParameterizedEI
+from acquisitions import RandomMove, SGD, Explore, Exploit, Phase, UCB, EI, ParameterizedEI
 from decisions import Propto, Softmax
 
 """
@@ -259,8 +260,6 @@ def fit_participant(participant_id, goal, actions, function, function_samples, k
     for i in range(len(kernels)):
         kernel = kernels[i]
         m = GPy.models.GPRegression(X = stacked_function_samples_x, Y = stacked_function_samples_y, kernel = kernel)
-        #m.Gaussian_noise.variance = .0001
-        #m.Gaussian_noise.variance.constrain_fixed()
         m.optimize()
         all_means, all_vars = get_mean_var(kernel, function, actions)
         for acquisition_type, decision_type in gp_strategies:
@@ -285,10 +284,10 @@ def add_viz_data(data):
         participant = data[i]
         colormap = np.array(sns.color_palette("hls", len(participant['models']) + 1).as_hex())
         plots = []
-        for trial in range(1, 2):#len(participant['models'][0]['all_utilities'].keys()) + 1):
-            u_plot = bp.figure(title = "Utility of Next Action", plot_width = 400, plot_height = 400, tools = "")
+        for trial in range(1, len(participant['models'][0]['all_utilities'].keys()) + 1):
+            u_plot = bp.figure(title = "Utility of Next Action", plot_width = 700, plot_height = 400, tools = "")
             u_plot.toolbar.logo = None
-            l_plot = bp.figure(title = "Log Likelihood of Next Action", plot_width = 400, plot_height = 400, tools = "")
+            l_plot = bp.figure(title = "Log Likelihood of Next Action", plot_width = 700, plot_height = 400, tools = "")
             l_plot.toolbar.logo = None
             legend_items = []
             
@@ -302,16 +301,19 @@ def add_viz_data(data):
                 max_reward = np.max(rewards)
             next_action = participant['actions'][trial - 1]
             if len(actions) > 0:
-                a = u_plot.circle(actions, rewards, color = colormap[-1], legend = "Actions")
+                u_plot.circle(actions, rewards, color = colormap[-1])
+                a = l_plot.circle(actions, rewards, color = colormap[-1])
                 legend_items.append(('Actions', [a]))
             utilities = [[model['all_utilities']['trial_' + str(trial)][k] for k in range(len(model['all_utilities']['trial_' + str(trial)]))] for model in participant['models']]
             likelihoods = [[model['all_likelihoods']['trial_' + str(trial)][k] for k in range(len(model['all_likelihoods']['trial_' + str(trial)]))] for model in participant['models']]
-            valmin = min(np.nanmin(np.array(utilities).ravel()), min_reward)
-            valmax = max(np.nanmax(np.array(utilities).ravel()), max_reward)
+            u_valmin = min(np.nanmin(np.array(utilities).ravel()), min_reward)
+            u_valmax = max(np.nanmax(np.array(utilities).ravel()), max_reward)
+            l_valmin = min(np.nanmin(np.array(likelihoods).ravel()), min_reward) - .01
+            l_valmax = max(np.nanmax(np.array(likelihoods).ravel()), max_reward) + .01
             
-            b = u_plot.vbar(x = next_action, width = 0.1, bottom = valmin, top = valmax, color = "black", legend = 'Next Action')
-            l_plot.vbar(x = next_action, width = 0.1, bottom = np.nanmin(np.array(likelihoods).ravel()), top = np.nanmax(np.array(likelihoods).ravel()), color = "black")
-            legend_items.append(('Next Action', [b]))
+            u_plot.vbar(x = next_action, width = 0.1, bottom = u_valmin, top = u_valmax, color = "black")
+            b = l_plot.vbar(x = next_action, width = 0.1, bottom = l_valmin, top = l_valmax, color = "black")
+            legend_items.append(('Next Action             | p(Next)   | p(1,...,Next - 1)', [b]))
             for j in range(len(utilities)):
                 utility = utilities[j]
                 likelihood = likelihoods[j]
@@ -320,18 +322,26 @@ def add_viz_data(data):
                 likelihood = [l if not np.isnan(l) else np.nanmin(likelihood) for l in likelihood]
                 acq = participant['models'][j]['acquisition']
                 if 'kernel' in participant['models'][j]:
-                    kern = ' (' + participant['models'][j]['kernel'] + ')'
+                    kern = '/' + participant['models'][j]['kernel']
                 else:
                     kern = ''
-                c = u_plot.line(list(range(len(utility))), utility, color = colormap[j], legend = acq + kern)
-                l_plot.line(list(range(len(likelihood))), likelihood, color = colormap[j])
-                legend_items.append((acq + kern, [c]))
-            u_plot.legend.location = "top_left"
+                params = '(' + ','.join([str(np.round(p, 2)) for p in participant['models'][j]['acquisition_params'] + participant['models'][j]['decision_params']]) + ')'
+                
+                u_plot.line(list(range(len(utility))), utility, color = colormap[j])
+                c = l_plot.line(list(range(len(likelihood))), likelihood, color = colormap[j])
+                
+                legend_string = acq + kern + params
+                trial_l = np.round(likelihood[next_action], 2)
+                likelihood_data = pd.DataFrame(participant['models'][j]['all_likelihoods'])
+                total_l = np.round(joint_log_likelihood(actions[:trial], likelihood_data), 2)
+                legend_string = legend_string + (' ' * (14 - len(legend_string))) + ' | ' + str(trial_l) + '      | ' + str(total_l)
+                
+                legend_items.append((legend_string, [c]))
             u_script, u_div = components(u_plot)
             l_script, l_div = components(l_plot)
             legend = Legend(items = legend_items)
-            bp.show(widgetbox(legend))
-            #u_plot.add_layout(legend, 'right')
+            l_plot.add_layout(legend, 'right')
+            
             
             gp_plot = bp.figure(title = "Expected Reward", plot_width = 400, plot_height = 400, tools = "")
             gp_plot.toolbar.logo = None
@@ -350,10 +360,14 @@ def add_viz_data(data):
                     band_x = np.append(index, index[::-1])
                     band_y = np.append(lower, upper[::-1])
                     gp_plot.patch(band_x, band_y, color = colormap[j], fill_alpha = 0.2)
-            gp_plot.legend.location = "top_left"
+            gp_plot.legend.location = "top_right"
             f_script, f_div = components(gp_plot)
             
-            plots.append({'u_script': u_script, 'u_div': u_div, 'l_script': l_script, 'l_div': l_div, 'f_script': f_script, 'f_div': f_div})
+            p = gridplot([[gp_plot, u_plot], [l_plot]], toolbar_location=None)
+            p_script, p_div = components(p)
+            
+            plots.append({'u_script': u_script, 'u_div': u_div, 'l_script': l_script, 'l_div': l_div,
+                          'f_script': f_script, 'f_div': f_div, 'p_script': p_script, 'p_div': p_div})
         data[i]['plots'] = plots
     return data
             
@@ -376,9 +390,11 @@ def fit_all_participants(results, method = 'DE', restarts = 5):
             kernels = [GPy.kern.RBF(1), GPy.kern.Linear(1) + GPy.kern.Bias(1)]
         elif function_name == 'neg_quad':
             kernels = [GPy.kern.RBF(1), GPy.kern.Poly(1, order = 2)]
+            kernels = [GPy.kern.RBF(1)]
         elif function_name == 'sinc_compressed':
             kernels = [GPy.kern.RBF(1), GPy.kern.StdPeriodic(1) + GPy.kern.RBF(1)]
         strategies = [(RandomMove, Softmax), (SGD, Softmax), (Phase, Softmax), (UCB, Softmax)]
+        strategies = [(RandomMove, Softmax), (SGD, Softmax), (Explore, Softmax), (Exploit, Softmax), (Phase, Softmax), (UCB, Softmax)]
         kernels = [GPy.kern.RBF(1)]
         
         participant_data = fit_participant(participant_id, goal, actions, function_n, function_samples_n, kernels, strategies, method = method, restarts = restarts)

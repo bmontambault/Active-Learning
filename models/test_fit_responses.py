@@ -9,7 +9,7 @@ with open('good_results.json', 'r') as f:
     good_results = pd.read_json(json.load(f))
 results = get_results('data/results.json').iloc[1:]
 
-a = results[results['function_name'] == 'neg_quad'].iloc[3:6]
+a = results[results['function_name'] == 'neg_quad'].iloc[5:11]
 
 #lin_opt = good_results[(good_results['function_name'] == 'pos_linear') & (good_results['goal'] == 'find_max_last')]
 #a = lin_opt[lin_opt['somataSessionId'] == 'GMGgVOhx4mAGGG4QXgCFDnygkI5tmqAQ']

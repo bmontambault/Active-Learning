@@ -51,6 +51,11 @@ function render_plot(trial){
         data: data,
         success:function(resp, data){
             var response = JSON.parse(resp);
+
+            document.getElementById("utilityPlot").innerHTML = response['p_div'];
+            run_script(response['p_script']);
+
+            /*
             document.getElementById("utilityPlot").innerHTML = response['u_div'];
             document.getElementById("functionPlot").innerHTML = response['f_div'];
             document.getElementById("likelihoodPlot").innerHTML = response['l_div'];
@@ -58,6 +63,7 @@ function render_plot(trial){
             run_script(response['u_script']);
             run_script(response['f_script']);
             run_script(response['l_script']);
+            */
         },
     });
 }

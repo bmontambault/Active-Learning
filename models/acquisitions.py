@@ -119,24 +119,22 @@ class SGD(Acq):
             return np.array([np.exp(-abs(next_x - x)) for x in self.all_x]).ravel()
 
 
-class SGD_MaxScore(SGD):
-        
-    def __call__(self, learning_rate):
-        if self.second_last_x == None or self.dk == None:
-            return np.ones(len(self.all_x)) / len(self.all_x)
-        else:
-            next_x = self.last_x + self.dk * learning_rate
-            return np.array([np.exp(-abs(next_x - x)) for x in self.all_x]).ravel()
-        
-
-class SGD_FindMax(SGD):
+class Exploit(GPAcq):
     
-    def __call__(self, learning_rate):
-        if self.second_last_x == None or self.dk == 0 or self.dk == None:
-            return np.ones(len(self.all_x)) / len(self.all_x)
-        else:
-            next_x = self.last_x + self.dk * learning_rate
-            return np.array([np.exp(-abs(next_x - x)) for x in self.all_x]).ravel()
+    init_params = []
+    bounds = []
+    
+    def __call__(self):
+        return self.mean
+    
+
+class Explore(GPAcq):
+    
+    init_params = []
+    bounds = []
+    
+    def __call__(self):
+        return self.var
         
         
 class Phase(GPAcq):
