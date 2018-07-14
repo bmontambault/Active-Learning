@@ -308,7 +308,7 @@ def add_viz_data(data):
             likelihoods = [[model['all_likelihoods']['trial_' + str(trial)][k] for k in range(len(model['all_likelihoods']['trial_' + str(trial)]))] for model in participant['models']]
             u_valmin = min(np.nanmin(np.array(utilities).ravel()), min_reward)
             u_valmax = max(np.nanmax(np.array(utilities).ravel()), max_reward)
-            l_valmin = min(np.nanmin(np.array(likelihoods).ravel()), min_reward) - .01
+            l_valmin = min(np.nanmin([l for l in np.array(likelihoods).ravel() if not np.isinf(l)]), min_reward) - .01
             l_valmax = max(np.nanmax(np.array(likelihoods).ravel()), max_reward) + .01
             
             u_plot.vbar(x = next_action, width = 0.1, bottom = u_valmin, top = u_valmax, color = "black")
@@ -318,8 +318,8 @@ def add_viz_data(data):
                 utility = utilities[j]
                 likelihood = likelihoods[j]
                 index = [utility[k] for k in range(len(utility)) if not np.isnan(utility[k])]
-                utility = [u if not np.isnan(u) else np.nanmin(utility) for u in utility]
-                likelihood = [l if not np.isnan(l) else np.nanmin(likelihood) for l in likelihood]
+                utility = [u if not np.isnan(u) and not np.isinf(u) else np.nanmin([ui for ui in utility if not np.isinf(ui)]) for u in utility]
+                likelihood = [l if not np.isnan(l) and not np.isinf(l) else np.nanmin([li for li in likelihood if not np.isinf(li)]) for l in likelihood]
                 acq = participant['models'][j]['acquisition']
                 if 'kernel' in participant['models'][j]:
                     kern = '/' + participant['models'][j]['kernel']
@@ -390,7 +390,6 @@ def fit_all_participants(results, method = 'DE', restarts = 5):
             kernels = [GPy.kern.RBF(1), GPy.kern.Linear(1) + GPy.kern.Bias(1)]
         elif function_name == 'neg_quad':
             kernels = [GPy.kern.RBF(1), GPy.kern.Poly(1, order = 2)]
-            kernels = [GPy.kern.RBF(1)]
         elif function_name == 'sinc_compressed':
             kernels = [GPy.kern.RBF(1), GPy.kern.StdPeriodic(1) + GPy.kern.RBF(1)]
         strategies = [(RandomMove, Softmax), (SGD, Softmax), (Phase, Softmax), (UCB, Softmax)]
