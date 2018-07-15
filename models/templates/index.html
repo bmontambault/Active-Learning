@@ -22,9 +22,9 @@
 
 <script type="text/javascript">
 
-createTable({{ids|safe}}, {{functions|safe}}, {{goals|safe}}, {{scores|safe}}, {{model_name|safe}}, {{params|safe}}, {{pseudo_r2|safe}});
+createTable({{ids|safe}}, {{functions|safe}}, {{goals|safe}}, {{scores|safe}}, {{max_scores|safe}}, {{model_name|safe}}, {{params|safe}}, {{pseudo_r2|safe}});
 	
-function createTable(ids, functions, goals, scores, model_name, params, pseudo_r2){
+function createTable(ids, functions, goals, scores, max_scores, model_name, params, pseudo_r2){
 
 	console.log(pseudo_r2)
 	var table = document.getElementById("table");
@@ -41,6 +41,8 @@ function createTable(ids, functions, goals, scores, model_name, params, pseudo_r
 		goal_cell.innerHTML = goals[i];
 		var score_cell = row.insertCell(-1);
 		score_cell.innerHTML = scores[i];
+		var max_score_cell = row.insertCell(-1);
+		max_score_cell.innerHTML = max_scores[i];
 		var model_cell = row.insertCell(-1);
 		model_cell.innerHTML = model_name[i];
 		var params_cell = row.insertCell(-1);
