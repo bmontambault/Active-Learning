@@ -1,13 +1,14 @@
 from flask import Flask, render_template, request
 import json
 import numpy as np
-
+import os
 
 app=Flask(__name__)
 app.secret_key=''
 app.config['SESSION_TYPE']='filesystem'
 
-with open('all_model_results.json', 'r') as f:
+path = os.path.dirname(os.path.realpath(__file__))
+with open(path + '/all_model_results.json', 'r') as f:
     model_results = json.load(f)
     
 
@@ -19,9 +20,6 @@ def index():
     goals = [model_results[i]['goal'] for i in range(len(model_results))]
     scores = [np.round(model_results[i]['score'], 2) for i in range(len(model_results))]
     max_scores = [np.round(model_results[i]['max_score'], 2) for i in range(len(model_results))]
-    
-    for d in model_results:
-        d['models'] = [m for m in d['models'] if m['acquisition'] != 'Phase']
     
     best_model = [max([m for m in d['models']], key = lambda x: x['pseudo_r2']) for d in model_results]
     model_name = []
