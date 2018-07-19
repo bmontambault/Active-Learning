@@ -11,7 +11,7 @@ from bokeh.layouts import gridplot
 
 import seaborn as sns
 
-from acquisitions import RandomMove, SGD, Explore, Exploit, Phase, UCB, EI, ParameterizedEI
+from acquisitions import LocalMove, SGD, Explore, Exploit, Phase, UCB, EI, ParameterizedEI
 from decisions import Propto, Softmax
 
 """
@@ -392,8 +392,8 @@ def fit_all_participants(results, method = 'DE', restarts = 5):
             kernels = [GPy.kern.RBF(1), GPy.kern.Poly(1, order = 2)]
         elif function_name == 'sinc_compressed':
             kernels = [GPy.kern.RBF(1), GPy.kern.StdPeriodic(1) + GPy.kern.RBF(1)]
-        strategies = [(RandomMove, Softmax), (SGD, Softmax), (Phase, Softmax), (UCB, Softmax)]
-        strategies = [(RandomMove, Softmax), (SGD, Softmax), (Explore, Softmax), (Exploit, Softmax), (Phase, Softmax), (UCB, Softmax)]
+        strategies = [(LocalMove, Softmax), (SGD, Softmax), (Phase, Softmax), (UCB, Softmax)]
+        strategies = [(LocalMove, Softmax), (SGD, Softmax), (Explore, Softmax), (Exploit, Softmax), (Phase, Softmax), (UCB, Softmax)]
         kernels = [GPy.kern.RBF(1)]
         
         participant_data = fit_participant(participant_id, goal, actions, function_n, function_samples_n, kernels, strategies, method = method, restarts = restarts)
