@@ -7,11 +7,11 @@ import GPy
 
 from data.get_results import get_results
 from fit_responses import gp
-from acquisitions import Random, RandomMove, SGD, Explore, Exploit, UCB
+from acquisitions import Random, LocalMove, SGD, Phase, Explore, Exploit, UCB
 from decisions import Propto, Softmax
 
 
-def task(kernel, function, acquisition_type, decision_type, acq_params, dec_params, ntrials):
+def task(function, acquisition_type, decision_type, acq_params, dec_params, ntrials, kernel = None):
     
     actions = []
     rewards = []
@@ -72,12 +72,15 @@ def test_condition(results, function_name, strategies, nattempts):
     condition = results[results['function_name'] == function_name].iloc[0]
     function_samples = condition['function_samples'].values()
     function_samples_n = np.array([((f - np.mean(f)) / np.std(f)) for f in function_samples])
-    stacked_function_samples_x = np.hstack([np.arange(len(f)) for f in function_samples_n])[:,None]
-    stacked_function_samples_y = np.hstack(funcstion_samples_n)[:,None]
-    m = GPy.models.GPRegression(X = stacked_function_samples_x, Y = stacked_function_samples_y, kernel = GPy.kern.RBF(1))
-    m.optimize()
     
-    kernel = m.kern
+    if np.any([s[0].isGP for s in strategies]):
+        stacked_function_samples_x = np.hstack([np.arange(len(f)) for f in function_samples_n])[:,None]
+        stacked_function_samples_y = np.hstack(function_samples_n)[:,None]
+        m = GPy.models.GPRegression(X = stacked_function_samples_x, Y = stacked_function_samples_y, kernel = GPy.kern.RBF(1))
+        m.optimize()
+        kernel = m.kern
+    else:
+        kernel = None
     function = np.array(condition['function'])
     fmean = np.mean(function)
     fstd = np.std(function)
@@ -89,8 +92,7 @@ def test_condition(results, function_name, strategies, nattempts):
         total_find_max = 0
         total_max_score = 0
         for i in range(nattempts):
-            actions, rewards = task(kernel, function_n, acquisition_type, decision_type, acq_params, dec_params, ntrials)
-            print (actions)
+            actions, rewards = task(function_n, acquisition_type, decision_type, acq_params, dec_params, ntrials, kernel)
             find_max = np.max([function[a] for a in actions])
             max_score = np.sum([function[a] for a in actions])
             total_find_max += find_max
@@ -98,14 +100,18 @@ def test_condition(results, function_name, strategies, nattempts):
         all_find_max.append(total_find_max / nattempts)
         all_max_score.append(total_max_score / nattempts)
     return all_find_max, all_max_score
-        
-ucb_params = [.1, 1, 10, 100]
-sgd_params = [10, 100, 500, 1000]
-        
 
+
+sgd_params = [10, 100, 500, 1000]        
+ucb_params = [.1, 1, 10, 100]
+phase_params = np.arange(2, 25)
+softmax_params = [.001, .1, 1., 10]
+
+strategies = [(Random, Softmax, [], [.1])] + [(SGD, Softmax, [s], [t]) for s in sgd_params for t in softmax_params]+ [(Explore, Softmax, [], [t]) for t in softmax_params] + [(Exploit, Softmax, [], [t]) for t in softmax_params] + [(Phase, Softmax, [p], [t]) for p in phase_params for t in softmax_params] + [(UCB, Softmax, [u], [t]) for u in ucb_params for t in softmax_params]
 results = get_results('data/results.json').iloc[3:]
-strategies = [
-        (SGD, Softmax, [500], [.001])
-        ]
 
 all_find_max, all_max_score = test_condition(results, 'pos_linear', strategies, 100)
+strategy_types = [s[0].__name__ for s in strategies]
+df = pd.DataFrame(np.array([strategy_types, all_max_score, all_find_max]).T, columns = ['strategy', 'max_score', 'find_max'])
+params = [tuple(s[2] + s[3]) for s in strategies]
+df['params'] = params
