@@ -29,7 +29,7 @@ class Random(Acq):
         return np.zeros(len(self.all_x))
     
 
-class RandomMove(Acq):
+class LocalMove(Acq):
     
     init_params = []
     bounds = []
@@ -115,8 +115,9 @@ class SGD(Acq):
         if self.second_last_x == None or self.dk == None:
             return np.ones(len(self.all_x)) / len(self.all_x)
         else:
-            next_x = self.last_x + self.dk * learning_rate
-            return np.array([np.exp(-abs(next_x - x)) for x in self.all_x]).ravel()
+            next_x = max(0, min(self.last_x + self.dk * learning_rate, max(self.all_x)))
+            u = np.array([np.exp(-abs(next_x - x)) for x in self.all_x]).ravel()
+            return u
 
 
 class Exploit(GPAcq):
