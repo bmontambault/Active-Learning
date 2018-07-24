@@ -11,7 +11,7 @@ from bokeh.layouts import gridplot
 
 import seaborn as sns
 
-from acquisitions import LocalMove, SGD, Explore, Exploit, Phase, UCB, EI, ParameterizedEI
+from acquisitions import LocalMove, SGD, Explore, Exploit, Phase, UCB, EI
 from decisions import Propto, Softmax
 
 """
@@ -116,7 +116,7 @@ def get_utility(all_x, actions, rewards, acquisition_type, acq_params, all_means
                 'last_x': last_x, 'last_y': last_y,
                 'second_last_x': second_last_x, 'second_last_y': second_last_y,
                 'unique_second_last_x': unique_second_last_x, 'unique_second_last_y': unique_second_last_y,
-                'ntrials': len(actions), 'trial': i, 'actions': actions[:i]}
+                'ntrials': len(actions), 'trial': i, 'actions': actions[:i], 'rewards': rewards[:i]}
         acq_arg_names = list(inspect.signature(acquisition_type.__init__).parameters.keys())
         acq_args = {arg_name: args[arg_name] for arg_name in args.keys() if arg_name in acq_arg_names}
         acquisition = acquisition_type(**acq_args)

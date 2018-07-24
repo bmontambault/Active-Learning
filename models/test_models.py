@@ -7,7 +7,7 @@ import GPy
 
 from data.get_results import get_results
 from fit_responses import gp
-from acquisitions import Random, LocalMove, SGD, Phase, Explore, Exploit, UCB
+from acquisitions import Random, LocalMove, MaxSGD, SGD, Phase, Explore, Exploit, UCB
 from decisions import Propto, Softmax
 
 
@@ -52,7 +52,7 @@ def task(function, acquisition_type, decision_type, acq_params, dec_params, ntri
                 'last_x': last_x, 'last_y': last_y,
                 'second_last_x': second_last_x, 'second_last_y': second_last_y,
                 'unique_second_last_x': unique_second_last_x, 'unique_second_last_y': unique_second_last_y,
-                'ntrials': len(actions), 'trial': i, 'actions': actions[:i]}
+                'ntrials': len(actions), 'trial': i, 'actions': actions[:i], 'rewards': rewards[:i]}
         acq_arg_names = list(inspect.signature(acquisition_type.__init__).parameters.keys())
         acq_args = {arg_name: args[arg_name] for arg_name in args.keys() if arg_name in acq_arg_names}
         acquisition = acquisition_type(**acq_args)
@@ -93,6 +93,8 @@ def test_condition(results, function_name, strategies, nattempts):
         total_max_score = 0
         for i in range(nattempts):
             actions, rewards = task(function_n, acquisition_type, decision_type, acq_params, dec_params, ntrials, kernel)
+            print (actions)
+            print (rewards)
             find_max = np.max([function[a] for a in actions])
             max_score = np.sum([function[a] for a in actions])
             total_find_max += find_max
@@ -102,16 +104,18 @@ def test_condition(results, function_name, strategies, nattempts):
     return all_find_max, all_max_score
 
 
-sgd_params = [10, 100, 500, 1000]        
+sgd_params = [1, 10, 100, 500, 1000]        
 ucb_params = [.1, 1, 10, 100]
 phase_params = np.arange(2, 25)
 softmax_params = [.001, .1, 1., 10]
 
-strategies = [(Random, Softmax, [], [.1])] + [(SGD, Softmax, [s], [t]) for s in sgd_params for t in softmax_params]+ [(Explore, Softmax, [], [t]) for t in softmax_params] + [(Exploit, Softmax, [], [t]) for t in softmax_params] + [(Phase, Softmax, [p], [t]) for p in phase_params for t in softmax_params] + [(UCB, Softmax, [u], [t]) for u in ucb_params for t in softmax_params]
+#strategies = [(Random, Softmax, [], [.1])] + [(SGD, Softmax, [s], [t]) for s in sgd_params for t in softmax_params]+ [(Explore, Softmax, [], [t]) for t in softmax_params] + [(Exploit, Softmax, [], [t]) for t in softmax_params] + [(Phase, Softmax, [p], [t]) for p in phase_params for t in softmax_params] + [(UCB, Softmax, [u], [t]) for u in ucb_params for t in softmax_params]
 results = get_results('data/results.json').iloc[3:]
 
-all_find_max, all_max_score = test_condition(results, 'pos_linear', strategies, 100)
-strategy_types = [s[0].__name__ for s in strategies]
-df = pd.DataFrame(np.array([strategy_types, all_max_score, all_find_max]).T, columns = ['strategy', 'max_score', 'find_max'])
-params = [tuple(s[2] + s[3]) for s in strategies]
-df['params'] = params
+strategies = [(MaxSGD, Softmax, [1], [.1])]
+all_find_max, all_max_score = test_condition(results, 'neg_quad', strategies, 1)
+
+#strategy_types = [s[0].__name__ for s in strategies]
+#df = pd.DataFrame(np.array([strategy_types, all_max_score, all_find_max]).T, columns = ['strategy', 'max_score', 'find_max'])
+#params = [tuple(s[2] + s[3]) for s in strategies]
+#df['params'] = params
