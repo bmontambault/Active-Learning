@@ -206,7 +206,24 @@ class MES(GPAcq):
         std = np.sqrt(self.var)
         a, b = fit_gumbel(self.mean, std, .01)
         ymax_samples = sample_gumbel(a, b, 100)
-        z_scores = z_score(ymax_samples, mean, std)
+        z_scores = z_score(ymax_samples, self.mean, std)
         log_norm_cdf_z_scores = st.norm.logcdf(z_scores)
         log_norm_pdf_z_scores = st.norm.logpdf(z_scores)
         return np.mean(z_scores * np.exp(log_norm_pdf_z_scores - (np.log(2) + log_norm_cdf_z_scores)) - log_norm_cdf_z_scores, axis = 1)
+    
+    
+class MinimizeSimpleRegretSearch(GPAcq):
+    
+    init_params = []
+    bounds = []
+    
+    def __init__(self, all_x, mean, var, rewards):
+        super().__init__(all_x, mean, var)
+        self.rewards = rewards
+    
+    def __call__(self):
+        samples = np.array([np.random.normal(self.mean[i], self.var[i], self.ynsamples) for i in range(len(self.mean))])
+        
+    def expected_regret(self, x):
+        pass
+        
