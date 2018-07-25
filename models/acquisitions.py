@@ -2,6 +2,7 @@ import numpy as np
 import scipy.stats as st
 from acquisition_utils import z_score, fit_gumbel, sample_gumbel, get_function_samples
 
+import matplotlib.pyplot as plt
 
 class Acq(object):
     
@@ -257,10 +258,28 @@ class MimimumRegretSearch(GPAcq):
 class MinimumCumulativeRegretSearch(MimimumRegretSearch):
     
     def expected_regret(self, ysamples):
-        u = np.array([np.mean([self.minimum_regret(get_function_samples(self.kernel, self.actions + [self.all_x[i]], self.rewards + [ysamples[i][j]], self.all_x, 5).T) * (self.remaining_trials - 1) + (np.max(self.mean) - ysamples[i][j]) for j in range(len(ysamples[i]))]) for i in range(len(self.all_x))])
-        print (u)
-        return u
-    
+        #u = np.array([np.mean([self.minimum_regret(get_function_samples(self.kernel, self.actions + [self.all_x[i]], self.rewards + [ysamples[i][j]], self.all_x, 5).T) * (self.remaining_trials - 1) + ( - ysamples[i][j]) for j in range(len(ysamples[i]))]) for i in range(len(self.all_x))])
+        #print (u)
+        #return u
+        all_regret = []
+        for i in range(len(self.all_x)):
+            ysample_regret = []
+            for j in range(len(ysamples[i])):
+                fsamples = get_function_samples(self.kernel, self.actions + [self.all_x[i]], self.rewards + [ysamples[i][j]], self.all_x, 5).T
+                fsample_regret = []
+                for f in fsamples:
+                    regret = np.mean([np.max(f) - f[x] for x in self.all_x])
+                    min_regret = np.min(regret)
+                    y_regret = np.max(f) - ysamples[i][j]
+                    #print (min_regret, y_regret, self.all_x[i], ysamples[i][j])
+                    #plt.plot(f)
+                    #plt.show()
+                    total_regret = min_regret * (self.remaining_trials - 1) + y_regret
+                    fsample_regret.append(total_regret)
+                ysample_regret.append(np.mean(fsample_regret))
+            all_regret.append(np.mean(ysample_regret))
+        return all_regret
+                    
     def current_regret(self):
          return self.minimum_regret(get_function_samples(self.kernel, self.actions, self.rewards, self.all_x, 5).T) * self.remaining_trials
 
@@ -270,8 +289,9 @@ class MinimumSimpleRegretSearch(MimimumRegretSearch):
          return self.minimum_regret(get_function_samples(self.kernel, self.actions, self.rewards, self.all_x, 5).T)
     
     def expected_regret(self, ysamples):
-        return np.array([np.mean([self.minimum_regret(get_function_samples(self.kernel, self.actions + [self.all_x[i]], self.rewards + [ysamples[i][j]], self.all_x, 5).T) for j in range(len(ysamples[i]))]) for i in range(len(self.all_x))])
-
+        u = np.array([np.mean([self.minimum_regret(get_function_samples(self.kernel, self.actions + [self.all_x[i]], self.rewards + [ysamples[i][j]], self.all_x, 5).T) for j in range(len(ysamples[i]))]) for i in range(len(self.all_x))])
+        #print(u)
+        return u
 
 
 '''

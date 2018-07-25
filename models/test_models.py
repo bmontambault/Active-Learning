@@ -86,7 +86,7 @@ def test_condition(results, function_name, strategies, nattempts):
     function = np.array(condition['function'])
     fmean = np.mean(function)
     fstd = np.std(function)
-    function_n = function - fmean / fstd
+    function_n = (function - fmean) / fstd
     ntrials = len(condition['response'])
     all_find_max = []
     all_max_score = []
@@ -119,7 +119,7 @@ softmax_params = [.001, .1, 1., 10]
 results = get_results('data/results.json').iloc[3:]
 
 #strategies = [(UCB, Softmax, [e], [s]) for e in ucb_params for s in softmax_params]
-strategies = [(MinimumCumulativeRegretSearch, Softmax, [], [.1])]
+strategies = [(MinimumSimpleRegretSearch, Softmax, [], [.1]), (MinimumCumulativeRegretSearch, Softmax, [], [.1])]
 all_find_max, all_max_score = test_condition(results, 'sinc_compressed', strategies, 1)
 
 strategy_types = [s[0].__name__ for s in strategies]
