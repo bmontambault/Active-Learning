@@ -73,7 +73,7 @@ Parameters:
                     acquisition function does not use a GP
 """
 
-def get_utility(all_x, actions, rewards, acquisition_type, acq_params, all_means = [], all_vars = [], replace = True):
+def get_utility(all_x, actions, rewards, acquisition_type, kernel, acq_params, all_means = [], all_vars = [], replace = True):
     
     
     utility_data = pd.DataFrame()
@@ -116,7 +116,8 @@ def get_utility(all_x, actions, rewards, acquisition_type, acq_params, all_means
                 'last_x': last_x, 'last_y': last_y,
                 'second_last_x': second_last_x, 'second_last_y': second_last_y,
                 'unique_second_last_x': unique_second_last_x, 'unique_second_last_y': unique_second_last_y,
-                'ntrials': len(actions), 'trial': i, 'actions': actions[:i], 'rewards': rewards[:i]}
+                'ntrials': len(actions), 'trial': i, 'actions': actions[:i], 'rewards': rewards[:i],
+                'kernel': kernel}
         acq_arg_names = list(inspect.signature(acquisition_type.__init__).parameters.keys())
         acq_args = {arg_name: args[arg_name] for arg_name in args.keys() if arg_name in acq_arg_names}
         acquisition = acquisition_type(**acq_args)
@@ -179,14 +180,14 @@ Parameters:
                     acquisition function does not use a GP
 """
 
-def fit_strategy(all_x, actions, rewards, acquisition_type, decision_type, replace, all_means = [], all_vars = [], method = 'DE', restarts = 5):
+def fit_strategy(all_x, actions, rewards, acquisition_type, decision_type, replace, kernel, all_means = [], all_vars = [], method = 'DE', restarts = 5):
     
     init_acq_params = acquisition_type.init_params
     init_dec_params = decision_type.init_params
     nacq_params = len(init_acq_params)
     
     if nacq_params == 0:
-        utility_data = get_utility(all_x, actions, rewards, acquisition_type, [], all_means = all_means, all_vars = all_vars, replace = replace)
+        utility_data = get_utility(all_x, actions, rewards, acquisition_type, [], kernel, all_means = all_means, all_vars = all_vars, replace = replace)
         def obj(params):
             likelihood_data = get_likelihood(utility_data, actions, decision_type, params)
             jll = joint_log_likelihood(actions, likelihood_data)
@@ -196,7 +197,7 @@ def fit_strategy(all_x, actions, rewards, acquisition_type, decision_type, repla
         def obj(params):
             acq_params = params[:nacq_params]
             dec_params = params[nacq_params:]
-            utility_data = get_utility(all_x, actions, rewards, acquisition_type, acq_params, all_means, all_vars, replace)
+            utility_data = get_utility(all_x, actions, rewards, acquisition_type, acq_params, kernel, all_means, all_vars, replace)
             likelihood_data = get_likelihood(utility_data, actions, decision_type, dec_params)
             jll = joint_log_likelihood(actions, likelihood_data)
             return -jll
@@ -218,7 +219,7 @@ def fit_strategy(all_x, actions, rewards, acquisition_type, decision_type, repla
     acq_params = params[:nacq_params]
     dec_params = params[nacq_params:]
     if nacq_params > 0:
-        utility_data = get_utility(all_x, actions, rewards, acquisition_type, acq_params, all_means, all_vars, replace)
+        utility_data = get_utility(all_x, actions, rewards, acquisition_type, acq_params, kernel, all_means, all_vars, replace)
     likelihood_data = get_likelihood(utility_data, actions, decision_type, dec_params)
     n = len(actions)
     k = len(params)

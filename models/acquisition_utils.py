@@ -5,6 +5,16 @@ import matplotlib.pyplot as plt
 import GPy
 
 
+def get_function_samples(kernel, observed_x, observed_y, all_x, size):
+    
+    X = np.array(observed_x)[:,None]
+    Y = np.array(observed_y)[:,None]
+    m = GPy.models.GPRegression(X, Y, kernel)
+    m.Gaussian_noise.variance = .00001
+    f = m.posterior_samples_f(np.array(all_x)[:,None], full_cov = True, size = size)
+    return f
+    
+
 def z_score(y, mean, std):
     
     if type(y) == list:
@@ -73,9 +83,6 @@ m = GPy.models.GPRegression(X = X[:,None], Y = y[:,None], kernel = GPy.kern.RBF(
 #m.optimize()
 
 newX = np.arange(1, 10)[:,None]
-mean, var = m.predict(newX)
-a, b = fit_gumbel(mean, np.sqrt(var), .01)
-y_samples = sample_gumbel(a, b, 100)
+#mean, var = m.predict(newX)
+f = m.posterior_samples_f(newX, full_cov = True, size = 5)
 
-plt.plot(maxval_entropy(mean, np.sqrt(var), y_samples))
-plt.plot(mean, var, 'bo')
