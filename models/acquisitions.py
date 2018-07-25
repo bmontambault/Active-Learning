@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.stats as st
-import matplotlib.pyplot as plt
+from acquisition_utils import z_score, fit_gumbel, sample_gumbel
 
 
 class Acq(object):
@@ -203,6 +203,10 @@ class MES(GPAcq):
     bounds = []
     
     def __call__(self):
-        pass
-    
-    
+        std = np.sqrt(self.var)
+        a, b = fit_gumbel(self.mean, std, .01)
+        ymax_samples = sample_gumbel(a, b, 100)
+        z_scores = z_score(ymax_samples, mean, std)
+        log_norm_cdf_z_scores = st.norm.logcdf(z_scores)
+        log_norm_pdf_z_scores = st.norm.logpdf(z_scores)
+        return np.mean(z_scores * np.exp(log_norm_pdf_z_scores - (np.log(2) + log_norm_cdf_z_scores)) - log_norm_cdf_z_scores, axis = 1)
