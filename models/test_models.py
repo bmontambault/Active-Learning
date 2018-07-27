@@ -7,7 +7,7 @@ import GPy
 
 from data.get_results import get_results
 from fit_responses import gp
-from acquisitions import Random, LocalMove, MaxSGD, SGD, Phase, Explore, Exploit, UCB, MinimumSimpleRegretSearch, MinimumCumulativeRegretSearch
+from acquisitions import Random, LocalMove, MaxSGD, SGD, Phase, Explore, Exploit, UCB, MES, MinimumSimpleRegretSearch, MinimumCumulativeRegretSearch
 from decisions import Propto, Softmax
 
 
@@ -15,14 +15,16 @@ def task(function, acquisition_type, decision_type, acq_params, dec_params, ntri
     
     actions = []
     rewards = []
+    all_means = []
+    all_vars = []
     all_x = np.arange(len(function))
     for i in range(ntrials):
         
         if acquisition_type.isGP:
             mean, var = gp(kernel, np.array(actions), np.array(rewards), all_x)
         else:
-            mean = []
-            var = []
+            mean = np.array([])
+            var = np.array([])
         
         if i > 0:
             last_x = actions[i - 1]
@@ -62,10 +64,12 @@ def task(function, acquisition_type, decision_type, acq_params, dec_params, ntri
         decision = decision_type()
         probability = decision(utility, *dec_params)
         next_action = st.rv_discrete(values = (all_x, probability)).rvs()
-        print (next_action)
+        #print (next_action)
         next_reward = function[next_action]
         actions.append(next_action)
         rewards.append(next_reward)
+        all_means.append(mean.ravel().tolist())
+        all_vars.append(var.ravel().tolist())
     return actions, rewards
 
 
@@ -95,8 +99,8 @@ def test_condition(results, function_name, strategies, nattempts):
         total_max_score = 0
         for i in range(nattempts):
             actions, rewards = task(function_n, acquisition_type, decision_type, acq_params, dec_params, ntrials, kernel)
-            #print (actions)
-            #print (rewards)
+            print (actions)
+            print (rewards)
             import matplotlib.pyplot as plt
             plt.plot(actions, rewards, 'bo')
             plt.show()
@@ -109,6 +113,18 @@ def test_condition(results, function_name, strategies, nattempts):
     return all_find_max, all_max_score
 
 
+def simulate(function, acquisition_type, decision_type, acq_params, dec_params, function_samples = None, kernel = None):
+    
+    if kernel != None:
+        stacked_function_samples_x = np.hstack([np.arange(len(f)) for f in function_samples])[:,None]
+        stacked_function_samples_y = np.hstack(function_samples)[:,None]
+        m = GPy.models.GPRegression(X = stacked_function_samples_x, Y = stacked_function_samples_y, kernel = kernel(1))
+        m.optimize()
+        kernel = m.kern
+        
+    
+
+
 sgd_params = [1, 10, 100, 500, 1000]        
 #ucb_params = [.1, 1, 10, 100]
 ucb_params = [100, 500, 1000, 5000, 10000]
@@ -119,7 +135,10 @@ softmax_params = [.001, .1, 1., 10]
 results = get_results('data/results.json').iloc[3:]
 
 #strategies = [(UCB, Softmax, [e], [s]) for e in ucb_params for s in softmax_params]
-strategies = [(MinimumSimpleRegretSearch, Softmax, [], [.1]), (MinimumCumulativeRegretSearch, Softmax, [], [.1])]
+#strategies = [(MES, Softmax, [], [.1]), (MinimumSimpleRegretSearch, Softmax, [], [.1]), (MinimumCumulativeRegretSearch, Softmax, [], [.1])]
+#strategies = [(MinimumSimpleRegretSearch, Softmax, [], [.1])]
+
+strategies = [(LocalMove, Softmax, [], [.4])]
 all_find_max, all_max_score = test_condition(results, 'sinc_compressed', strategies, 1)
 
 strategy_types = [s[0].__name__ for s in strategies]
