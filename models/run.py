@@ -87,7 +87,7 @@ def get_trial_features(actions, rewards, trial, ntrials):
     return {'action_1': action_1, 'reward_1': reward_1, 'action_2': action_2, 'reward_2': reward_2,
             'unique_action_2': unique_action_2, 'unique_reward_2': unique_reward_2,
             'trial': trial, 'actions': actions[:trial], 'rewards': rewards[:trial],
-            'remaining_trials': ntrials - trial}
+            'remaining_trials': ntrials - trial, 'best_action': actions[np.argmax(rewards)]}
 
 """
 Given a full sequence of actions and rewards, return a (#trials x #choices) array of utilities given previous observations
@@ -135,7 +135,7 @@ Parameters:
     dec_params: acquistion function parameters
     all_utility: (#trial x #choices) array of utilities over all trials
 """
-def get_all_likelihood(actions, rewards, decision_type, dec_params, all_utility):
+def get_all_likelihood(actions, rewards, choices, decision_type, dec_params, all_utility, all_means = [], all_vars = []):
     
     all_likelihood = []
     action_likelihood = []
@@ -143,6 +143,15 @@ def get_all_likelihood(actions, rewards, decision_type, dec_params, all_utility)
     for trial in range(ntrials):
         utility = all_utility[trial]
         args = get_trial_features(actions, rewards, trial, ntrials)
+        if len(all_means) > 0:
+            mean = all_means[trial]
+            var = all_vars[trial]
+        else:
+            mean = None
+            var = None
+        args['mean'] = mean
+        args['var'] = var
+        args['choices'] = choices
         dec_arg_names = list(inspect.signature(decision_type.__init__).parameters.keys())
         dec_args = {arg_name: args[arg_name] for arg_name in args.keys() if arg_name in dec_arg_names}
         decision = decision_type(**dec_args)
@@ -163,11 +172,9 @@ Parameters:
     dec_params: decision function parameters
     ntrials: int
 """
-def run(function, acquisition_type, decision_type, acq_params, dec_params, ntrials, kernel = None):
+def run(function, acquisition_type, decision_type, acq_params, dec_params, ntrials, kernel = None, actions = [], rewards = []):
     
     data = {'trial_data': {}}
-    actions = []
-    rewards = []
     all_means = []
     all_vars = []
     choices = np.arange(len(function))
@@ -190,13 +197,20 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
         acq_args = {arg_name: args[arg_name] for arg_name in args.keys() if arg_name in acq_arg_names}
         acquisition = acquisition_type(**acq_args)
         utility = acquisition(*acq_params)
-        decision = decision_type()
+        dec_arg_names = list(inspect.signature(decision_type.__init__).parameters.keys())
+        dec_args = {dec_name: args[dec_name] for dec_name in args.keys() if dec_name in dec_arg_names}
+        decision = decision_type(**dec_args)
         likelihood = decision(utility, *dec_params)
-        next_action = st.rv_discrete(values = (choices, likelihood)).rvs()
+        
+        if len(actions) == trial:
+            next_action = st.rv_discrete(values = (choices, likelihood)).rvs()
+            next_reward = function[next_action]
+            actions.append(next_action)
+            rewards.append(next_reward)
+        else:
+            next_action = actions[trial]
+            next_reward = rewards[trial]
         action_likelihood.append(likelihood[next_action])
-        next_reward = function[next_action]
-        actions.append(next_action)
-        rewards.append(next_reward)
         if np.all(mean != None):
             mean = mean.ravel().tolist()
             var = var.ravel().tolist()
@@ -265,8 +279,9 @@ Parameters:
     method: optimization method
     restarts: number of optimization restarts
 """
-def fit_strategy(actions, rewards, choices, kernel, acquisition_type, decision_type, all_means = [], all_vars = [], method = 'DE', restarts = 5):
+def fit_strategy(actions, rewards, choices, acquisition_type, decision_type, kernel = None, all_means = [], all_vars = [], method = 'DE', restarts = 5):
     
+    nacq_params = len(acquisition_type.init_params)
     init_params = acquisition_type.init_params + decision_type.init_params
     bounds = acquisition_type.bounds + decision_type.bounds
     if len(all_means) == 0 and acquisition_type.isGP:
@@ -285,9 +300,14 @@ def fit_strategy(actions, rewards, choices, kernel, acquisition_type, decision_t
         if x.fun < fun:
             fun = x.fun
             final_x = x
-    print (final_x)
-    params = final_x.x
-    return params
+    params = final_x.x.tolist()
+    acq_params = params[:nacq_params]
+    dec_params = params[nacq_params:]
+    return {'actions': actions, 'rewards': rewards, 'acquisition_type': acquisition_type,
+            'decision_type': decision_type, 'acq_params': acq_params, 'dec_params': dec_params,
+            'kernel': kernel, 'choices': choices, 'log_likelihood': -fun, 'ntrials': len(actions)}
+        
+    
 
 
 

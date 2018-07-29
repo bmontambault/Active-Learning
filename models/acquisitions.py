@@ -8,8 +8,8 @@ class Acq(object):
     
     isGP = False
     
-    def __init__(self, all_x):
-        self.all_x = all_x
+    def __init__(self, choices):
+        self.choices = choices
 
 
 class GPAcq(Acq):
@@ -28,7 +28,8 @@ class Random(Acq):
     bounds = []
     
     def __call__(self):
-        return np.zeros(len(self.all_x))
+        return np.zeros(len(self.choices))
+    
     
 
 class LocalMove(Acq):
@@ -36,15 +37,15 @@ class LocalMove(Acq):
     init_params = []
     bounds = []
     
-    def __init__(self, all_x, last_x):
-        super().__init__(all_x)
-        self.last_x = last_x
+    def __init__(self, choices, action_1):
+        super().__init__(choices)
+        self.action_1 = action_1
     
     def __call__(self):
-        if self.last_x == None:
-            return np.ones(len(self.all_x)) / len(self.all_x)
+        if self.action_1 == None:
+            return np.ones(len(self.choices)) / len(self.choices)
         else:
-            return np.array([np.exp(-abs(self.last_x - x)) for x in self.all_x]).ravel()
+            return np.array([np.exp(-abs(self.action_1 - x)) for x in self.choices]).ravel()
 
 
 class SGD1(Acq):
@@ -102,7 +103,7 @@ class SGD2(Acq):
             self.last_action = unique_actions[max(range(len(unique_rewards)), key = lambda x: unique_rewards[x])]
         else:
             self.dk = []
-            for i in range(20):
+            for i in range(100):
                 xi1 = np.random.choice(range(len(unique_actions) - 1))
                 xi2 = np.random.choice(range(xi1 + 1, len(unique_actions)))
                 action_1 = unique_actions[xi1]
@@ -119,6 +120,37 @@ class SGD2(Acq):
         else:
             u = np.ones(len(self.choices))
         return u
+    
+    
+class SGD3(Acq):
+    
+    init_params = [100.]
+    bounds = [(.001, 1000)]
+    
+    def __init__(self, choices, actions, rewards):
+        self.choices = choices
+        unique_actions = []
+        unique_rewards = []
+        for i in range(len(actions)):
+            if actions[i] not in unique_actions:
+                unique_actions.append(actions[i])
+                unique_rewards.append(rewards[i])
+                
+        if len(unique_actions) < 2:
+            self.dk = None
+            self.last_action = None
+        else:
+            self.dk =  (unique_rewards[-1] - unique_rewards[-2]) / (unique_actions[-1] - unique_actions[-2])
+            self.last_action = unique_actions[max(range(len(unique_rewards)), key = lambda x: unique_rewards[x])]
+    
+    def __call__(self, learning_rate):
+        if np.all(self.dk != None):
+            next_action = max(0, min(self.last_action + self.dk * learning_rate, max(self.choices)))
+            u = np.array([np.exp(-abs(next_action - x)) for x in self.choices])
+        else:
+            u = np.ones(len(self.choices))
+        return u
+        
 
 '''     
 class SGD(Acq):
