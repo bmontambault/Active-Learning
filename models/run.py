@@ -3,7 +3,13 @@ import scipy.stats as st
 import scipy.optimize as opt
 import GPy
 import inspect
+import uuid
 
+import bokeh.plotting as bp
+from bokeh.embed import components
+from bokeh.models import Legend, Span
+from bokeh.layouts import widgetbox
+from bokeh.layouts import gridplot
 
 """
 Get means and variances for one trial given the set of actions and rewerds up to that trial and a kernel
@@ -157,7 +163,7 @@ Parameters:
     dec_params: decision function parameters
     ntrials: int
 """
-def run(kernel, function, acquisition_type, decision_type, acq_params, dec_params, ntrials):
+def run(function, acquisition_type, decision_type, acq_params, dec_params, ntrials, kernel = None):
     
     data = {'trial_data': {}}
     actions = []
@@ -191,11 +197,15 @@ def run(kernel, function, acquisition_type, decision_type, acq_params, dec_param
         next_reward = function[next_action]
         actions.append(next_action)
         rewards.append(next_reward)
-        all_means.append(mean.ravel().tolist())
-        all_vars.append(var.ravel().tolist())
+        if np.all(mean != None):
+            mean = mean.ravel().tolist()
+            var = var.ravel().tolist()
+        all_means.append(mean)
+        all_vars.append(var)
         data['trial_data'][trial] = {'actions': a, 'rewards': r, 'utility': utility.tolist(), 'likelihood': utility.tolist(),
-                                    'joint_log_likelihood': np.sum(action_likelihood), 'mean': mean.ravel().tolist(),
-                                    'var': var.ravel().tolist(), 'next_action': next_action, 'next_reward': next_reward}
+                                    'joint_log_likelihood': np.sum(action_likelihood), 'mean': mean,
+                                    'var': var, 'next_action': next_action, 'next_reward': next_reward,
+                                    'score': np.sum(r) + next_reward}
     data['kernel'] = type(kernel).__name__
     data['acquisition'] = acquisition_type.__name__
     data['decision'] = decision_type.__name__
@@ -207,6 +217,9 @@ def run(kernel, function, acquisition_type, decision_type, acq_params, dec_param
     data['all_means'] = all_means
     data['all_vars'] = all_vars
     data['joint_log_likelihood'] = np.sum(action_likelihood)
+    data['function'] = function
+    data['score'] = np.sum(r) + next_reward
+    data['id'] = str(uuid.uuid4())
     return data
 
 
@@ -275,5 +288,60 @@ def fit_strategy(actions, rewards, choices, kernel, acquisition_type, decision_t
     print (final_x)
     params = final_x.x
     return params
+
+
+
+def add_single_plot(data):
+    
+    function = data['function']
+    all_plot_data = {'ntrials': len(data['actions']), 'acquisition': data['acquisition'], 'decision': data['decision'],
+                     'acq_params': data['acq_params'], 'dec_params': data['dec_params'], 'trial_data': {},
+                     'function': function, 'id': data['id']}
+    for trial in range(len(data['trial_data'])):
+        utility_plot = bp.figure(title = "Utility of Next Action", plot_width = 400, plot_height = 400, tools = "")
+        utility_plot.toolbar.logo = None
+        likelihood_plot = bp.figure(title = "Log Likelihood of Next Action", plot_width = 400, plot_height = 400, tools = "")
+        likelihood_plot.toolbar.logo = None
+        actions = data['trial_data'][trial]['actions']
+        rewards = data['trial_data'][trial]['rewards']
+        utility = data['trial_data'][trial]['utility']
+        likelihood = data['trial_data'][trial]['likelihood']
+        mean = data['trial_data'][trial]['mean']
+        var = data['trial_data'][trial]['var']
+        next_action = data['trial_data'][trial]['next_action']
+        if len(actions) > 0:
+            utility_plot.circle(actions, rewards, color = '#db5f57')
+        utility_plot.line(list(range(len(function))), function, color = '#57d3db')
+        utility_plot.line(list(range(len(utility))), utility, color = '#57d3db')
+        likelihood_plot.line(list(range(len(likelihood))), likelihood, color = '#57d3db')
+        utility_next_action = Span(location = next_action, dimension = 'height', line_color = 'black')
+        likelihood_next_action = Span(location = next_action, dimension = 'height', line_color = 'black')
+        utility_plot.add_layout(utility_next_action)
+        likelihood_plot.add_layout(likelihood_next_action)
+        utility_script, utility_div = components(utility_plot)
+        likelihood_script, likelihood_div = components(likelihood_plot)
+                             
+        if np.all(mean != None):
+            gp_plot = bp.figure(title = "Expected Reward", plot_width = 400, plot_height = 400, tools = "")
+            gp_plot.toolbar.logo = None
+            if len(actions) > 0:
+                gp_plot.circle(actions, rewards, color = '#db5f57', legend = "Actions")
+            std = np.sqrt(np.array(var))
+            upper = np.array(mean) + 2 * std
+            lower = np.array(mean) - 2 * std
+            index = np.arange(len(mean))
+            gp_plot.line(list(range(len(function))), function, color = '#57d3db')
+            gp_plot.line(index, mean, color = '#db5f57')
+            band_x = np.append(index, index[::-1])
+            band_y = np.append(lower, upper[::-1])
+            gp_plot.patch(band_x, band_y, color = '#db5f57', fill_alpha = 0.2)
+            gp_script, gp_div = components(gp_plot)
+        else:
+            gp_script = None
+            gp_div = None
         
+        all_plot_data['trial_data'][trial] = {'utility_div': utility_div, 'utility_script': utility_script,
+                                            'likelihood_div': likelihood_div, 'likelihood_script': likelihood_script,
+                                            'gp_div': gp_div, 'gp_script': gp_script, 'score': data['trial_data'][trial]['score']}
+    return all_plot_data
     
