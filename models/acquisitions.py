@@ -16,10 +16,10 @@ class GPAcq(Acq):
     
     isGP = True
     
-    def __init__(self, all_x, mean, var):
-        super().__init__(all_x)
-        self.mean = mean
-        self.var = var
+    def __init__(self, choices, mean, var):
+        super().__init__(choices)
+        self.mean = np.array(mean)
+        self.var = np.array(var)
 
 
 class Random(Acq):
@@ -45,15 +45,88 @@ class LocalMove(Acq):
             return np.ones(len(self.all_x)) / len(self.all_x)
         else:
             return np.array([np.exp(-abs(self.last_x - x)) for x in self.all_x]).ravel()
+
+
+class SGD1(Acq):
+    
+    init_params = [100.]
+    bounds = [(.001, 1000)]
+    
+    def __init__(self, choices, actions, rewards):
+        self.choices = choices
+        unique_actions = []
+        unique_rewards = []
+        for i in range(len(actions)):
+            if actions[i] not in unique_actions:
+                unique_actions.append(actions[i])
+                unique_rewards.append(rewards[i])
         
+        if len(unique_actions) < 2:
+            self.dk = None
+            self.last_action = None
+        elif len(unique_actions) == 2:
+            self.dk = (unique_rewards[-1] - unique_rewards[-2]) / (unique_actions[-1] - unique_actions[-2])
+            self.last_action = unique_actions[max(range(len(unique_rewards)), key = lambda x: unique_rewards[x])]
+        else:
+            self.dk = (unique_rewards[-1] - unique_rewards[-2]) / (unique_actions[-1] - unique_actions[-2])
+            self.last_action = unique_actions[-1]
+    
+    def __call__(self, learning_rate):
+        if np.all(self.dk != None):
+            next_action = max(0, min(self.last_action + self.dk * learning_rate, max(self.choices)))
+            u = np.array([np.exp(-abs(next_action - x)) for x in self.choices])
+        else:
+            u = np.ones(len(self.choices))
+        return u
+     
+
+class SGD2(Acq):
+    
+    init_params = [100.]
+    bounds = [(.001, 1000)]
+    
+    def __init__(self, choices, actions, rewards):
+        self.choices = choices
+        unique_actions = []
+        unique_rewards = []
+        for i in range(len(actions)):
+            if actions[i] not in unique_actions:
+                unique_actions.append(actions[i])
+                unique_rewards.append(rewards[i])
         
-        
+        if len(unique_actions) < 2:
+            self.dk = None
+            self.last_action = None
+        elif len(unique_actions) == 2:
+            self.dk =  [(unique_rewards[-1] - unique_rewards[-2]) / (unique_actions[-1] - unique_actions[-2])]
+            self.last_action = unique_actions[max(range(len(unique_rewards)), key = lambda x: unique_rewards[x])]
+        else:
+            self.dk = []
+            for i in range(20):
+                xi1 = np.random.choice(range(len(unique_actions) - 1))
+                xi2 = np.random.choice(range(xi1 + 1, len(unique_actions)))
+                action_1 = unique_actions[xi1]
+                action_2 = unique_actions[xi2]
+                reward_1 = unique_rewards[xi1]
+                reward_2 = unique_rewards[xi2]
+                self.dk.append((reward_2 - reward_1) / (action_2 - action_1))
+            self.last_action = unique_actions[-1]
+    
+    def __call__(self, learning_rate):
+        if np.all(self.dk != None):
+            next_actions = [max(0, min(self.last_action + dki * learning_rate, max(self.choices))) for dki in self.dk]
+            u = np.mean([[np.exp(-abs(next_action - x)) for x in self.choices] for next_action in next_actions], axis = 0)
+        else:
+            u = np.ones(len(self.choices))
+        return u
+
+'''     
 class SGD(Acq):
     
     init_params = [100.]
     bounds = [(.001, 1000)]
     
-    def __init__(self, all_x, last_x, last_y, second_last_x, second_last_y, unique_second_last_x):
+    def __init__(self, choices, action_1, reward_1, action_2, reward_2, unique_second_last_x):
         self.all_x = all_x
         self.last_x = last_x
         self.last_y = last_y
@@ -78,7 +151,7 @@ class SGD(Acq):
             next_x = max(0, min(self.last_x + self.dk * learning_rate, max(self.all_x)))
             u = np.array([np.exp(-abs(next_x - x)) for x in self.all_x]).ravel()
             return u
-        
+'''     
         
 class MaxSGD(Acq):
     
