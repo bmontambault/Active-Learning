@@ -2,7 +2,7 @@ import numpy as np
 import json
 import GPy
 
-from acquisitions import LocalMove, SGD1, SGD2, SGD3
+from acquisitions import LocalMove, SGD, SGDMax, RandomSGD, RandomSGDMax
 from decisions import Softmax, PhaseSoftmax
 from run import run, fit_strategy, add_single_plot
 from data.get_results import get_results
@@ -31,7 +31,7 @@ pos_linear_rbf = get_kernel(results, GPy.kern.RBF(1), 'pos_linear')
 neg_quad_rbf = get_kernel(results, GPy.kern.RBF(1), 'neg_quad')
 sinc_compressed_rbf = get_kernel(results, GPy.kern.RBF(1), 'sinc_compressed')
 
-
+'''
 ID = "JpTkw0A5hejoJZn5U12X6qwjSrtweYFK"
 participant = results[results['somataSessionId'] == ID].iloc[0]
 actions = participant['response']
@@ -41,9 +41,9 @@ fit_data = fit_strategy(actions, rewards, choices, SGD1, PhaseSoftmax, kernel = 
 data = run(sinc_compressed_n, fit_data['acquisition_type'], fit_data['decision_type'], 
            fit_data['acq_params'], fit_data['dec_params'], fit_data['ntrials'], 
            fit_data['kernel'], fit_data['actions'], fit_data['rewards'])
+'''
 
-
-#data = run(sinc_compressed_n, SGD2, Softmax, [60.], [.1], 25)
+data = run(sinc_compressed_n, SGD, Softmax, [60.], [.1], 25)
 plot_data = add_single_plot(data)
 with open('test_plot_data.json', 'w') as f:
     json.dump(plot_data, f)

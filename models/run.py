@@ -84,10 +84,22 @@ def get_trial_features(actions, rewards, trial, ntrials):
         unique_action_2 = None
         unique_reward_2 = None
         
+    unique_actions = []
+    unique_rewards = []
+    for i in range(len(actions)):
+        if actions[i] not in unique_actions:
+            unique_actions.append(actions[i])
+            unique_rewards.append(rewards[i])
+    
+    if len(rewards) > 0:
+        best_action = actions[np.argmax(rewards)]
+    else:
+        best_action = None
     return {'action_1': action_1, 'reward_1': reward_1, 'action_2': action_2, 'reward_2': reward_2,
             'unique_action_2': unique_action_2, 'unique_reward_2': unique_reward_2,
             'trial': trial, 'actions': actions[:trial], 'rewards': rewards[:trial],
-            'remaining_trials': ntrials - trial, 'best_action': actions[np.argmax(rewards)]}
+            'remaining_trials': ntrials - trial, 'best_action': best_action, 'unique_actions': unique_actions,
+            'unique_rewards': unique_rewards}
 
 """
 Given a full sequence of actions and rewards, return a (#trials x #choices) array of utilities given previous observations
@@ -143,14 +155,6 @@ def get_all_likelihood(actions, rewards, choices, decision_type, dec_params, all
     for trial in range(ntrials):
         utility = all_utility[trial]
         args = get_trial_features(actions, rewards, trial, ntrials)
-        if len(all_means) > 0:
-            mean = all_means[trial]
-            var = all_vars[trial]
-        else:
-            mean = None
-            var = None
-        args['mean'] = mean
-        args['var'] = var
         args['choices'] = choices
         dec_arg_names = list(inspect.signature(decision_type.__init__).parameters.keys())
         dec_args = {arg_name: args[arg_name] for arg_name in args.keys() if arg_name in dec_arg_names}
