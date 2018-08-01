@@ -147,7 +147,7 @@ Parameters:
     dec_params: acquistion function parameters
     all_utility: (#trial x #choices) array of utilities over all trials
 """
-def get_all_likelihood(actions, rewards, choices, decision_type, dec_params, all_utility, all_means = [], all_vars = []):
+def get_all_likelihood(actions, rewards, choices, decision_type, dec_params, all_utility):
     
     all_likelihood = []
     action_likelihood = []
@@ -176,7 +176,7 @@ Parameters:
     dec_params: decision function parameters
     ntrials: int
 """
-def run(function, acquisition_type, decision_type, acq_params, dec_params, ntrials, kernel = None, actions = [], rewards = []):
+def run(function, acquisition_type, decision_type, acq_params, dec_params, ntrials, kernel = None, actions = [], rewards = [], all_means = [], all_vars = []):
     
     data = {'trial_data': {}}
     all_means = []
@@ -189,8 +189,11 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
         if kernel == None:
             mean = None
             var = None
-        else:
+        elif len(all_means) == trial:
             mean, var = get_mean_var(kernel, a, r, choices)
+        else:
+            mean = all_means[trial]
+            var = all_vars[trial]
         args = get_trial_features(actions, rewards, trial, ntrials)
         args['mean'] = mean
         args['var'] = var
@@ -231,7 +234,7 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
     data['dec_params'] = dec_params
     data['actions'] = actions
     data['rewards'] = rewards
-    data['choices'] = choices
+    data['choices'] = choices.tolist()
     data['all_means'] = all_means
     data['all_vars'] = all_vars
     data['joint_log_likelihood'] = np.sum(action_likelihood)
@@ -263,7 +266,7 @@ def objective(params, actions, rewards, choices, kernel, acquisition_type, decis
     dec_params = params[nacq_params:]
     if len(all_utility) == 0:
         all_utility = get_all_utility(actions, rewards, choices, acquisition_type, acq_params, all_means = all_means, all_vars = all_vars, kernel = kernel)
-    all_likelihood, action_likelihood = get_all_likelihood(actions, rewards, decision_type, dec_params, all_utility)
+    all_likelihood, action_likelihood = get_all_likelihood(actions, rewards, choices, decision_type, dec_params, all_utility)
     joint_log_likelihood = np.sum(action_likelihood)
     return -joint_log_likelihood
 
@@ -310,9 +313,7 @@ def fit_strategy(actions, rewards, choices, acquisition_type, decision_type, ker
     return {'actions': actions, 'rewards': rewards, 'acquisition_type': acquisition_type,
             'decision_type': decision_type, 'acq_params': acq_params, 'dec_params': dec_params,
             'kernel': kernel, 'choices': choices, 'log_likelihood': -fun, 'ntrials': len(actions)}
-        
     
-
 
 
 def add_single_plot(data):
@@ -368,4 +369,18 @@ def add_single_plot(data):
                                             'likelihood_div': likelihood_div, 'likelihood_script': likelihood_script,
                                             'gp_div': gp_div, 'gp_script': gp_script, 'score': data['trial_data'][trial]['score']}
     return all_plot_data
+
+
+def add_all_plots(data):
+    
+    all_plot_data = {'ntrials': len(data[0]['actions']), 'acquisition': [], 'decision': [],
+                     'acq_params': [], 'dec_params': [], 'trial_data': {},
+                     'function': data[0]['function'], 'id': data['id']}
+    for i in range(len(data)):
+        all_plot_data['acquisition'].append(data['acquisition'][i])
+        all_plot_data['decision'].append(data['decision'][i])
+        all_plot_data['acq_params'].append(data['acq_params'][i])
+        all_plot_data['dec_params'].append(data['dec_params'][i])
+    for trial in range(all_plot_data['ntrials']):
+        
     

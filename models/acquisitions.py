@@ -50,6 +50,9 @@ class LocalMove(Acq):
         
 class SGD(Acq):
     
+    init_params = [50.]
+    bounds = [(10., 800)]
+    
     def __init__(self, choices, unique_actions, unique_rewards):
         self.choices = choices
         self.unique_actions = unique_actions

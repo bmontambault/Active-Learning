@@ -4,7 +4,7 @@ import GPy
 
 from acquisitions import LocalMove, SGD, SGDMax, RandomSGD, RandomSGDMax
 from decisions import Softmax, PhaseSoftmax
-from run import run, fit_strategy, add_single_plot
+from run import run, fit_strategy, add_single_plot, get_all_means_vars
 from data.get_results import get_results
 
 def get_kernel(results, kernel, function_name):
@@ -31,20 +31,30 @@ pos_linear_rbf = get_kernel(results, GPy.kern.RBF(1), 'pos_linear')
 neg_quad_rbf = get_kernel(results, GPy.kern.RBF(1), 'neg_quad')
 sinc_compressed_rbf = get_kernel(results, GPy.kern.RBF(1), 'sinc_compressed')
 
-'''
+
 ID = "JpTkw0A5hejoJZn5U12X6qwjSrtweYFK"
 participant = results[results['somataSessionId'] == ID].iloc[0]
 actions = participant['response']
 rewards = [sinc_compressed_n[a] for a in actions]
 choices = np.arange(len(sinc_compressed))
+strategies = ((SGD, Softmax), (SGD, PhaseSoftmax))
+
+all_means, all_vars = get_all_means_vars(sinc_compressed_rbf, actions, rewards, choices)
+fit_data = [fit_strategy(actions, rewards, choices, strategy[0], strategy[1], sinc_compressed_rbf, all_means, all_vars) for strategy in strategies]
+data = [run(sinc_compressed_n, d['acquisition_type'], d['decision_type'], d['acq_params'], d['dec_params'], d['ntrials'], d['kernel'], d['actions'], d['rewards']) for d in fit_data]
+
+
+
+'''
 fit_data = fit_strategy(actions, rewards, choices, SGD1, PhaseSoftmax, kernel = sinc_compressed_rbf, all_means = [], all_vars = [], method = 'DE', restarts = 5)
 data = run(sinc_compressed_n, fit_data['acquisition_type'], fit_data['decision_type'], 
            fit_data['acq_params'], fit_data['dec_params'], fit_data['ntrials'], 
            fit_data['kernel'], fit_data['actions'], fit_data['rewards'])
 '''
-
+'''
 data = run(sinc_compressed_n, SGD, Softmax, [60.], [.1], 25)
 plot_data = add_single_plot(data)
 with open('test_plot_data.json', 'w') as f:
     json.dump(plot_data, f)
 print (data['id'])
+'''
