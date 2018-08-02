@@ -41,7 +41,7 @@ class PhaseSoftmax:
             utility = np.array([np.exp(-abs(self.best_action - x)) for x in self.choices])
             
         centered_utility = utility - np.nanmax(utility)
-        exp_u = np.exp(centered_utility / temperature)
+        exp_u = np.exp(centered_utility / temperature).ravel()
         return exp_u / np.nansum(exp_u)
     
     
