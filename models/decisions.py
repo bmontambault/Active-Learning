@@ -29,7 +29,7 @@ class Softmax:
 class PhaseSoftmax:
     
     init_params = [1., 12]
-    bounds = [(.001, 10), (.1, 24)]
+    bounds = [(.001, 10), (1, 24)]
     
     def __init__(self, choices, best_action, trial):
         self.choices = choices
