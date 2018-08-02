@@ -87,13 +87,13 @@ def get_trial_features(actions, rewards, trial, ntrials):
         
     unique_actions = []
     unique_rewards = []
-    for i in range(len(actions)):
+    for i in range(trial):
         if actions[i] not in unique_actions:
             unique_actions.append(actions[i])
             unique_rewards.append(rewards[i])
     
-    if len(rewards) > 0:
-        best_action = actions[np.argmax(rewards)]
+    if trial > 0:
+        best_action = actions[np.argmax(rewards[:trial])]
     else:
         best_action = None
     return {'action_1': action_1, 'reward_1': reward_1, 'action_2': action_2, 'reward_2': reward_2,
@@ -224,7 +224,7 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
             var = var.ravel().tolist()
         all_means.append(mean)
         all_vars.append(var)
-        data['trial_data'][trial] = {'actions': a, 'rewards': r, 'utility': utility.tolist(), 'likelihood': utility.tolist(),
+        data['trial_data'][trial] = {'actions': a, 'rewards': r, 'utility': utility.tolist(), 'likelihood': likelihood.tolist(),
                                     'joint_log_likelihood': np.sum(action_likelihood), 'mean': mean,
                                     'var': var, 'next_action': next_action, 'next_reward': next_reward,
                                     'score': np.sum(r) + next_reward}
@@ -379,7 +379,9 @@ def add_single_plot(data):
 
 def add_all_plots(data):
     
-    used_kernels = []
+    kernel_idx = [i for i in range(len(data)) if data[i]['kernel'] != 'NoneType']
+    print (kernel_idx)
+    
     colormap = np.array(sns.color_palette("hls", len(data)).as_hex())
     all_plot_data = {'ntrials': len(data[0]['actions']), 'acquisition': [], 'decision': [],
                      'acq_params': [], 'dec_params': [], 'trial_data': {},
@@ -398,24 +400,25 @@ def add_all_plots(data):
         actions = data[0]['trial_data'][trial]['actions']
         rewards = data[0]['trial_data'][trial]['rewards']
         next_action = data[0]['trial_data'][trial]['next_action']
+        utility_next_action = Span(location = next_action, dimension = 'height', line_color = 'black')
+        likelihood_next_action = Span(location = next_action, dimension = 'height', line_color = 'black')
+        utility_plot.add_layout(utility_next_action)
+        likelihood_plot.add_layout(likelihood_next_action)
         if len(actions) > 0:
             utility_plot.circle(actions, rewards, color = '#db5f57')
         utility_plot.line(list(range(len(all_plot_data['function']))), all_plot_data['function'], color = '#57d3db')
         
         gp_plot = bp.figure(title = "Expected Reward", plot_width = 400, plot_height = 400, tools = "")
+        gp_plot.toolbar.logo = None
+        if len(actions) > 0:
+            gp_plot.circle(actions, rewards, color = '#db5f57')
         for j in range(len(data)):
             utility = data[j]['trial_data'][trial]['utility']
             likelihood = data[j]['trial_data'][trial]['likelihood']
             utility_plot.line(list(range(len(utility))), utility, color = colormap[j])
             likelihood_plot.line(list(range(len(likelihood))), likelihood, color = colormap[j])
-            utility_next_action = Span(location = next_action, dimension = 'height', line_color = 'black')
-            likelihood_next_action = Span(location = next_action, dimension = 'height', line_color = 'black')
-            utility_plot.add_layout(utility_next_action)
-            likelihood_plot.add_layout(likelihood_next_action)
-            
-            kernel = data[j]['kernel']
-            if kernel != type(None).__name__ and kernel not in used_kernels:
-                used_kernels.append(kernel)
+                        
+            if j in kernel_idx:
                 mean = data[j]['trial_data'][trial]['mean']
                 var = data[j]['trial_data'][trial]['var']
                 std = np.sqrt(np.array(var))

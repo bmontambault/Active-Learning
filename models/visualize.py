@@ -7,6 +7,7 @@ with open('test_plot_data.json', 'r') as f:
     all_plot_data = json.load(f)
     all_plot_data = {d['id']: d for d in [all_plot_data]}
 
+
 app=Flask(__name__)
 
 @app.route('/<ID>')
@@ -26,4 +27,3 @@ def simulation(ID):
 
 if __name__=="__main__":
     app.run()
-    

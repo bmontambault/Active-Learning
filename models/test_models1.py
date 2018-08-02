@@ -2,7 +2,7 @@ import numpy as np
 import json
 import GPy
 
-from acquisitions import LocalMove, SGD, SGDMax, RandomSGD, RandomSGDMax
+from acquisitions import LocalMove, SGD, SGDMax, RandomSGD, RandomSGDMax, UCB
 from decisions import Softmax, PhaseSoftmax
 from run import run, fit_strategy, add_single_plot, get_all_means_vars, add_all_plots
 from data.get_results import get_results
@@ -37,13 +37,15 @@ participant = results[results['somataSessionId'] == ID].iloc[0]
 actions = participant['response']
 rewards = [sinc_compressed_n[a] for a in actions]
 choices = np.arange(len(sinc_compressed))
-strategies = ((SGD, Softmax), (SGD, PhaseSoftmax))
+strategies = ((SGD, Softmax), (SGD, PhaseSoftmax), (UCB, Softmax), (UCB, PhaseSoftmax))
 
 #all_means, all_vars = get_all_means_vars(sinc_compressed_rbf, actions, rewards, choices)
 #fit_data = [fit_strategy(actions, rewards, choices, strategy[0], strategy[1], sinc_compressed_rbf, all_means, all_vars) for strategy in strategies]
 #data = [run(sinc_compressed_n, d['acquisition_type'], d['decision_type'], d['acq_params'], d['dec_params'], d['ntrials'], d['kernel'], d['actions'], d['rewards']) for d in fit_data]
 plot_data = add_all_plots(data)
-
+print (plot_data['id'])
+with open('test_plot_data.json', 'w') as f:
+    json.dump(plot_data, f)
 
 '''
 fit_data = fit_strategy(actions, rewards, choices, SGD1, PhaseSoftmax, kernel = sinc_compressed_rbf, all_means = [], all_vars = [], method = 'DE', restarts = 5)
