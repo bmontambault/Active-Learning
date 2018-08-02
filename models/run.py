@@ -5,6 +5,7 @@ import GPy
 import inspect
 import uuid
 
+import seaborn as sns
 import bokeh.plotting as bp
 from bokeh.embed import components
 from bokeh.models import Legend, Span
@@ -288,6 +289,11 @@ Parameters:
 """
 def fit_strategy(actions, rewards, choices, acquisition_type, decision_type, kernel = None, all_means = [], all_vars = [], method = 'DE', restarts = 5):
     
+    if not acquisition_type.isGP:
+        all_means = []
+        all_vars = []
+        kernel = None
+    
     nacq_params = len(acquisition_type.init_params)
     init_params = acquisition_type.init_params + decision_type.init_params
     bounds = acquisition_type.bounds + decision_type.bounds
@@ -373,14 +379,63 @@ def add_single_plot(data):
 
 def add_all_plots(data):
     
+    used_kernels = []
+    colormap = np.array(sns.color_palette("hls", len(data)).as_hex())
     all_plot_data = {'ntrials': len(data[0]['actions']), 'acquisition': [], 'decision': [],
                      'acq_params': [], 'dec_params': [], 'trial_data': {},
-                     'function': data[0]['function'], 'id': data['id']}
+                     'function': data[0]['function'], 'id': data[0]['id']}
     for i in range(len(data)):
-        all_plot_data['acquisition'].append(data['acquisition'][i])
-        all_plot_data['decision'].append(data['decision'][i])
-        all_plot_data['acq_params'].append(data['acq_params'][i])
-        all_plot_data['dec_params'].append(data['dec_params'][i])
-    for trial in range(all_plot_data['ntrials']):
+        all_plot_data['acquisition'].append(data[i]['acquisition'])
+        all_plot_data['decision'].append(data[i]['decision'])
+        all_plot_data['acq_params'].append(data[i]['acq_params'])
+        all_plot_data['dec_params'].append(data[i]['dec_params'])
         
-    
+    for trial in range(all_plot_data['ntrials']):
+        utility_plot = bp.figure(title = "Utility of Next Action", plot_width = 400, plot_height = 400, tools = "")
+        utility_plot.toolbar.logo = None
+        likelihood_plot = bp.figure(title = "Log Likelihood of Next Action", plot_width = 400, plot_height = 400, tools = "")
+        likelihood_plot.toolbar.logo = None
+        actions = data[0]['trial_data'][trial]['actions']
+        rewards = data[0]['trial_data'][trial]['rewards']
+        next_action = data[0]['trial_data'][trial]['next_action']
+        if len(actions) > 0:
+            utility_plot.circle(actions, rewards, color = '#db5f57')
+        utility_plot.line(list(range(len(all_plot_data['function']))), all_plot_data['function'], color = '#57d3db')
+        
+        gp_plot = bp.figure(title = "Expected Reward", plot_width = 400, plot_height = 400, tools = "")
+        for j in range(len(data)):
+            utility = data[j]['trial_data'][trial]['utility']
+            likelihood = data[j]['trial_data'][trial]['likelihood']
+            utility_plot.line(list(range(len(utility))), utility, color = colormap[j])
+            likelihood_plot.line(list(range(len(likelihood))), likelihood, color = colormap[j])
+            utility_next_action = Span(location = next_action, dimension = 'height', line_color = 'black')
+            likelihood_next_action = Span(location = next_action, dimension = 'height', line_color = 'black')
+            utility_plot.add_layout(utility_next_action)
+            likelihood_plot.add_layout(likelihood_next_action)
+            
+            kernel = data[j]['kernel']
+            if kernel != type(None).__name__ and kernel not in used_kernels:
+                used_kernels.append(kernel)
+                mean = data[j]['trial_data'][trial]['mean']
+                var = data[j]['trial_data'][trial]['var']
+                std = np.sqrt(np.array(var))
+                upper = np.array(mean) + 2 * std
+                lower = np.array(mean) - 2 * std
+                index = np.arange(len(mean))
+                gp_plot.line(list(range(len(all_plot_data['function']))), all_plot_data['function'], color = '#57d3db')
+                gp_plot.line(index, mean, color = '#db5f57')
+                band_x = np.append(index, index[::-1])
+                band_y = np.append(lower, upper[::-1])
+                gp_plot.patch(band_x, band_y, color = '#db5f57', fill_alpha = 0.2)
+                if len(actions) > 0:
+                    utility_plot.circle(actions, rewards, color = '#db5f57')
+                
+                
+        gp_script, gp_div = components(gp_plot)
+        utility_script, utility_div = components(utility_plot)
+        likelihood_script, likelihood_div = components(likelihood_plot)
+        all_plot_data['trial_data'][trial] = {'utility_div': utility_div, 'utility_script': utility_script,
+                                            'likelihood_div': likelihood_div, 'likelihood_script': likelihood_script,
+                                            'gp_div': gp_div, 'gp_script': gp_script,
+                                            'score': data[0]['trial_data'][trial]['score']}
+    return all_plot_data

@@ -4,7 +4,7 @@ import GPy
 
 from acquisitions import LocalMove, SGD, SGDMax, RandomSGD, RandomSGDMax
 from decisions import Softmax, PhaseSoftmax
-from run import run, fit_strategy, add_single_plot, get_all_means_vars
+from run import run, fit_strategy, add_single_plot, get_all_means_vars, add_all_plots
 from data.get_results import get_results
 
 def get_kernel(results, kernel, function_name):
@@ -39,10 +39,10 @@ rewards = [sinc_compressed_n[a] for a in actions]
 choices = np.arange(len(sinc_compressed))
 strategies = ((SGD, Softmax), (SGD, PhaseSoftmax))
 
-all_means, all_vars = get_all_means_vars(sinc_compressed_rbf, actions, rewards, choices)
-fit_data = [fit_strategy(actions, rewards, choices, strategy[0], strategy[1], sinc_compressed_rbf, all_means, all_vars) for strategy in strategies]
-data = [run(sinc_compressed_n, d['acquisition_type'], d['decision_type'], d['acq_params'], d['dec_params'], d['ntrials'], d['kernel'], d['actions'], d['rewards']) for d in fit_data]
-
+#all_means, all_vars = get_all_means_vars(sinc_compressed_rbf, actions, rewards, choices)
+#fit_data = [fit_strategy(actions, rewards, choices, strategy[0], strategy[1], sinc_compressed_rbf, all_means, all_vars) for strategy in strategies]
+#data = [run(sinc_compressed_n, d['acquisition_type'], d['decision_type'], d['acq_params'], d['dec_params'], d['ntrials'], d['kernel'], d['actions'], d['rewards']) for d in fit_data]
+plot_data = add_all_plots(data)
 
 
 '''
