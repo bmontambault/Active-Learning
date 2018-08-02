@@ -30,34 +30,18 @@
     <div id = "plots2" class = "container">
         <div class = "row">
             <div id = "likelihoodPlot"></div>
-            <div id = "scoreTable">
-                <table id = "table" class="table table-striped text-left">
-                  <tbody>
-                    <tr>
-                      <th scope="row">Acquisition Function:</th>
-                      <td>{{acquisition}}</td>
+            <div id = "tableDiv">
+                <table id = "table" class="table table-sm table-striped text-left">
+                  <thead class = "thead-dark">
+                    <tr class = "headRow">
+                      <th scope="col">Acquisition</th>
+                      <th scope="col">Acq Params</th>
+                      <th scope="col">Decision</th>
+                      <th scope="col">Dec Params</th>
+                      <th scope="col">Log Likelihood</th>
+                      <th scope="col">Joint Log Likelihood</th>
                     </tr>
-                    <tr>
-                      <th scope="row">Acquisition Parameters:</th>
-                      <td>{{acq_params}}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Decision Function:</th>
-                      <td>{{decision}}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Decision Parameters:</th>
-                      <td>{{dec_params}}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Score:</th>
-                      <td id = 'score'></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Max Score:</th>
-                      <td>{{max_score}}</td>
-                    </tr>
-                   </tbody>
+                  </thead>
                 </table>
             </div>
         </div>
@@ -70,6 +54,7 @@
 <script type="text/javascript">
 
 var trial = 1
+build_table({{acquisition|safe}}, {{acq_params|safe}}, {{decision|safe}}, {{dec_params|safe}})
 render_plot(trial - 1);
 
 function render_plot(trial){
@@ -94,9 +79,42 @@ function render_plot(trial){
                 run_script(response['gp_script']);
             }
 
-            document.getElementById('score').innerHTML = response['score']
+            for (var i = 0; i < response['likelihood'].length; i++){
+                document.getElementById('logLike' + i).innerHTML = response['likelihood'][i].toLocaleString()
+                document.getElementById('jointLogLike' + i).innerHTML = response['joint_log_likelihood'][i].toLocaleString()
+            }
+            //document.getElementById('score').innerHTML = response['score']
+
+
+
         },
     });
+}
+
+
+function build_table(acquisition, acq_params, decision, dec_params){
+
+    var table = document.getElementById("table");
+    var body = document.createElement("tbody");
+    for (var i = 0; i < acquisition.length; i++){
+
+        var row = body.insertRow(-1);
+        var acqCell = row.insertCell(-1);
+        acqCell.innerHTML = acquisition[i];
+        var acqParamsCell = row.insertCell(-1);
+        acqParamsCell.innerHTML = acq_params[i];
+        var decCell = row.insertCell(-1);
+        decCell.innerHTML = decision[i];
+        var decParamsCell = row.insertCell(-1);
+        decParamsCell.innerHTML = dec_params[i];
+        var logLikeCell = row.insertCell(-1);
+        logLikeCell.id = "logLike" + i;
+        var jointLogLikeCell = row.insertCell(-1);
+        jointLogLikeCell.id = "jointLogLike" + i;
+    }
+    table.appendChild(body);
+
+
 }
 
 

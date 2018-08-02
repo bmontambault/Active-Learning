@@ -208,7 +208,7 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
         dec_arg_names = list(inspect.signature(decision_type.__init__).parameters.keys())
         dec_args = {dec_name: args[dec_name] for dec_name in args.keys() if dec_name in dec_arg_names}
         decision = decision_type(**dec_args)
-        likelihood = decision(utility, *dec_params)
+        likelihood = np.log(decision(utility, *dec_params))
         
         if len(actions) == trial:
             next_action = st.rv_discrete(values = (choices, likelihood)).rvs()
@@ -224,7 +224,7 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
             var = var.ravel().tolist()
         all_means.append(mean)
         all_vars.append(var)
-        data['trial_data'][trial] = {'actions': a, 'rewards': r, 'utility': utility.tolist(), 'likelihood': likelihood.tolist(),
+        data['trial_data'][trial] = {'actions': a, 'rewards': r, 'utility': utility.tolist(), 'likelihood': likelihood.ravel().tolist(),
                                     'joint_log_likelihood': np.sum(action_likelihood), 'mean': mean,
                                     'var': var, 'next_action': next_action, 'next_reward': next_reward,
                                     'score': np.sum(r) + next_reward}
@@ -440,5 +440,11 @@ def add_all_plots(data):
         all_plot_data['trial_data'][trial] = {'utility_div': utility_div, 'utility_script': utility_script,
                                             'likelihood_div': likelihood_div, 'likelihood_script': likelihood_script,
                                             'gp_div': gp_div, 'gp_script': gp_script,
-                                            'score': data[0]['trial_data'][trial]['score']}
+                                            'score': data[0]['trial_data'][trial]['score'],
+                                            'likelihood': [], 'joint_log_likelihood': []}
+        for j in range(len(data)):
+            all_plot_data['trial_data'][trial]['likelihood'].append(data[j]['trial_data'][trial]['likelihood'][next_action])
+            all_plot_data['trial_data'][trial]['joint_log_likelihood'].append(data[j]['trial_data'][trial]['joint_log_likelihood'])
+            
+        
     return all_plot_data
