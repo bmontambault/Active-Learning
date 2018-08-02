@@ -17,8 +17,8 @@ def simulation(ID):
     data = request.args
     if len(data) == 0:
         ntrials = plot_data['ntrials']
-        acq_params = [np.round(a, 2) for a in plot_data['acq_params']]
-        dec_params = [np.round(a, 2) for a in plot_data['dec_params']]
+        acq_params = [np.round(a, 2).tolist() for a in plot_data['acq_params']]
+        dec_params = [np.round(a, 2).tolist() for a in plot_data['dec_params']]
         return render_template('simulation.html', ntrials = ntrials, acquisition = plot_data['acquisition'],
                                decision = plot_data['decision'], acq_params = acq_params, dec_params = dec_params,
                                max_score = np.max(plot_data['function']) * ntrials, ID = ID)
