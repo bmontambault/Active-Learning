@@ -177,7 +177,10 @@ Parameters:
     dec_params: decision function parameters
     ntrials: int
 """
-def run(function, acquisition_type, decision_type, acq_params, dec_params, ntrials, kernel = None, actions = [], rewards = [], all_means = [], all_vars = []):
+def run(function, acquisition_type, decision_type, acq_params, dec_params, ntrials, kernel = None, actions = [], rewards = [], all_means = [], all_vars = [], ID = None):
+    
+    if acquisition_type.isGP and kernel == None:
+        raise ValueError("must pass kernel with GP acquisition")
     
     data = {'trial_data': {}}
     all_means = []
@@ -231,7 +234,7 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
                                     'random_joint_log_likelihood': np.log(1./len(choices)) * (trial + 1)}
         data['trial_data'][trial]['AIC'] = -2 * data['trial_data'][trial]['joint_log_likelihood'] + 2 * (len(acq_params) + len(dec_params))
         data['trial_data'][trial]['RandomAIC'] =  -2 * data['trial_data'][trial]['random_joint_log_likelihood']
-        data['trial_data'][trial]['pseudo_r2'] = 1 - (data['trial_data'][trial]['AIC'] / data['trial_data'][trial]['RandomAIC'])
+        data['trial_data'][trial]['pseudo_r2'] = 1 - (data['trial_data'][trial]['joint_log_likelihood'] / data['trial_data'][trial]['random_joint_log_likelihood'])
         
         
     data['kernel'] = type(kernel).__name__
@@ -248,7 +251,10 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
     data['random_joint_log_likelihood'] = np.log(1./len(choices)) * ntrials
     data['function'] = function
     data['score'] = np.sum(r) + next_reward
-    data['id'] = str(uuid.uuid4())
+    if ID == None:
+        data['id'] = str(uuid.uuid4())
+    else:
+        data['id'] = ID
     data['AIC'] = data['trial_data'][trial]['AIC']
     data['RandomAIC'] = data['trial_data'][trial]['RandomAIC']
     data['pseudo_r2'] = data['trial_data'][trial]['pseudo_r2']

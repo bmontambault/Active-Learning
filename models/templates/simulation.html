@@ -48,11 +48,11 @@
                                 <td id = "score"></td>
                             </tr>
                             <tr>
-                                <th scope="row">Random Log Likelihood</th>
+                                <th scope="row">$P(a_{t+1} | M_{rand})$</th>
                                 <td id = "randomll"></td>
                             </tr>
                             <tr>
-                                <th scope="row">Random Joint Log Likelihood</th>
+                                <th scope="row">$P(a_{1:t+1} | M_{rand})$</th>
                                 <td id = "randomjll"></td>
                             </tr>
                         </tbody>
@@ -69,6 +69,7 @@
                           <th scope="col">$\theta_{D}$</th>
                           <th scope="col">$P(a_{t+1})$</th>
                           <th scope="col">$P(a_{1:t+1})$</th>
+                          <th scope="col">$AIC$</th>
                           <th scope="col">$R^{2}$</th>
                         </tr>
                       </thead>
@@ -114,6 +115,7 @@ function render_plot(trial){
             for (var i = 0; i < response['likelihood'].length; i++){
                 document.getElementById('logLike' + i).innerHTML = response['likelihood'][i].toLocaleString();
                 document.getElementById('jointLogLike' + i).innerHTML = response['joint_log_likelihood'][i].toLocaleString();
+                document.getElementById('aic' + i).innerHTML = response['AIC'][i].toLocaleString();
                 document.getElementById('r2' + i).innerHTML = response['pseudo_r2'][i].toLocaleString();
             }
             document.getElementById('score').innerHTML = response['score'].toLocaleString();
@@ -147,6 +149,8 @@ function build_table(acquisition, acq_params, decision, dec_params){
         logLikeCell.id = "logLike" + i;
         var jointLogLikeCell = row.insertCell(-1);
         jointLogLikeCell.id = "jointLogLike" + i;
+        var aic = row.insertCell(-1);
+        aic.id = "aic" + i;
         var r2 = row.insertCell(-1);
         r2.id = "r2" + i;
     }
