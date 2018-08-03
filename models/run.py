@@ -250,7 +250,8 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
     data['joint_log_likelihood'] = np.sum(action_likelihood)
     data['random_joint_log_likelihood'] = np.log(1./len(choices)) * ntrials
     data['function'] = function
-    data['score'] = np.sum(r) + next_reward
+    data['score'] = data['trial_data'][trial]['score']
+    data['max_score'] = max(function) * ntrials
     if ID == None:
         data['id'] = str(uuid.uuid4())
     else:
@@ -335,71 +336,21 @@ def fit_strategy(actions, rewards, choices, acquisition_type, decision_type, ker
     return {'actions': actions, 'rewards': rewards, 'acquisition_type': acquisition_type,
             'decision_type': decision_type, 'acq_params': acq_params, 'dec_params': dec_params,
             'kernel': kernel, 'choices': choices, 'log_likelihood': -fun, 'ntrials': len(actions)}
-    
 
 
-def add_single_plot(data):
-    
-    function = data['function']
-    all_plot_data = {'ntrials': len(data['actions']), 'acquisition': data['acquisition'], 'decision': data['decision'],
-                     'acq_params': data['acq_params'], 'dec_params': data['dec_params'], 'trial_data': {},
-                     'function': function, 'id': data['id']}
-    for trial in range(len(data['trial_data'])):
-        utility_plot = bp.figure(title = "Utility of Next Action", plot_width = 400, plot_height = 400, tools = "")
-        utility_plot.toolbar.logo = None
-        likelihood_plot = bp.figure(title = "Log Likelihood of Next Action", plot_width = 400, plot_height = 400, tools = "")
-        likelihood_plot.toolbar.logo = None
-        actions = data['trial_data'][trial]['actions']
-        rewards = data['trial_data'][trial]['rewards']
-        utility = data['trial_data'][trial]['utility']
-        likelihood = data['trial_data'][trial]['likelihood']
-        mean = data['trial_data'][trial]['mean']
-        var = data['trial_data'][trial]['var']
-        next_action = data['trial_data'][trial]['next_action']
-        if len(actions) > 0:
-            utility_plot.circle(actions, rewards, color = '#db5f57')
-        utility_plot.line(list(range(len(function))), function, color = '#57d3db')
-        utility_plot.line(list(range(len(utility))), utility, color = '#57d3db')
-        likelihood_plot.line(list(range(len(likelihood))), likelihood, color = '#57d3db')
-        utility_next_action = Span(location = next_action, dimension = 'height', line_color = 'black')
-        likelihood_next_action = Span(location = next_action, dimension = 'height', line_color = 'black')
-        utility_plot.add_layout(utility_next_action)
-        likelihood_plot.add_layout(likelihood_next_action)
-        utility_script, utility_div = components(utility_plot)
-        likelihood_script, likelihood_div = components(likelihood_plot)
-                             
-        if np.all(mean != None):
-            gp_plot = bp.figure(title = "Expected Reward", plot_width = 400, plot_height = 400, tools = "")
-            gp_plot.toolbar.logo = None
-            if len(actions) > 0:
-                gp_plot.circle(actions, rewards, color = '#db5f57', legend = "Actions")
-            std = np.sqrt(np.array(var))
-            upper = np.array(mean) + 2 * std
-            lower = np.array(mean) - 2 * std
-            index = np.arange(len(mean))
-            gp_plot.line(list(range(len(function))), function, color = '#57d3db')
-            gp_plot.line(index, mean, color = '#db5f57')
-            band_x = np.append(index, index[::-1])
-            band_y = np.append(lower, upper[::-1])
-            gp_plot.patch(band_x, band_y, color = '#db5f57', fill_alpha = 0.2)
-            gp_script, gp_div = components(gp_plot)
-        else:
-            gp_script = None
-            gp_div = None
-        
-        all_plot_data['trial_data'][trial] = {'utility_div': utility_div, 'utility_script': utility_script,
-                                            'likelihood_div': likelihood_div, 'likelihood_script': likelihood_script,
-                                            'gp_div': gp_div, 'gp_script': gp_script, 'score': data['trial_data'][trial]['score']}
-    return all_plot_data
-
-
+"""
+Given a list of results from run on a single participant, return a dictionary with
+data for plotting. This data can be loaded in visualize.py
+"""
 def add_all_plots(data):
     
     kernel_idx = [i for i in range(len(data)) if data[i]['kernel'] != 'NoneType']    
     colormap = np.array(sns.color_palette("hls", len(data)).as_hex())
     all_plot_data = {'ntrials': len(data[0]['actions']), 'acquisition': [], 'decision': [],
                      'acq_params': [], 'dec_params': [], 'trial_data': {},
-                     'function': data[0]['function'], 'id': data[0]['id']}
+                     'function': data[0]['function'], 'id': data[0]['id'],
+                     'score': data[0]['score'], 'max_score': data[0]['max_score'],
+                     'actions': data[0]['actions'], 'colormap': colormap.tolist()}
     for i in range(len(data)):
         all_plot_data['acquisition'].append(data[i]['acquisition'])
         all_plot_data['decision'].append(data[i]['decision'])
@@ -464,5 +415,6 @@ def add_all_plots(data):
             all_plot_data['trial_data'][trial]['AIC'].append(data[j]['trial_data'][trial]['AIC'])
             all_plot_data['trial_data'][trial]['pseudo_r2'].append(data[j]['trial_data'][trial]['pseudo_r2'])
             
-        
+    all_plot_data['AIC'] = all_plot_data['trial_data'][trial]['AIC']
+    all_plot_data['pseudo_r2'] = all_plot_data['trial_data'][trial]['pseudo_r2']
     return all_plot_data

@@ -63,6 +63,7 @@
                     <table id = "table" class = "table table-sm table-striped text-left">
                       <thead class = "thead-dark">
                         <tr class = "headRow">
+                          <th scope="col"></th>
                           <th scope="col">$f_{A}$</th>
                           <th scope="col">$\theta_{A}$</th>
                           <th scope="col">$f_{D}$</th>
@@ -87,7 +88,7 @@
 <script type="text/javascript">
 
 var trial = 1
-build_table({{acquisition|safe}}, {{acq_params|safe}}, {{decision|safe}}, {{dec_params|safe}})
+build_table({{acquisition|safe}}, {{acq_params|safe}}, {{decision|safe}}, {{dec_params|safe}}, {{colormap|safe}})
 render_plot(trial - 1);
 
 function render_plot(trial){
@@ -130,13 +131,15 @@ function render_plot(trial){
 }
 
 
-function build_table(acquisition, acq_params, decision, dec_params){
+function build_table(acquisition, acq_params, decision, dec_params, colormap){
 
     var table = document.getElementById("table");
     var body = document.createElement("tbody");
     for (var i = 0; i < acquisition.length; i++){
 
         var row = body.insertRow(-1);
+        var colorCell = row.insertCell(-1);
+        colorCell.innerHTML =  "<span style='background-color:{};color:{}'>......</span>".replace(/{}/g, colormap[i]);
         var acqCell = row.insertCell(-1);
         acqCell.innerHTML = acquisition[i];
         var acqParamsCell = row.insertCell(-1);
