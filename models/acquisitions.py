@@ -129,7 +129,6 @@ class RandomSGDMax(SGD):
             return np.ones(len(self.choices))
 
 
-
 class Exploit(GPAcq):
     
     init_params = []
