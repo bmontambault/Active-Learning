@@ -11,6 +11,10 @@
 	<link
     href="https://cdn.pydata.org/bokeh/release/bokeh-tables-0.12.16.min.css"
     rel="stylesheet" type="text/css">
+
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
 </head>
 
 <body>
@@ -30,19 +34,47 @@
     <div id = "plots2" class = "container">
         <div class = "row">
             <div id = "likelihoodPlot"></div>
-            <div id = "tableDiv">
-                <table id = "table" class="table table-sm table-striped text-left">
-                  <thead class = "thead-dark">
-                    <tr class = "headRow">
-                      <th scope="col">Acquisition</th>
-                      <th scope="col">Acq Params</th>
-                      <th scope="col">Decision</th>
-                      <th scope="col">Dec Params</th>
-                      <th scope="col">Log Likelihood</th>
-                      <th scope="col">Joint Log Likelihood</th>
-                    </tr>
-                  </thead>
-                </table>
+            <div class = "column">
+
+                <div>
+                    <table class = "table table-sm table-striped text-left">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Max Score</th>
+                                <td>{{max_score}}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Score</th>
+                                <td id = "score"></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Random Log Likelihood</th>
+                                <td id = "randomll"></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Random Joint Log Likelihood</th>
+                                <td id = "randomjll"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id = "tableDiv">
+                    <table id = "table" class = "table table-sm table-striped text-left">
+                      <thead class = "thead-dark">
+                        <tr class = "headRow">
+                          <th scope="col">$f_{A}$</th>
+                          <th scope="col">$\theta_{A}$</th>
+                          <th scope="col">$f_{D}$</th>
+                          <th scope="col">$\theta_{D}$</th>
+                          <th scope="col">$P(a_{t+1})$</th>
+                          <th scope="col">$P(a_{1:t+1})$</th>
+                          <th scope="col">$R^{2}$</th>
+                        </tr>
+                      </thead>
+                    </table>
+                </div>
+
             </div>
         </div>
     </div>
@@ -80,10 +112,14 @@ function render_plot(trial){
             }
 
             for (var i = 0; i < response['likelihood'].length; i++){
-                document.getElementById('logLike' + i).innerHTML = response['likelihood'][i].toLocaleString()
-                document.getElementById('jointLogLike' + i).innerHTML = response['joint_log_likelihood'][i].toLocaleString()
+                document.getElementById('logLike' + i).innerHTML = response['likelihood'][i].toLocaleString();
+                document.getElementById('jointLogLike' + i).innerHTML = response['joint_log_likelihood'][i].toLocaleString();
+                document.getElementById('r2' + i).innerHTML = response['pseudo_r2'][i].toLocaleString();
             }
-            //document.getElementById('score').innerHTML = response['score']
+            document.getElementById('score').innerHTML = response['score'].toLocaleString();
+            document.getElementById('randomll').innerHTML = response['random_likelihood'].toLocaleString();
+            document.getElementById('randomjll').innerHTML = response['random_joint_log_likelihood'].toLocaleString();
+
 
 
 
@@ -111,6 +147,8 @@ function build_table(acquisition, acq_params, decision, dec_params){
         logLikeCell.id = "logLike" + i;
         var jointLogLikeCell = row.insertCell(-1);
         jointLogLikeCell.id = "jointLogLike" + i;
+        var r2 = row.insertCell(-1);
+        r2.id = "r2" + i;
     }
     table.appendChild(body);
 

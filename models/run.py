@@ -208,7 +208,7 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
         dec_arg_names = list(inspect.signature(decision_type.__init__).parameters.keys())
         dec_args = {dec_name: args[dec_name] for dec_name in args.keys() if dec_name in dec_arg_names}
         decision = decision_type(**dec_args)
-        likelihood = np.log(decision(utility, *dec_params))
+        likelihood = decision(utility, *dec_params)
         
         if len(actions) == trial:
             next_action = st.rv_discrete(values = (choices, likelihood)).rvs()
@@ -218,16 +218,22 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
         else:
             next_action = actions[trial]
             next_reward = rewards[trial]
-        action_likelihood.append(likelihood[next_action])
+        action_likelihood.append(np.log(likelihood[next_action]))
         if np.all(mean != None):
             mean = mean.ravel().tolist()
             var = var.ravel().tolist()
         all_means.append(mean)
         all_vars.append(var)
-        data['trial_data'][trial] = {'actions': a, 'rewards': r, 'utility': utility.tolist(), 'likelihood': likelihood.ravel().tolist(),
+        data['trial_data'][trial] = {'actions': a, 'rewards': r, 'utility': utility.tolist(), 'likelihood': np.log(likelihood.ravel().tolist()),
                                     'joint_log_likelihood': np.sum(action_likelihood), 'mean': mean,
                                     'var': var, 'next_action': next_action, 'next_reward': next_reward,
-                                    'score': np.sum(r) + next_reward}
+                                    'score': np.sum(r) + next_reward, 'random_likelihood': np.log(1./len(choices)),
+                                    'random_joint_log_likelihood': np.log(1./len(choices)) * (trial + 1)}
+        data['trial_data'][trial]['AIC'] = -2 * data['trial_data'][trial]['joint_log_likelihood'] + 2 * (len(acq_params) + len(dec_params))
+        data['trial_data'][trial]['RandomAIC'] =  -2 * data['trial_data'][trial]['random_joint_log_likelihood']
+        data['trial_data'][trial]['pseudo_r2'] = 1 - (data['trial_data'][trial]['AIC'] / data['trial_data'][trial]['RandomAIC'])
+        
+        
     data['kernel'] = type(kernel).__name__
     data['acquisition'] = acquisition_type.__name__
     data['decision'] = decision_type.__name__
@@ -239,9 +245,13 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
     data['all_means'] = all_means
     data['all_vars'] = all_vars
     data['joint_log_likelihood'] = np.sum(action_likelihood)
+    data['random_joint_log_likelihood'] = np.log(1./len(choices)) * ntrials
     data['function'] = function
     data['score'] = np.sum(r) + next_reward
     data['id'] = str(uuid.uuid4())
+    data['AIC'] = data['trial_data'][trial]['AIC']
+    data['RandomAIC'] = data['trial_data'][trial]['RandomAIC']
+    data['pseudo_r2'] = data['trial_data'][trial]['pseudo_r2']
     return data
 
 
@@ -379,9 +389,7 @@ def add_single_plot(data):
 
 def add_all_plots(data):
     
-    kernel_idx = [i for i in range(len(data)) if data[i]['kernel'] != 'NoneType']
-    print (kernel_idx)
-    
+    kernel_idx = [i for i in range(len(data)) if data[i]['kernel'] != 'NoneType']    
     colormap = np.array(sns.color_palette("hls", len(data)).as_hex())
     all_plot_data = {'ntrials': len(data[0]['actions']), 'acquisition': [], 'decision': [],
                      'acq_params': [], 'dec_params': [], 'trial_data': {},
@@ -441,10 +449,14 @@ def add_all_plots(data):
                                             'likelihood_div': likelihood_div, 'likelihood_script': likelihood_script,
                                             'gp_div': gp_div, 'gp_script': gp_script,
                                             'score': data[0]['trial_data'][trial]['score'],
-                                            'likelihood': [], 'joint_log_likelihood': []}
+                                            'likelihood': [], 'joint_log_likelihood': [], 'AIC': [], 'pseudo_r2': [],
+                                            'random_likelihood': data[0]['trial_data'][trial]['random_likelihood'],
+                                            'random_joint_log_likelihood': data[0]['trial_data'][trial]['random_joint_log_likelihood']}
         for j in range(len(data)):
             all_plot_data['trial_data'][trial]['likelihood'].append(data[j]['trial_data'][trial]['likelihood'][next_action])
             all_plot_data['trial_data'][trial]['joint_log_likelihood'].append(data[j]['trial_data'][trial]['joint_log_likelihood'])
+            all_plot_data['trial_data'][trial]['AIC'].append(data[j]['trial_data'][trial]['AIC'])
+            all_plot_data['trial_data'][trial]['pseudo_r2'].append(data[j]['trial_data'][trial]['pseudo_r2'])
             
         
     return all_plot_data
