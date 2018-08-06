@@ -158,7 +158,7 @@ class Phase(GPAcq):
         
     def __call__(self, p):
        if self.trial < p:
-           return np.ones(len(self.choices)) / len(self.choices)
+           return np.ones(len(self.choices)) / len(self.choicesgit )
        else:
            return self.mean
         
