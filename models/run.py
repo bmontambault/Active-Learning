@@ -8,9 +8,8 @@ import uuid
 import seaborn as sns
 import bokeh.plotting as bp
 from bokeh.embed import components
-from bokeh.models import Legend, Span
-from bokeh.layouts import widgetbox
-from bokeh.layouts import gridplot
+from bokeh.models import Span
+
 
 """
 Get means and variances for one trial given the set of actions and rewerds up to that trial and a kernel
@@ -230,8 +229,12 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
         data['trial_data'][trial] = {'actions': a, 'rewards': r, 'utility': utility.tolist(), 'likelihood': np.log(likelihood.ravel().tolist()),
                                     'joint_log_likelihood': np.sum(action_likelihood), 'mean': mean,
                                     'var': var, 'next_action': next_action, 'next_reward': next_reward,
-                                    'score': np.sum(r) + next_reward, 'random_likelihood': np.log(1./len(choices)),
+                                    'ms_score': np.sum(r) + next_reward, 'random_likelihood': np.log(1./len(choices)),
                                     'random_joint_log_likelihood': np.log(1./len(choices)) * (trial + 1)}
+        if len(r) == 0:
+            data['trial_data'][trial]['fm_score'] = next_reward
+        else:
+            data['trial_data'][trial]['fm_score'] = max((max(r), next_reward))
         data['trial_data'][trial]['AIC'] = -2 * data['trial_data'][trial]['joint_log_likelihood'] + 2 * (len(acq_params) + len(dec_params))
         data['trial_data'][trial]['RandomAIC'] =  -2 * data['trial_data'][trial]['random_joint_log_likelihood']
         data['trial_data'][trial]['pseudo_r2'] = 1 - (data['trial_data'][trial]['joint_log_likelihood'] / data['trial_data'][trial]['random_joint_log_likelihood'])
@@ -250,8 +253,10 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
     data['joint_log_likelihood'] = np.sum(action_likelihood)
     data['random_joint_log_likelihood'] = np.log(1./len(choices)) * ntrials
     data['function'] = function
-    data['score'] = data['trial_data'][trial]['score']
-    data['max_score'] = max(function) * ntrials
+    data['ms_score'] = data['trial_data'][trial]['ms_score']
+    data['fm_score'] = data['trial_data'][trial]['fm_score']
+    data['max_ms_score'] = max(function) * ntrials
+    data['max_fm_score'] = max(function)
     if ID == None:
         data['id'] = str(uuid.uuid4())
     else:
@@ -349,7 +354,8 @@ def add_all_plots(data):
     all_plot_data = {'ntrials': len(data[0]['actions']), 'acquisition': [], 'decision': [],
                      'acq_params': [], 'dec_params': [], 'trial_data': {},
                      'function': data[0]['function'], 'id': data[0]['id'],
-                     'score': data[0]['score'], 'max_score': data[0]['max_score'],
+                     'ms_score': data[0]['ms_score'], 'max_ms_score': data[0]['max_ms_score'],
+                     'fm_score': data[0]['fm_score'], 'max_fm_score': data[0]['max_fm_score'],
                      'actions': data[0]['actions'], 'colormap': colormap.tolist()}
     for i in range(len(data)):
         all_plot_data['acquisition'].append(data[i]['acquisition'])
@@ -405,7 +411,8 @@ def add_all_plots(data):
         all_plot_data['trial_data'][trial] = {'utility_div': utility_div, 'utility_script': utility_script,
                                             'likelihood_div': likelihood_div, 'likelihood_script': likelihood_script,
                                             'gp_div': gp_div, 'gp_script': gp_script,
-                                            'score': data[0]['trial_data'][trial]['score'],
+                                            'ms_score': data[0]['trial_data'][trial]['ms_score'],
+                                            'fm_score': data[0]['trial_data'][trial]['fm_score'],
                                             'likelihood': [], 'joint_log_likelihood': [], 'AIC': [], 'pseudo_r2': [],
                                             'random_likelihood': data[0]['trial_data'][trial]['random_likelihood'],
                                             'random_joint_log_likelihood': data[0]['trial_data'][trial]['random_joint_log_likelihood']}

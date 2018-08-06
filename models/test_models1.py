@@ -3,14 +3,14 @@ import pandas as pd
 import json
 import GPy
 
-from acquisitions import LocalMove, SGD, SGDMax, RandomSGD, RandomSGDMax, Explore, Exploit, EI, UCB
-from decisions import Softmax, PhaseSoftmax, StaySoftmax, StayPhaseSoftmax
+from acquisitions import LocalMove, SGD, SGDMax, RandomSGD, RandomSGDMax, Explore, Exploit, EI, UCB, MES, MCRS, MSRS
+from decisions import Softmax, PhaseSoftmax, StaySoftmax, StayPhaseSoftmax, PhaseSoftmax2
 from run import run, fit_strategy, get_all_means_vars, add_all_plots
 from data.get_results import get_results
 
 def get_kernel(results, kernel, function_name):
     
-    function_samples = list(results[results['function_name'] == 'sinc_compressed'].iloc[0]['function_samples'].values())
+    function_samples = list(results[results['function_name'] == function_name].iloc[0]['function_samples'].values())
     function_samples_n = np.array([((f - np.mean(f)) / np.std(f)) for f in function_samples])
     stacked_function_samples_x = np.hstack([np.arange(len(f)) for f in function_samples_n])[:,None]
     stacked_function_samples_y = np.hstack(function_samples_n)[:,None]
@@ -54,25 +54,39 @@ def fit_participants(results, IDs, strategies):
     for ID in IDs:
         plot_data = fit_participant(results, ID, strategies)
         all_plot_data.append(plot_data)
-        row = [plot_data['acquisition'], plot_data['decision'], plot_data['acq_params'], plot_data['dec_params'], plot_data['function_name'], plot_data['goal'], plot_data['actions'], plot_data['AIC'], [plot_data['score']], [plot_data['max_score']], plot_data['pseudo_r2'], plot_data['id']]
+        row = [plot_data['acquisition'], plot_data['decision'], plot_data['acq_params'], plot_data['dec_params'], plot_data['function_name'], plot_data['goal'], [plot_data['actions']], plot_data['AIC'], [plot_data['ms_score']], [plot_data['max_ms_score']], [plot_data['fm_score']], [plot_data['max_fm_score']], plot_data['pseudo_r2'], plot_data['id']]
         stacked = [[d[i] if len(d) > 1 else d[0] for d in row] for i in range(len(row[0]))]
         all_data += stacked
     data = pd.DataFrame(all_data)
-    data.columns = ['acq', 'dec', 'acq_params', 'dec_params', 'f', 'goal', 'actions', 'AIC', 'score', 'max_score', 'pseudo_r2', 'id']
-    data['%score'] = data['score'] / data['max_score']
+    data.columns = ['acq', 'dec', 'acq_params', 'dec_params', 'f', 'goal', 'actions', 'AIC', 'ms_score', 'max_ms_score', 'fm_score', 'max_fm_score', 'pseudo_r2', 'id']
+    data['%ms_score'] = data['ms_score'] / data['max_ms_score']
+    data['%fm_score'] = data['fm_score'] / data['max_fm_score']
     return data, all_plot_data
     
 
 results = get_results('data/results.json').iloc[3:]
-strategies = [(LocalMove, Softmax), (Explore, Softmax)]
-IDs = ["gV5RZpvDCQgGzfrdPaYQMJH1kbbNaJN3"]
+'''
+strategies = [(LocalMove, PhaseSoftmax), (SGD, PhaseSoftmax), (SGDMax, PhaseSoftmax),
+              (Explore, PhaseSoftmax), (Exploit, PhaseSoftmax), (EI, PhaseSoftmax),
+              (UCB, PhaseSoftmax), (MES, PhaseSoftmax),
+              (MCRS, PhaseSoftmax), (MSRS, PhaseSoftmax)]
+'''
+results = results[(results['function_name'] == 'pos_linear') & (results['goal'] == 'find_max_last')]
+strategies = [(SGD, PhaseSoftmax2), (SGDMax, PhaseSoftmax2),
+              (Explore, PhaseSoftmax2), (Exploit, PhaseSoftmax2), (EI, PhaseSoftmax2),
+              (UCB, PhaseSoftmax2), (MES, PhaseSoftmax2),
+              (MCRS, PhaseSoftmax2), (MSRS, PhaseSoftmax2)]
+strategies = [(SGD, PhaseSoftmax)]
+#IDs = results['somataSessionId'].tolist()[40:]
+IDs = results['somataSessionId'].tolist()[:1]
 data, plot_data = fit_participants(results, IDs, strategies)
 
-#plot_data1 = fit_participant(results, "JpTkw0A5hejoJZn5U12X6qwjSrtweYFK", strategies)
-#plot_data2 = fit_participant(results, "gV5RZpvDCQgGzfrdPaYQMJH1kbbNaJN3", strategies)
 
-#print (plot_data['id'])
-#with open('test_plot_data.json', 'w') as f:
-    #json.dump(plot_data, f)
 
-#data = run(sinc_compressed_n, SGD, Softmax, [60.], [.1], 25)
+'''
+function = results[results['function_name'] == 'neg_quad'].iloc[0]['function']
+function_n = [(f - np.mean(function)) / np.std(function) for f in function]
+kernel = get_kernel(results, GPy.kern.RBF(1), 'neg_quad')
+data = [run(function_n, MES, Softmax, [], [.1], 25, kernel = kernel)]
+plot_data = add_all_plots(data)
+'''
