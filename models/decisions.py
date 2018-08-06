@@ -45,6 +45,25 @@ class PhaseSoftmax:
         return exp_u / np.nansum(exp_u)
     
     
+class PhaseSoftmax2:
+    
+    init_params = [1., 12]
+    bounds = [(.001, 10), (1, 25)]
+    
+    def __init__(self, choices, action_1, trial):
+        self.choices = choices
+        self.action_1 = action_1
+        self.trial = trial
+        
+    def __call__(self, utility, temperature, phase):
+        if self.trial + 1 > phase:
+            utility = np.array([np.exp(-abs(self.action_1 - x)) for x in self.choices])
+        
+        centered_utility = utility - np.nanmax(utility)
+        exp_u = np.exp(centered_utility / temperature).ravel()
+        return exp_u / np.nansum(exp_u)
+    
+    
 class StaySoftmax:
     
     init_params = [1., .5]
