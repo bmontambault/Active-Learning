@@ -152,13 +152,13 @@ class Phase(GPAcq):
     init_params = [12]
     bounds = [(.1, 24)]
     
-    def __init__(self, all_x, mean, var, trial):
-        super().__init__(all_x, mean, var)
+    def __init__(self, choices, mean, var, trial):
+        super().__init__(choices, mean, var)
         self.trial = trial
         
     def __call__(self, p):
        if self.trial < p:
-           return np.ones(len(self.all_x)) / len(self.all_x)
+           return np.ones(len(self.choices)) / len(self.choices)
        else:
            return self.mean
         
