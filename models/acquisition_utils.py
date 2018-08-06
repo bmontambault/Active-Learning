@@ -19,6 +19,8 @@ def z_score(y, mean, std):
     
     if type(y) == list:
         y = np.array(y)[None,:]
+    mean = mean.reshape(len(mean), 1)
+    std = std.reshape(len(std), 1)
     return (y - mean)/std  
 
 

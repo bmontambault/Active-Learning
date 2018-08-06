@@ -51,7 +51,7 @@ class LocalMove(Acq):
 class SGD(Acq):
     
     init_params = [50.]
-    bounds = [(10., 800)]
+    bounds = [(1., 800)]
     
     def __init__(self, choices, unique_actions, unique_rewards):
         self.choices = choices
@@ -191,8 +191,8 @@ class MES(GPAcq):
     init_params = []
     bounds = []
     
-    def __init__(self, all_x, mean, var, remaining_trials):
-        super().__init__(all_x, mean, var)
+    def __init__(self, choices, mean, var, remaining_trials):
+        super().__init__(choices, mean, var)
         self.remaining_trials = remaining_trials
     
     def __call__(self):
@@ -208,13 +208,13 @@ class MES(GPAcq):
             return np.mean(z_scores * np.exp(log_norm_pdf_z_scores - (np.log(2) + log_norm_cdf_z_scores)) - log_norm_cdf_z_scores, axis = 1)
     
 
-class MimimumRegretSearch(GPAcq):
+class MRS(GPAcq):
 
     init_params = []
     bounds = []
 
-    def __init__(self, all_x, mean, var, kernel, actions, rewards, remaining_trials):
-        super().__init__(all_x, mean, var)
+    def __init__(self, choices, mean, var, kernel, actions, rewards, remaining_trials):
+        super().__init__(choices, mean, var)
         self.actions = actions
         self.rewards = rewards
         self.kernel = kernel
@@ -223,7 +223,7 @@ class MimimumRegretSearch(GPAcq):
     def __call__(self):
         
         if len(self.actions) == 0:
-            return np.ones(len(self.all_x))
+            return np.ones(len(self.choices))
         elif self.remaining_trials == 1:
             return self.mean  
         else:
@@ -243,20 +243,20 @@ class MimimumRegretSearch(GPAcq):
         pass
     
     
-class MinimumCumulativeRegretSearch(MimimumRegretSearch):
+class MCRS(MRS):
     
     def expected_regret(self, ysamples):
         #u = np.array([np.mean([self.minimum_regret(get_function_samples(self.kernel, self.actions + [self.all_x[i]], self.rewards + [ysamples[i][j]], self.all_x, 5).T) * (self.remaining_trials - 1) + ( - ysamples[i][j]) for j in range(len(ysamples[i]))]) for i in range(len(self.all_x))])
         #print (u)
         #return u
         all_regret = []
-        for i in range(len(self.all_x)):
+        for i in range(len(self.choices)):
             ysample_regret = []
             for j in range(len(ysamples[i])):
-                fsamples = get_function_samples(self.kernel, self.actions + [self.all_x[i]], self.rewards + [ysamples[i][j]], self.all_x, 5).T
+                fsamples = get_function_samples(self.kernel, self.actions + [self.choices[i]], self.rewards + [ysamples[i][j]], self.choices, 5).T
                 fsample_regret = []
                 for f in fsamples:
-                    regret = np.mean([np.max(f) - f[x] for x in self.all_x])
+                    regret = np.mean([np.max(f) - f[x] for x in self.choices])
                     min_regret = np.min(regret)
                     y_regret = np.max(f) - ysamples[i][j]
                     #print (min_regret, y_regret, self.all_x[i], ysamples[i][j])
@@ -269,14 +269,14 @@ class MinimumCumulativeRegretSearch(MimimumRegretSearch):
         return all_regret
                     
     def current_regret(self):
-         return self.minimum_regret(get_function_samples(self.kernel, self.actions, self.rewards, self.all_x, 5).T) * self.remaining_trials
+         return self.minimum_regret(get_function_samples(self.kernel, self.actions, self.rewards, self.choices, 5).T) * self.remaining_trials
 
-class MinimumSimpleRegretSearch(MimimumRegretSearch):
+class MSRS(MRS):
     
     def current_regret(self):
-         return self.minimum_regret(get_function_samples(self.kernel, self.actions, self.rewards, self.all_x, 5).T)
+         return self.minimum_regret(get_function_samples(self.kernel, self.actions, self.rewards, self.choices, 5).T)
     
     def expected_regret(self, ysamples):
-        u = np.array([np.mean([self.minimum_regret(get_function_samples(self.kernel, self.actions + [self.all_x[i]], self.rewards + [ysamples[i][j]], self.all_x, 5).T) for j in range(len(ysamples[i]))]) for i in range(len(self.all_x))])
+        u = np.array([np.mean([self.minimum_regret(get_function_samples(self.kernel, self.actions + [self.choices[i]], self.rewards + [ysamples[i][j]], self.choices, 5).T) for j in range(len(ysamples[i]))]) for i in range(len(self.choices))])
         #print(u)
         return u

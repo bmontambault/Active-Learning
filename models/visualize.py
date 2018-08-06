@@ -3,7 +3,7 @@ import json
 import numpy as np
 
 
-with open('plot_data2.json', 'r') as f:
+with open('all_plot_data.json', 'r') as f:
     all_plot_data = json.load(f)
     all_plot_data = {d['id'][0]: d for d in all_plot_data}
 
