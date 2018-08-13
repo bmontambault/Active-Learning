@@ -3,8 +3,8 @@ import pandas as pd
 import json
 import GPy
 
-from acquisitions import LocalMove, SGD, SGDMax, RandomSGD, RandomSGDMax, Explore, Exploit, EI, UCB, MES, MCRS, MSRS
-from decisions import Softmax, PhaseSoftmax, StaySoftmax, StayPhaseSoftmax, PhaseSoftmax2
+from acquisitions import LocalMove, SGD, SGDMax, RandomSGD, RandomSGDMax, Explore, Exploit, Phase, EI, UCB, MES, MCRS, MSRS
+from decisions import Softmax, PhaseSoftmax, RepeatSoftmax, StaySoftmax, StayPhaseSoftmax, PhaseSoftmax2
 from run import run, fit_strategy, get_all_means_vars, add_all_plots
 from data.get_results import get_results
 
@@ -65,22 +65,35 @@ def fit_participants(results, IDs, strategies):
     
 
 results = get_results('data/results.json').iloc[3:]
+lin_opt = results[(results['function_name'] == 'pos_linear') & (results['goal'] == 'find_max_last')]
+
+strategies = [(Phase, RepeatSoftmax), (Phase, Softmax), (Exploit, RepeatSoftmax), (UCB, RepeatSoftmax), (Exploit, Softmax), (UCB, Softmax), (LocalMove, Softmax), (LocalMove, RepeatSoftmax)]
+IDs = ['9cc1xQCU1v20pOLL8uC0DLSNQ4e6cnZT']
+data, plot_data = fit_participants(lin_opt, IDs, strategies)
+
+#function = results[results['function_name'] == 'pos_linear'].iloc[0]['function']
+#function_n = [(f - np.mean(function)) / np.std(function) for f in function]
+#kernel = get_kernel(results, GPy.kern.RBF(1), 'pos_linear')
+#data = [run(function_n, Exploit, StaySoftmax, [], [.57, .001], 25, kernel = kernel)]
+
 '''
 strategies = [(LocalMove, PhaseSoftmax), (SGD, PhaseSoftmax), (SGDMax, PhaseSoftmax),
               (Explore, PhaseSoftmax), (Exploit, PhaseSoftmax), (EI, PhaseSoftmax),
               (UCB, PhaseSoftmax), (MES, PhaseSoftmax),
               (MCRS, PhaseSoftmax), (MSRS, PhaseSoftmax)]
 '''
-results = results[(results['function_name'] == 'pos_linear') & (results['goal'] == 'find_max_last')]
+#results = results[(results['function_name'] == 'pos_linear') & (results['goal'] == 'find_max_last')]
+'''
 strategies = [(SGD, PhaseSoftmax2), (SGDMax, PhaseSoftmax2),
               (Explore, PhaseSoftmax2), (Exploit, PhaseSoftmax2), (EI, PhaseSoftmax2),
               (UCB, PhaseSoftmax2), (MES, PhaseSoftmax2),
-              (MCRS, PhaseSoftmax2), (MSRS, PhaseSoftmax2)]
-strategies = [(SGD, PhaseSoftmax)]
-#IDs = results['somataSessionId'].tolist()[40:]
-IDs = results['somataSessionId'].tolist()[:1]
+              (MCRS, PhaseSoftmax2), (MSRS, PhaseSoftmax2),
+              (Phase, Softmax), (Phase, PhaseSoftmax2)]
+#strategies = [(SGD, PhaseSoftmax)]
+IDs = results['somataSessionId'].tolist()
+#IDs = results['somataSessionId'].tolist()[:1]
 data, plot_data = fit_participants(results, IDs, strategies)
-
+'''
 
 
 '''

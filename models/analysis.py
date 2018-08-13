@@ -11,10 +11,10 @@ def get_strategy(data, col, val):
     return pd.concat([data, params], axis = 1)
 
 
-def count_best_by_condition(data, condition = ['f', 'goal']):
+def count_best_by_condition(data, condition = ['f', 'goal'], field = 'acq'):
     
     df = get_best_aic(data)
-    df = df[['f', 'goal', 'acq']]
-    for acq in data['acq'].unique():
-        df[acq] = df.apply(lambda x: 1 if x['acq'] == acq else 0, axis = 1)
+    df = df[['f', 'goal'] + [field]]
+    for acq in data[field].unique():
+        df[acq] = df.apply(lambda x: 1 if x[field] == acq else 0, axis = 1)
     return df.groupby(condition).sum()

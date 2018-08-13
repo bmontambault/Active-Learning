@@ -212,8 +212,10 @@ def run(function, acquisition_type, decision_type, acq_params, dec_params, ntria
         decision = decision_type(**dec_args)
         likelihood = decision(utility, *dec_params)
         
+        #print (likelihood.shape)
         if len(actions) == trial:
             next_action = st.rv_discrete(values = (choices, likelihood)).rvs()
+            #print (next_action)
             next_reward = function[next_action]
             actions.append(next_action)
             rewards.append(next_reward)
