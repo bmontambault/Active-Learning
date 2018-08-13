@@ -75,8 +75,32 @@ class StaySoftmax:
     def __call__(self, utility, temperature, stay):
         centered_utility = utility - np.nanmax(utility)
         exp_u = np.exp(centered_utility / temperature)
-        u = np.array([ui * stay if ui == self.action_1 else (1 - stay) * ui for ui in exp_u])  
-        return u / np.sum(u)
+        if self.action_1 == None:
+            stayp = np.ones(len(exp_u)) / len(utility)
+        else:
+            stayp = np.array([stay if ui == self.action_1 else (1. - stay) / (len(utility) - 1) for ui in range(len(exp_u))])
+        p = exp_u.ravel() * stayp.ravel()
+        return p / p.sum()
+    
+    
+class RepeatSoftmax:
+    
+    init_params = [1., .5]
+    bounds = [(.001, 10), (.001, .999)]
+    
+    def __init__(self, actions):
+        self.actions = actions
+    
+    def __call__(self, utility, temperature, repeat):
+        centered_utility = utility - np.nanmax(utility)
+        exp_u = np.exp(centered_utility / temperature)
+        nvisited = len(self.actions)
+        nnotvisited = len(utility) - nvisited
+        
+        stayp = np.array([repeat / nvisited if ui in self.actions else (1. - repeat) / nnotvisited for ui in range(len(utility))])
+        p = exp_u.ravel() * stayp.ravel()
+        return p / p.sum()
+    
     
     
 class StayPhaseSoftmax:
