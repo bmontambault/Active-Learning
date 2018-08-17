@@ -147,7 +147,7 @@ class Explore(GPAcq):
         return self.var
         
         
-class Phase(GPAcq):
+class RandomPhase(GPAcq):
     
     init_params = [12]
     bounds = [(.1, 24)]
@@ -161,7 +161,56 @@ class Phase(GPAcq):
            return np.ones(len(self.choices)) / len(self.choices)
        else:
            return self.mean
+       
         
+class SoftRandomPhase(GPAcq):
+        
+    init_params = [12, 1.]
+    bounds = [(.1, 24), (.001, 1000.)]
+    
+    def __init__(self, choices, mean, var, trial):
+        super().__init__(choices, mean, var)
+        self.trial = trial
+        
+    def __call__(self, p, k):
+        w = self.logistic(self.trial, p, k)
+        return w * self.mean + (1 - w) * np.ones(len(self.choices)) / len(self.choices)
+    
+    def logistic(self, x, p, k):
+        return 1. / (1 + np.exp(-k * (x - p)))
+
+
+class ExplorePhase(GPAcq):
+    
+    init_params = [12]
+    bounds = [(.1, 24)]
+    
+    def __init__(self, choices, mean, var, trial):
+        super().__init__(choices, mean, var)
+        self.trial = trial
+        
+    def __call__(self, p):
+       if self.trial < p:
+           return self.var
+       else:
+           return self.mean
+       
+
+class SoftExplorePhase(GPAcq):
+        
+    init_params = [12, 1.]
+    bounds = [(.1, 24), (.001, 1000.)]
+    
+    def __init__(self, choices, mean, var, trial):
+        super().__init__(choices, mean, var)
+        self.trial = trial
+        
+    def __call__(self, p, k):
+        w = self.logistic(self.trial, p, k)
+        return w * self.mean + (1 - w) * self.var
+    
+    def logistic(self, x, p, k):
+        return 1. / (1 + np.exp(-k * (x - p)))
     
     
 class UCB(GPAcq):
@@ -246,9 +295,6 @@ class MRS(GPAcq):
 class MCRS(MRS):
     
     def expected_regret(self, ysamples):
-        #u = np.array([np.mean([self.minimum_regret(get_function_samples(self.kernel, self.actions + [self.all_x[i]], self.rewards + [ysamples[i][j]], self.all_x, 5).T) * (self.remaining_trials - 1) + ( - ysamples[i][j]) for j in range(len(ysamples[i]))]) for i in range(len(self.all_x))])
-        #print (u)
-        #return u
         all_regret = []
         for i in range(len(self.choices)):
             ysample_regret = []
@@ -259,9 +305,6 @@ class MCRS(MRS):
                     regret = np.mean([np.max(f) - f[x] for x in self.choices])
                     min_regret = np.min(regret)
                     y_regret = np.max(f) - ysamples[i][j]
-                    #print (min_regret, y_regret, self.all_x[i], ysamples[i][j])
-                    #plt.plot(f)
-                    #plt.show()
                     total_regret = min_regret * (self.remaining_trials - 1) + y_regret
                     fsample_regret.append(total_regret)
                 ysample_regret.append(np.mean(fsample_regret))
@@ -271,6 +314,7 @@ class MCRS(MRS):
     def current_regret(self):
          return self.minimum_regret(get_function_samples(self.kernel, self.actions, self.rewards, self.choices, 5).T) * self.remaining_trials
 
+
 class MSRS(MRS):
     
     def current_regret(self):
@@ -278,5 +322,4 @@ class MSRS(MRS):
     
     def expected_regret(self, ysamples):
         u = np.array([np.mean([self.minimum_regret(get_function_samples(self.kernel, self.actions + [self.choices[i]], self.rewards + [ysamples[i][j]], self.choices, 5).T) for j in range(len(ysamples[i]))]) for i in range(len(self.choices))])
-        #print(u)
         return u
