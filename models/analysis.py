@@ -185,23 +185,27 @@ def keep_best_r2(pivot):
 
 def setup_decision_tree(pivot):
     
-    s = '@RELATION "r2_test"\n\n@ATTRIBUTE goal {Find-Max, Max-Score}\n@ATTRIBUTE f 	{Linear, Quadratic, Sinc}\n'
-    
-    variables = pivot.drop(['id', 'f', 'goal'], axis = 1).columns
-    var_s = '\n'.join(['@ATTRIBUTE ' + str(col) + ' {0, 1}' for col in variables]) + '\n\n@DATA\n'
+    strat = pivot.drop(['id', 'f', 'goal'], axis = 1).idxmax(1)
+    new_pivot = pivot[['f', 'goal']]
+    new_pivot['strat'] = strat
+    s = '@RELATION "r2_test"\n\n@ATTRIBUTE f 	{Linear, Quadratic, Sinc}\n@ATTRIBUTE goal {Find-Max, Max-Score}\n'
+    #variables = pivot.drop(['id', 'f', 'goal'], axis = 1).columns
+    var_s = '@ATTRIBUTE strat [{}]\n'.format(', '.join(new_pivot['strat'].unique())).replace(']', '}').replace('[', '{') + '\n@DATA\n'
+    #var_s = '\n'.join(['@ATTRIBUTE ' + str(col) + ' numeric' for col in variables]) + '\n\n@DATA\n'
     with open('clus/r2_part_test.arff', 'w') as file:
         file.write(s + var_s)
-    for col in pivot.columns:
-        if col not in ['id', 'f', 'goal']:
-            pivot[col] = pivot[col].apply(lambda x: int(x))
-    pivot.drop('id', axis = 1).to_csv('clus/data.csv', index = False, header = False)
+    #for col in pivot.columns:
+        #if col not in ['id', 'f', 'goal']:
+            #pivot[col] = pivot[col].apply(lambda x: int(x))
+    new_pivot.to_csv('clus/data.csv', index = False, header = False)
     
     filenames = ['clus/r2_part_test.arff', 'clus/data.csv']
     with open('clus/r2_test.arff', 'w') as outfile:
         for line in itertools.chain.from_iterable(list(map(open, filenames))):
             outfile.write(line)
-            
-    ss = '[Attributes]\nDescriptive = 1-2\nTarget = 3-{0}\nClustering = 3-{0}\n\n[Tree]\nHeuristic = Default\nPruningMethod = m5'.format(len(variables) + 2)
+    
+    ss = '[Attributes]\nDescriptive = 1-2\nTarget = 3\nClustering = 3\n\n[Tree]\nHeuristic = Default\nPruningMethod = M5Multi'
+    #ss = '[Attributes]\nDescriptive = 1-2\nTarget = 3-{0}\nClustering = 3-{0}\n\n[Tree]\nHeuristic = Default\nPruningMethod = M5Multi'.format(len(variables) + 2)
     with open('clus/r2_test.s', 'w') as outfile:
         outfile.write(ss)
     
@@ -224,7 +228,7 @@ def clean_names(df):
     columns = ['id', 'goal', 'f'] + ['-'.join((col[0].replace('\\','').replace('$','').replace('-',''), col[1].replace('\\','').replace('$','').replace('-',''))) for col in clean_df.columns if col not in ['id', 'f', 'goal']]
     clean_df.columns = columns
     return clean_df
-    
+
 
 
 def tsne(X_):
