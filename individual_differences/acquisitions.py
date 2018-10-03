@@ -2,7 +2,7 @@ import pandas as pd
 import GPy
 import numpy as np
 import scipy.stats as st
-from theano import tensor as tt
+#from theano import tensor as tt
 from inspect import signature
 
 
@@ -47,7 +47,6 @@ def generate(model, params, kernel, function, ntrials, nparticipants):
             parameter_names = list(signature(model).parameters)
             model_params = {p: params[p] for p in parameter_names}
             likelihood = model(**model_params).ravel()
-            
             action = st.rv_discrete(values = (choices, likelihood)).rvs()
             actions.append(action)
             rewards.append(function[action])
@@ -57,7 +56,7 @@ def generate(model, params, kernel, function, ntrials, nparticipants):
             response = np.array([mean.ravel(), var.ravel(), one_hot_actions])
             participant_responses.append(response)
         all_responses.append(participant_responses)
-    return np.array(all_responses)
+    return np.array(all_responses) #(nparticipants, ntrials, function variables, choices)
 
 
 def mixture_generate(model, params, kernel, function, ntrials, nparticipants, mixture, K):
@@ -67,18 +66,18 @@ def mixture_generate(model, params, kernel, function, ntrials, nparticipants, mi
 
 def likelihood(X, model, params):
     
-    mean = X[:,:,0]
-    var = X[:,:,1]
+    mean = X[:,:,0] #(nparticipants, ntrials, choices)
+    var = X[:,:,1] #(nparticipants, ntrials, choices)
     params['mean'] = mean
     params['var'] = var
     parameter_names = list(signature(model).parameters)
     model_params = {p: params[p] for p in parameter_names}
     
-    likelihood = model(**model_params)
-    action = X[:,:,2]
-    action_likelihood = (likelihood * action).sum(axis = 2)
-    participant_likelihood = action_likelihood.sum(axis = 1)
-    sample_likelihood = participant_likelihood.sum()
+    likelihood = model(**model_params) #(nparticipants, ntrials, choices)
+    action = X[:,:,2] #(nparticipants, ntrials, choices)
+    action_likelihood = (likelihood * action).sum(axis = 2) #(nparticipants, ntrials)
+    participant_likelihood = action_likelihood.sum(axis = 1) #(nparticipants)
+    sample_likelihood = participant_likelihood.sum() #()
     return sample_likelihood
 
 
@@ -90,16 +89,14 @@ def mixture_likelihood(X, model, params, mixture, K):
 def ucb(mean, var, explore, temperature):
     
     mean_dims = mean.ndim    
-    utility = mean + var * explore
-    return utility
+    utility = mean + var * explore #(nparticipants, ntrials, choices)
     center = utility.max(axis = mean_dims - 1, keepdims = True)
-    centered_utility = utility - center
-    return centered_utility
+    centered_utility = utility - center #(nparticipants, ntrials, choices)
     
-    exp_u = np.exp(centered_utility / temperature)
-    exp_u_row_sums = exp_u.sum(axis = mean_dims - 1, keepdims = True)
+    exp_u = np.exp(centered_utility / temperature) #(nparticipants, ntrials, choices)
+    exp_u_row_sums = exp_u.sum(axis = mean_dims - 1, keepdims = True) #(nparticipants, ntrials, 1)
     likelihood = exp_u / exp_u_row_sums
-    return likelihood
+    return likelihood #(nparticipants, ntrials, choices)
 
 
 def multi_ucb(mean, var, explore, temperature):
