@@ -1,6 +1,8 @@
 import pandas as pd
 import GPy
 import numpy as np
+from theano import tensor as tt
+
 
 from data.get_results import get_results
 from likelihood import get_kernel
@@ -56,19 +58,64 @@ def vectorize(participant, kernel_dict, normalized_functions_dict):
     return np.array(list(zip(mean.T, var.T, vec_actions.T))).T
 
 
+def vectorize_all(results, kernel_dict, normalized_functions_dict):
+    
+    return np.array([vectorize(row, kernel_dict, normalized_functions_dict) for index, row in results.iterrows()])
+
+
+def participant_ucb(x, explore):
+    
+    utility = x[:,0] + x[:,1] * explore
+    return utility
+
+
 def ucb(X, explore):
     
-    utility = X[:,0] + X[:,1] * explore
+    utility = X[:,:,0] + X[:,:,1] * explore
     return utility
+
+
+def participant_softmax(utility, temperature):
+    
+    center = utility.max(axis = 1, keepdims = True)
+    centered_utility = utility - center
+    exp_u = (centered_utility / temperature).exp()
+    exp_u_row_sums = exp_u.sum(axis = 1, keepdims = True)
+    return exp_u / exp_u_row_sums
 
 
 def softmax(utility, temperature):
     
-    centered_utility = utility - np.nanmax(utility, axis = 1)
-    exp_u = np.exp(centered_utility / temperature)
-    return exp_u / np.nansum(exp_u)
+    center = np.nanmax(utility, axis = 2, keepdims = True)
+    centered_utility = utility - center
+    exp_u = (centered_utility / temperature).exp()
+    exp_u_row_sums = exp_u.sum(axis = 2, keepdims = True)
+    return exp_u / exp_u_row_sums
 
 
+def participant_ucb_likelihood(x, explore, temperature):
+    
+    all_utility = participant_ucb(x, explore)
+    all_likelihoods = participant_softmax(all_utility, temperature)
+    actions = x[:,2]
+    likelihood = (all_likelihoods * actions).sum(axis = 1)
+    log_likelihood = likelihood.log()
+    joint_log_likelihood = log_likelihood.sum()
+    return joint_log_likelihood
+
+
+def ucb_likelihood(X, explore, temperature):
+    
+    all_utility = ucb(X, explore)
+    all_likelihoods = softmax(all_utility, temperature)
+    actions = X[:,:,2]
+    likelihood = (all_likelihoods * actions).sum(axis = 2)
+    log_likelihood = np.log(likelihood)
+    joint_log_likelihood = log_likelihood.sum(axis = 1)
+    return joint_log_likelihood.sum()
+    
+
+'''
 results = get_results('data/results.json').iloc[3:]
 function_names = results['function_name'].unique()
 kernel = GPy.kern.RBF(1)
@@ -77,4 +124,6 @@ functions_dict = results[['function_name', 'function']].drop_duplicates(subset =
 normalized_functions_dict = {f: (np.array(functions_dict[f]) - np.mean(functions_dict[f])) / np.std(functions_dict[f]) for f in function_names}
 
 participant = results.iloc[0]
-X = vectorize(participant, kernel_dict, normalized_functions_dict)
+'''
+#x = vectorize(participant, kernel_dict, normalized_functions_dict)
+#X = vectorize_all(results, kernel_dict, normalized_functions_dict)
