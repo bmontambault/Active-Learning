@@ -64,7 +64,7 @@ def mixture_generate(model, params, kernel, function, ntrials, nparticipants, mi
     return np.vstack([generate(model, {p: params[p][i] for p in params.keys()}, kernel, function, ntrials, int(nparticipants * mixture[i])) for i in range(K)])
 
 
-def likelihood(X, model, params):
+def likelihood(X, model, params, K, mixture):
     
     mean = X[:,:,0] #(nparticipants, ntrials, choices)
     var = X[:,:,1] #(nparticipants, ntrials, choices)
@@ -73,46 +73,25 @@ def likelihood(X, model, params):
     parameter_names = list(signature(model).parameters)
     model_params = {p: params[p] for p in parameter_names}
     
-    likelihood = model(**model_params) #(nparticipants, ntrials, choices)
-    action = X[:,:,2] #(nparticipants, ntrials, choices)
-    action_likelihood = (likelihood * action).sum(axis = 2) #(nparticipants, ntrials)
+    likelihood = model(**model_params) #(nparticipants, ntrials, choices, K)
+    action = X[:,:,2]
+    action_likelihood = (likelihood * (action[:,:,:,None] * np.ones(K))).sum(axis = 2) #(nparticipants, ntrials, K)
     participant_likelihood = action_likelihood.sum(axis = 1) #(nparticipants)
-    sample_likelihood = participant_likelihood.sum() #()
-    return sample_likelihood
-
-
-def mixture_likelihood(X, model, params, mixture, K):
-    
-    return np.array([likelihood(X, model, {p: params[p][i] for p in params.keys()}) * mixture[i] for i in range(K)]).sum()
+    sample_likelihood = participant_likelihood.sum(axis = 0) #(K)
+    return (sample_likelihood * mixture).sum()
 
 
 def ucb(mean, var, explore, temperature):
     
-    mean_dims = mean.ndim    
-    utility = mean + var * explore #(nparticipants, ntrials, choices)
-    center = utility.max(axis = mean_dims - 1, keepdims = True)
-    centered_utility = utility - center #(nparticipants, ntrials, choices)
+    mean_dims = mean.ndim
+    utility = ((mean + var)[:,:,:,None] * explore) #(nparticipants, ntrials, choices, K)
+    center = utility.max(axis = mean_dims - 1, keepdims = True)  #(nparticipants, ntrials, 1, K)
+    centered_utility = utility - center #(nparticipants, ntrials, choices, K)
     
     exp_u = np.exp(centered_utility / temperature) #(nparticipants, ntrials, choices)
-    exp_u_row_sums = exp_u.sum(axis = mean_dims - 1, keepdims = True) #(nparticipants, ntrials, 1)
+    exp_u_row_sums = exp_u.sum(axis = mean_dims - 1, keepdims = True) #(nparticipants, ntrials, 1, K)
     likelihood = exp_u / exp_u_row_sums
-    return likelihood #(nparticipants, ntrials, choices)
-
-
-def multi_ucb(mean, var, explore, temperature):
-    
-    mean_dims = mean.ndim
-    
-    utility = ((mean + var)[:,:,None] * explore).T
-    return utility
-    center = utility.max(axis = mean_dims - 1, keepdims = True)
-    centered_utility = utility - center
-    return centered_utility
-    
-    exp_u = np.exp(centered_utility / temperature)
-    exp_u_row_sums = exp_u.sum(axis = mean_dims - 1, keepdims = True)
-    likelihood = exp_u / exp_u_row_sums
-    return likelihood
+    return likelihood #(nparticipants, ntrials, choices, K)
 
 
 def local(linear_interp, last_action, learning_rate):
