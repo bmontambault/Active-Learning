@@ -1,8 +1,6 @@
-import pandas as pd
 import GPy
 import numpy as np
 import scipy.stats as st
-#from theano import tensor as tt
 from inspect import signature
 
 
@@ -32,7 +30,7 @@ def get_all_means_vars(kernel, actions, rewards, choices):
     return np.array(all_means), np.array(all_vars)
 
 
-def generate(model, params, kernel, function, ntrials, nparticipants):
+def generate_cluster(model, params, kernel, function, ntrials, nparticipants):
     
     choices = np.arange(len(function))
     all_responses = []
@@ -42,8 +40,8 @@ def generate(model, params, kernel, function, ntrials, nparticipants):
         participant_responses = []
         for trial in range(ntrials):
             mean, var = get_mean_var(kernel, actions, rewards, choices)
-            params['mean'] = mean.T
-            params['var'] = var.T
+            params['mean'] = mean.T[None]
+            params['var'] = var.T[None]
             parameter_names = list(signature(model).parameters)
             model_params = {p: params[p] for p in parameter_names}
             likelihood = model(**model_params).ravel()
@@ -59,10 +57,13 @@ def generate(model, params, kernel, function, ntrials, nparticipants):
     return np.array(all_responses) #(nparticipants, ntrials, function variables, choices)
 
 
-def mixture_generate(model, params, kernel, function, ntrials, nparticipants, mixture, K):
+def generate(model, params, kernel, function, ntrials, nparticipants, K, mixture):
     
-    return np.vstack([generate(model, {p: params[p][i] for p in params.keys()}, kernel, function, ntrials, int(nparticipants * mixture[i])) for i in range(K)])
-
+    cluster_sizes = [int(nparticipants * mixture[i]) for i in range(K)]
+    clusters = np.hstack([np.ones(cluster_sizes[i]) * i for i in range(len(cluster_sizes))])
+    results = np.vstack([generate_cluster(model, {p: params[p][i] if p not in ['mean', 'var'] else params[p] for p in params.keys()}, kernel, function, ntrials, cluster_sizes[i]) for i in range(K)])
+    return results, clusters
+    
 
 def likelihood(X, model, params, K, mixture):
     
@@ -81,18 +82,22 @@ def likelihood(X, model, params, K, mixture):
     return (sample_likelihood * mixture).sum()
 
 
-def ucb(mean, var, explore, temperature):
+def ucb(mean, var, explore):
     
-    mean_dims = mean.ndim
-    utility = ((mean + var)[:,:,:,None] * explore) #(nparticipants, ntrials, choices, K)
-    center = utility.max(axis = mean_dims - 1, keepdims = True)  #(nparticipants, ntrials, 1, K)
+    utility = (mean[:,:,:,None] * (1 - explore) + var[:,:,:,None] * explore) #(nparticipants, ntrials, choices, K)
+    if np.count_nonzero(utility) == 0:
+        utility += 1
+    return utility / utility.sum()
+    
+"""
+    center = utility.max(axis = 2, keepdims = True)  #(nparticipants, ntrials, 1, K)
     centered_utility = utility - center #(nparticipants, ntrials, choices, K)
     
     exp_u = np.exp(centered_utility / temperature) #(nparticipants, ntrials, choices)
-    exp_u_row_sums = exp_u.sum(axis = mean_dims - 1, keepdims = True) #(nparticipants, ntrials, 1, K)
+    exp_u_row_sums = exp_u.sum(axis = 2, keepdims = True) #(nparticipants, ntrials, 1, K)
     likelihood = exp_u / exp_u_row_sums
     return likelihood #(nparticipants, ntrials, choices, K)
-
+"""
 
 def local(linear_interp, last_action, learning_rate):
     
