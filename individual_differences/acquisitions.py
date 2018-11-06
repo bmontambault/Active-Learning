@@ -74,7 +74,7 @@ def generate_cluster(model, params, kernel, function, ntrials, nparticipants, de
             one_hot_actions = np.zeros(len(choices))
             one_hot_actions[action] = 1
             
-            response = np.array([mean.ravel(), var.ravel(), linear_interp, one_hot_last_actions, trial_array, one_hot_actions])
+            response = np.array([mean.ravel(), var.ravel(), linear_interp, one_hot_last_actions, trial_array, one_hot_actions, likelihood])
             participant_responses.append(response)
         all_responses.append(participant_responses)
     return np.array(all_responses) #(nparticipants, ntrials, function variables, choices)
@@ -105,13 +105,15 @@ def likelihood(X, model, params, K, mixture, c=0):
     parameter_names = list(signature(model).parameters)
     model_params = {p: params[p] for p in parameter_names}
     
-    likelihood = np.log(model(**model_params) * c) #(nparticipants, ntrials, choices, K)
     action = X[:,:,5]
+    all_likelihood = model(**model_params)
+    likelihood = (all_likelihood * (action[:,:,:,None] * np.ones(K))).sum(axis=2)
+    log_likelihood = np.log(likelihood)
     
-    action_likelihood = (np.nan_to_num(likelihood) * (action[:,:,:,None] * np.ones(K))).sum(axis=2) #(nparticipants, ntrials, K)
-    participant_likelihood = action_likelihood.sum(axis=1) #(nparticipants)
-    sample_likelihood = participant_likelihood.sum(axis=0) #(K)
-    return (sample_likelihood * mixture).sum()
+    avg_participant_log_likelihood = log_likelihood.mean(axis=1)
+    avg_sample_log_likelihood = avg_participant_log_likelihood.mean(axis=0)
+    mixture_log_likelihood = (avg_sample_log_likelihood * mixture).sum()
+    return mixture_log_likelihood
 
 
 def ucb(mean, var, explore):
@@ -166,6 +168,13 @@ def softmax(utility, temperature):
     return likelihood
 
 
+def ucb_acq(mean, var, explore):
+    
+    utility = ucb(mean, var, explore)
+    likelihood = propto(utility)
+    return likelihood
+
+
 def softmax_ucb_acq(mean, var, explore, temperature):
     
     utility = ucb(mean, var, explore)
@@ -173,9 +182,9 @@ def softmax_ucb_acq(mean, var, explore, temperature):
     return likelihood
 
 
-def phase_ucb_acq(mean, var, trial, steepness, midpoint, temperature):
+def phase_ucb_acq(mean, var, trial, steepness, x_midpoint, yscale, temperature):
     
-    explore = (1 - 1. / (1 + np.exp(-steepness[:,None] * (trial - midpoint[:,None]))).T)
+    explore = (1 - 1. / (1 + yscale[:,None] * np.exp(-steepness[:,None] * (trial - x_midpoint[:,None]))).T)
     utility = ucb_by_trial(mean, var, explore)    
     likelihood = softmax(utility, temperature)
     return likelihood
