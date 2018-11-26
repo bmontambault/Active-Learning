@@ -32,7 +32,6 @@ def get_all_means_vars(kernel, actions, rewards, choices):
 
 def generate_cluster(model, params, kernel, function, ntrials, nparticipants, deterministic=False):
     
-    #print (params)
     choices = np.arange(len(function))
     all_responses = []
     for participant in range(nparticipants):
@@ -47,21 +46,31 @@ def generate_cluster(model, params, kernel, function, ntrials, nparticipants, de
             if len(actions) == 0:
                 linear_interp = np.zeros(len(choices))
             else:
-                linear_interp = np.interp(choices, actions, rewards)
-            params['linear_interp'] = linear_interp
+                sorted_actions = sorted(list(set(actions)))
+                sorted_rewards = [function[a] for a in sorted_actions]
+                linear_interp = np.interp(choices, sorted_actions, sorted_rewards)
+            params['linear_interp'] = linear_interp[None,None,:]
             
             if trial == 0:
                 one_hot_last_actions = np.zeros(len(choices))
             else:
-                one_hot_last_actions = participant_responses[trial - 1][2]
-            params['last_actions'] = one_hot_last_actions
+                one_hot_last_actions = participant_responses[trial - 1][5]
+            params['last_actions'] = one_hot_last_actions[None,None,:]
             
             trial_array = np.ones(len(mean)) * trial
             params['trial'] = trial_array.mean()
             
+            if trial < 2:
+                is_first = np.ones(len(choices))
+            else:
+                is_first = np.zeros(len(choices))
+            params['is_first'] = is_first
+            
             parameter_names = list(signature(model).parameters)
             model_params = {p: params[p] for p in parameter_names}
-            likelihood = model(**model_params).ravel()
+            utility, likelihood = model(**model_params)
+            utility = utility.ravel()
+            likelihood = likelihood.ravel()
             
             if deterministic:
                 best = [i for i in range(len(likelihood)) if likelihood[i] == likelihood.max()]
@@ -74,7 +83,7 @@ def generate_cluster(model, params, kernel, function, ntrials, nparticipants, de
             one_hot_actions = np.zeros(len(choices))
             one_hot_actions[action] = 1
             
-            response = np.array([mean.ravel(), var.ravel(), linear_interp, one_hot_last_actions, trial_array, one_hot_actions, likelihood])
+            response = np.array([mean.ravel(), var.ravel(), linear_interp, one_hot_last_actions, trial_array, one_hot_actions, is_first, utility, likelihood])
             participant_responses.append(response)
         all_responses.append(participant_responses)
     return np.array(all_responses) #(nparticipants, ntrials, function variables, choices)
@@ -94,24 +103,26 @@ def likelihood(X, model, params, K, mixture, c=0):
     var = X[:,:,1] #(nparticipants, ntrials, choices)
     linear_interp = X[:,:,2]
     last_actions = X[:,:,3]
+    is_first = X[:,:,6]
     
     trial = X[:,:,4].mean(axis=2).mean(axis=0)
     params['mean'] = mean
     params['var'] = var
     params['linear_interp'] = linear_interp
     params['last_actions'] = last_actions
+    params['is_first'] = is_first
     params['trial'] = trial
     
     parameter_names = list(signature(model).parameters)
     model_params = {p: params[p] for p in parameter_names}
     
     action = X[:,:,5]
-    all_likelihood = model(**model_params)
+    utility, all_likelihood = model(**model_params)
     likelihood = (all_likelihood * (action[:,:,:,None] * np.ones(K))).sum(axis=2)
     log_likelihood = np.log(likelihood)
     
-    avg_participant_log_likelihood = log_likelihood.mean(axis=1)
-    avg_sample_log_likelihood = avg_participant_log_likelihood.mean(axis=0)
+    avg_participant_log_likelihood = log_likelihood.sum(axis=1)
+    avg_sample_log_likelihood = avg_participant_log_likelihood.sum(axis=0)
     mixture_log_likelihood = (avg_sample_log_likelihood * mixture).sum()
     return mixture_log_likelihood
 
@@ -119,7 +130,6 @@ def likelihood(X, model, params, K, mixture, c=0):
 def ucb(mean, var, explore):
     """
     Returns ucb function values where there is one explore paramter value for all trials
-    Returns ucb function values when there are explore parameter values for each trial
     Patameters:
         mean: (participants, trials, choices)
         var: (participants, trials, choices)
@@ -158,9 +168,8 @@ def softmax(utility, temperature):
         utility: (participants, trials, choices, K)
         temperature: (K)
     """
-    normalized_utility = propto(utility)
-    center = normalized_utility.max(axis = 2, keepdims = True)  #(nparticipants, ntrials, 1, K)
-    centered_utility = normalized_utility - center #(nparticipants, ntrials, choices, K)
+    center = utility.max(axis = 2, keepdims = True)  #(nparticipants, ntrials, 1, K)
+    centered_utility = utility - center #(nparticipants, ntrials, choices, K)
     
     exp_u = np.exp(centered_utility / temperature) #(nparticipants, ntrials, choices)
     exp_u_row_sums = exp_u.sum(axis = 2, keepdims = True) #(nparticipants, ntrials, 1, K)
@@ -172,7 +181,7 @@ def ucb_acq(mean, var, explore):
     
     utility = ucb(mean, var, explore)
     likelihood = propto(utility)
-    return likelihood
+    return utility, likelihood
 
 
 def softmax_ucb_acq(mean, var, explore, temperature):
@@ -187,20 +196,39 @@ def phase_ucb_acq(mean, var, trial, steepness, x_midpoint, yscale, temperature):
     explore = (1 - 1. / (1 + yscale[:,None] * np.exp(-steepness[:,None] * (trial - x_midpoint[:,None]))).T)
     utility = ucb_by_trial(mean, var, explore)    
     likelihood = softmax(utility, temperature)
-    return likelihood
+    return utility, likelihood
     
     
-
-def local(linear_interp, last_actions, learning_rate):
+#TODO: Fix dimmensions
+def local(linear_interp, last_actions, is_first, learning_rate, stay_penalty):
     
-    choices = np.arange(len(linear_interp))
-    if np.count_nonzero(last_actions) == 0:
-        return np.ones(len(choices)) / len(choices)
-    else:
-        gradient = np.gradient(linear_interp)
-        last_action = np.argmax(last_actions, axis = 2)
-        next_action = last_action + gradient * learning_rate
-        return np.exp(abs(next_action - choices))
+    gradient = (np.gradient(linear_interp, axis=2) * last_actions).sum(axis=2) #(nparticipant, ntrials)
+    actions = last_actions.argmax(axis=2) #(nparticipant, ntrials)
+    next_action = actions[:,:,None] + gradient[:,:,None] * learning_rate
+    next_action1 = actions + gradient * learning_rate
+    
+    choices = (np.arange(linear_interp.shape[2])[:,None,None] * np.ones(shape=(1, linear_interp.shape[0], linear_interp.shape[1], 1))).transpose((1, 2, 0, 3)) #(nparticipant, ntrials, choices)
+        
+    nonfirst_utility = np.exp(-abs(next_action[:,:,None] - choices)) * (1 - is_first)
+    nonfirst_utility1 = np.exp(-abs(next_action1 - choices)) * (1 - is_first)
+    
+    print (next_action1.shape)
+    print (choices.shape)
+    print (nonfirst_utility1.shape)
+    
+    first_utility = np.ones(shape=linear_interp.shape) * is_first
+    move_utility = (nonfirst_utility + first_utility)
+    
+    penalty = (last_actions * stay_penalty) + (1 - last_actions)
+    utility = move_utility * penalty
+    return utility
+    
+    
+def local_acq(linear_interp, last_actions, is_first, learning_rate, stay_penalty, temperature):
+    
+    utility = local(linear_interp, last_actions, is_first, learning_rate, stay_penalty)
+    likelihood = softmax(utility, temperature)
+    return utility, likelihood
     
 
 
