@@ -42,6 +42,7 @@ def generate_cluster(model, params, kernel, function, ntrials, nparticipants, de
             mean, var = get_mean_var(kernel, actions, rewards, choices)
             params['mean'] = mean.T[None]
             params['var'] = var.T[None]
+            params['choices'] = choices[None,None,:]
             
             if len(actions) == 0:
                 linear_interp = np.zeros(len(choices))
@@ -83,7 +84,7 @@ def generate_cluster(model, params, kernel, function, ntrials, nparticipants, de
             one_hot_actions = np.zeros(len(choices))
             one_hot_actions[action] = 1
             
-            response = np.array([mean.ravel(), var.ravel(), linear_interp, one_hot_last_actions, trial_array, one_hot_actions, is_first, utility, likelihood])
+            response = np.array([mean.ravel(), var.ravel(), linear_interp, one_hot_last_actions, trial_array, one_hot_actions, is_first, choices, utility, likelihood])
             participant_responses.append(response)
         all_responses.append(participant_responses)
     return np.array(all_responses) #(nparticipants, ntrials, function variables, choices)
@@ -104,10 +105,12 @@ def likelihood(X, model, params, K, mixture, c=0):
     linear_interp = X[:,:,2]
     last_actions = X[:,:,3]
     is_first = X[:,:,6]
+    choices = X[:,:,7]
     
     trial = X[:,:,4].mean(axis=2).mean(axis=0)
     params['mean'] = mean
     params['var'] = var
+    params['choices'] = choices
     params['linear_interp'] = linear_interp
     params['last_actions'] = last_actions
     params['is_first'] = is_first
@@ -135,6 +138,7 @@ def ucb(mean, var, explore):
         var: (participants, trials, choices)
         explore: K
     """
+    
     utility = (mean[:,:,:,None] * (1 - explore) + var[:,:,:,None] * explore) #(nparticipants, ntrials, choices, K)
     return utility
 
@@ -199,34 +203,26 @@ def phase_ucb_acq(mean, var, trial, steepness, x_midpoint, yscale, temperature):
     return utility, likelihood
     
     
-#TODO: Fix dimmensions
-def local(linear_interp, last_actions, is_first, learning_rate, stay_penalty):
+#TODO: Do without transpose arguments
+def local(linear_interp, last_actions, choices, is_first, learning_rate, stay_penalty):
     
     gradient = (np.gradient(linear_interp, axis=2) * last_actions).sum(axis=2) #(nparticipant, ntrials)
     actions = last_actions.argmax(axis=2) #(nparticipant, ntrials)
-    next_action = actions[:,:,None] + gradient[:,:,None] * learning_rate
-    next_action1 = actions + gradient * learning_rate
+    next_action = actions[:,:,None] + gradient[:,:,None] * learning_rate #(nparticipants, ntrials, K)
     
-    choices = (np.arange(linear_interp.shape[2])[:,None,None] * np.ones(shape=(1, linear_interp.shape[0], linear_interp.shape[1], 1))).transpose((1, 2, 0, 3)) #(nparticipant, ntrials, choices)
+    distance = np.abs((next_action.T - choices[:,:,None,:].T).transpose(3,2,0,1)) #(participants, trials, choices, K)
+    nonfirst_utility = (np.exp(-distance).T * (1 - is_first.T)).T #(participants, trials, choices, K)
+    first_utility = ((distance**0).T * is_first.T).T #(participants, trials, choices, K)   
+    move_utility = (nonfirst_utility + first_utility) #(participants, trials, choices, K)
         
-    nonfirst_utility = np.exp(-abs(next_action[:,:,None] - choices)) * (1 - is_first)
-    nonfirst_utility1 = np.exp(-abs(next_action1 - choices)) * (1 - is_first)
-    
-    print (next_action1.shape)
-    print (choices.shape)
-    print (nonfirst_utility1.shape)
-    
-    first_utility = np.ones(shape=linear_interp.shape) * is_first
-    move_utility = (nonfirst_utility + first_utility)
-    
-    penalty = (last_actions * stay_penalty) + (1 - last_actions)
-    utility = move_utility * penalty
+    penalty = (last_actions[:,:,:,None] * stay_penalty) + (1 - last_actions[:,:,:,None]) #(participants, trials, choices, K)
+    utility = move_utility * penalty #(participants, trials, choices, K)
     return utility
     
     
-def local_acq(linear_interp, last_actions, is_first, learning_rate, stay_penalty, temperature):
+def local_acq(linear_interp, last_actions, choices, is_first, learning_rate, stay_penalty, temperature):
     
-    utility = local(linear_interp, last_actions, is_first, learning_rate, stay_penalty)
+    utility = local(linear_interp, last_actions, choices, is_first, learning_rate, stay_penalty)
     likelihood = softmax(utility, temperature)
     return utility, likelihood
     
