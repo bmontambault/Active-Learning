@@ -65,7 +65,7 @@ def generate_cluster(model, params, kernel, function, ntrials, nparticipants, de
                 is_first = np.ones(len(choices))
             else:
                 is_first = np.zeros(len(choices))
-            params['is_first'] = is_first
+            params['is_first'] = is_first[None,None,:]
             
             parameter_names = list(signature(model).parameters)
             model_params = {p: params[p] for p in parameter_names}
@@ -185,6 +185,7 @@ def ucb_acq(mean, var, explore):
     
     utility = ucb(mean, var, explore)
     likelihood = propto(utility)
+    print (likelihood.shape)
     return utility, likelihood
 
 
@@ -202,8 +203,7 @@ def phase_ucb_acq(mean, var, trial, steepness, x_midpoint, yscale, temperature):
     likelihood = softmax(utility, temperature)
     return utility, likelihood
     
-    
-#TODO: Do without transpose arguments
+
 def local(linear_interp, last_actions, choices, is_first, learning_rate, stay_penalty):
     
     gradient = (np.gradient(linear_interp, axis=2) * last_actions).sum(axis=2) #(nparticipant, ntrials)
@@ -225,8 +225,3 @@ def local_acq(linear_interp, last_actions, choices, is_first, learning_rate, sta
     utility = local(linear_interp, last_actions, choices, is_first, learning_rate, stay_penalty)
     likelihood = softmax(utility, temperature)
     return utility, likelihood
-    
-
-
-    
-    
