@@ -29,6 +29,82 @@ def get_all_means_vars(kernel, actions, rewards, choices):
         all_vars.append(var.ravel())
     return np.array(all_means), np.array(all_vars)
 
+def get_function_samples(kernel, observed_x, observed_y, all_x, size):
+    
+    X = np.array(observed_x)[:,None]
+    Y = np.array(observed_y)[:,None]
+    m = GPy.models.GPRegression(X, Y, kernel)
+    m.Gaussian_noise.variance = .00001
+    f = m.posterior_samples_f(np.array(all_x)[:,None], full_cov = True, size = size)
+    return f
+    
+
+def z_score(y, mean, std):
+    
+    if type(y) == list:
+        y = np.array(y)[None,:]
+    mean = mean.reshape(len(mean), 1)
+    std = std.reshape(len(std), 1)
+    return (y - mean)/std  
+
+
+def ymax_cdf(y, mean, std):
+        return np.prod(st.norm.cdf(z_score(y, mean, std)), axis = 0)
+
+
+
+def inv_ymax_cdf(p, mean, std, precision):
+    
+    upper_bound = precision
+    while True:
+        if ymax_cdf(upper_bound, mean, std) >= p:
+            break
+        else:
+            upper_bound *= 2
+    
+    Z = np.arange(0, upper_bound + precision, precision)
+    while len(Z) > 2:
+        bisect = len(Z) // 2
+        z = Z[bisect]
+        prob = ymax_cdf(z, mean, std)
+        if prob > p:
+            Z = Z[:bisect + 1]
+        else:
+            Z = Z[bisect:]
+    return np.mean(Z)
+    
+
+def fit_gumbel(mean, std, precision):
+    r1 = .25
+    r2 = .75
+    y1 = inv_ymax_cdf(r1, mean, std, precision)
+    y2 = inv_ymax_cdf(r2, mean, std, precision)
+    if y1 == y2:
+        y1 -= precision
+    R = np.array([[1., np.log(-np.log(r1))], [1., np.log(-np.log(r2))]])
+    Y = np.array([y1, y2])
+    a, b = np.linalg.solve(R, Y)
+    return a, b
+
+
+def sample_gumbel(a, b, nsamples):
+    return [a - (b * np.log(-np.log(r))) for r in np.random.uniform(0, 1, int(nsamples))]
+
+
+def gumbel_pdf(a, b, y):
+    z = (y - a) / b
+    return - ((1 / b) * np.exp(-(z + np.exp(-z))))
+
+
+def get_mes_utility(mean, var, nsamples=100):
+    std = np.sqrt(var)
+    a, b = fit_gumbel(mean, std, .01)
+    ymax_samples = sample_gumbel(a, b, nsamples)
+    z_scores = z_score(ymax_samples, mean, std)
+    log_norm_cdf_z_scores = st.norm.logcdf(z_scores)
+    log_norm_pdf_z_scores = st.norm.logpdf(z_scores)
+    return np.mean(z_scores * np.exp(log_norm_pdf_z_scores - (np.log(2) + log_norm_cdf_z_scores)) - log_norm_cdf_z_scores, axis = 1)
+
 
 def generate_cluster(model, params, kernel, function, ntrials, nparticipants, deterministic=False):
     
@@ -40,8 +116,10 @@ def generate_cluster(model, params, kernel, function, ntrials, nparticipants, de
         participant_responses = []
         for trial in range(ntrials):
             mean, var = get_mean_var(kernel, actions, rewards, choices)
+            mes_utility = get_mes_utility(mean, var)
             params['mean'] = mean.T[None]
             params['var'] = var.T[None]
+            params['mes_utility'] = mes_utility[None,None,:]
             params['choices'] = choices[None,None,:]
             
             if len(actions) == 0:
@@ -67,6 +145,11 @@ def generate_cluster(model, params, kernel, function, ntrials, nparticipants, de
                 is_first = np.zeros(len(choices))
             params['is_first'] = is_first[None,None,:]
             
+            one_hot_all_actions = np.zeros(len(choices))
+            for a in actions:
+                one_hot_all_actions[a] = 1
+            params['all_actions'] = one_hot_all_actions[None,None,:]
+            
             parameter_names = list(signature(model).parameters)
             model_params = {p: params[p] for p in parameter_names}
             utility, likelihood = model(**model_params)
@@ -84,7 +167,7 @@ def generate_cluster(model, params, kernel, function, ntrials, nparticipants, de
             one_hot_actions = np.zeros(len(choices))
             one_hot_actions[action] = 1
             
-            response = np.array([mean.ravel(), var.ravel(), linear_interp, one_hot_last_actions, trial_array, one_hot_actions, is_first, choices, utility, likelihood])
+            response = np.array([mean.ravel(), var.ravel(), linear_interp, one_hot_last_actions, trial_array, one_hot_actions, is_first, choices, one_hot_all_actions, mes_utility, utility, likelihood])
             participant_responses.append(response)
         all_responses.append(participant_responses)
     return np.array(all_responses) #(nparticipants, ntrials, function variables, choices)
@@ -106,6 +189,8 @@ def likelihood(X, model, params, K, mixture, c=0):
     last_actions = X[:,:,3]
     is_first = X[:,:,6]
     choices = X[:,:,7]
+    all_actions = X[:,:,8]
+    mes_utility = X[:,:,9]
     
     trial = X[:,:,4].mean(axis=2).mean(axis=0)
     params['mean'] = mean
@@ -115,6 +200,8 @@ def likelihood(X, model, params, K, mixture, c=0):
     params['last_actions'] = last_actions
     params['is_first'] = is_first
     params['trial'] = trial
+    params['all_actions'] = all_actions
+    params['mes_utility'] = mes_utility
     
     parameter_names = list(signature(model).parameters)
     model_params = {p: params[p] for p in parameter_names}
@@ -185,7 +272,6 @@ def ucb_acq(mean, var, explore):
     
     utility = ucb(mean, var, explore)
     likelihood = propto(utility)
-    print (likelihood.shape)
     return utility, likelihood
 
 
@@ -204,7 +290,7 @@ def phase_ucb_acq(mean, var, trial, steepness, x_midpoint, yscale, temperature):
     return utility, likelihood
     
 
-def local(linear_interp, last_actions, choices, is_first, learning_rate, stay_penalty):
+def local(linear_interp, last_actions, all_actions, choices, is_first, learning_rate, stay_penalty):
     
     gradient = (np.gradient(linear_interp, axis=2) * last_actions).sum(axis=2) #(nparticipant, ntrials)
     actions = last_actions.argmax(axis=2) #(nparticipant, ntrials)
@@ -215,13 +301,21 @@ def local(linear_interp, last_actions, choices, is_first, learning_rate, stay_pe
     first_utility = ((distance**0).T * is_first.T).T #(participants, trials, choices, K)   
     move_utility = (nonfirst_utility + first_utility) #(participants, trials, choices, K)
         
-    penalty = (last_actions[:,:,:,None] * stay_penalty) + (1 - last_actions[:,:,:,None]) #(participants, trials, choices, K)
-    utility = move_utility * penalty #(participants, trials, choices, K)
+    penalty = (all_actions[:,:,:,None] * stay_penalty)
+    utility = move_utility + penalty
+    #penalty = (last_actions[:,:,:,None] * stay_penalty) + (1 - last_actions[:,:,:,None]) #(participants, trials, choices, K)
+    #utility = move_utility * penalty #(participants, trials, choices, K)
     return utility
     
     
-def local_acq(linear_interp, last_actions, choices, is_first, learning_rate, stay_penalty, temperature):
+def local_acq(linear_interp, last_actions, all_actions, choices, is_first, learning_rate, stay_penalty, temperature):
     
-    utility = local(linear_interp, last_actions, choices, is_first, learning_rate, stay_penalty)
+    utility = local(linear_interp, last_actions, all_actions, choices, is_first, learning_rate, stay_penalty)
     likelihood = softmax(utility, temperature)
     return utility, likelihood
+
+
+def mes_acq(mes_utility, temperature):
+    
+    likelihood = softmax(mes_utility, temperature)
+    return mes_utility, likelihood
