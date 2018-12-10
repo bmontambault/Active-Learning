@@ -52,7 +52,6 @@ def ymax_cdf(y, mean, std):
         return np.prod(st.norm.cdf(z_score(y, mean, std)), axis = 0)
 
 
-
 def inv_ymax_cdf(p, mean, std, precision):
     
     upper_bound = precision
@@ -317,5 +316,24 @@ def local_acq(linear_interp, last_actions, all_actions, choices, is_first, learn
 
 def mes_acq(mes_utility, temperature):
     
-    likelihood = softmax(mes_utility, temperature)
-    return mes_utility, likelihood
+    likelihood = softmax(mes_utility[:,:,:,None], temperature)
+    return mes_utility[:,:,:,None], likelihood
+
+
+def mixture_acq(mean, var, trial, linear_interp, last_actions, all_actions, choices, is_first, mes_utility,
+                steepness, x_midpoint, yscale, phase_ucb_temperature, learning_rate, stay_penalty, local_temperature,
+                mes_temperature, mixture):
+    
+    phase_ucb_u, phase_ucb_l = phase_ucb_acq(mean, var, trial, steepness, x_midpoint, yscale, phase_ucb_temperature)
+    local_u, local_l = local_acq(linear_interp, last_actions, all_actions, choices, is_first, learning_rate,
+                                                stay_penalty, local_temperature)
+    mes_u, mes_l = mes_acq(mes_utility, mes_temperature)
+    
+    all_utility = np.array([phase_ucb_u, local_u, mes_u])
+    all_likelihood = np.array([phase_ucb_l, local_l, mes_l])
+    
+    utility = (all_utility * mixture.T[:,:,None,None,None]).sum(axis=0)
+    likelihood = (all_likelihood * mixture.T[:,:,None,None,None]).sum(axis=0)
+    
+    return utility, likelihood
+    
