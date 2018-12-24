@@ -7,14 +7,14 @@ from inspect import signature
 def get_mean_var(kernel, actions, rewards, choices):
     
     if len(actions) == 0:
-        return np.ones(len(choices))[:,None], np.ones(len(choices))[:,None]
+        return np.ones(len(choices)), np.ones(len(choices))
     else:
         X = np.array(actions)[:,None]
         Y = np.array(rewards)[:,None]
         m = GPy.models.GPRegression(X, Y, kernel)
         m.Gaussian_noise.variance = .00001
         mean, var = m.predict(np.array(choices)[:,None])
-        return mean, var
+        return mean.ravel(), var.ravel()
     
     
 def get_all_means_vars(kernel, actions, rewards, choices):
@@ -95,10 +95,10 @@ def gumbel_pdf(a, b, y):
     return - ((1 / b) * np.exp(-(z + np.exp(-z))))
 
 
-def get_mes_utility(mean, var, nsamples=100):
+def get_mes_utility(mean, var, samples=100):
     std = np.sqrt(var)
     a, b = fit_gumbel(mean, std, .01)
-    ymax_samples = sample_gumbel(a, b, nsamples)
+    ymax_samples = sample_gumbel(a, b, samples)
     z_scores = z_score(ymax_samples, mean, std)
     log_norm_cdf_z_scores = st.norm.logcdf(z_scores)
     log_norm_pdf_z_scores = st.norm.logpdf(z_scores)
@@ -178,6 +178,125 @@ def generate(model, params, kernel, function, ntrials, nparticipants, K, mixture
     clusters = np.hstack([np.ones(cluster_sizes[i]) * i for i in range(len(cluster_sizes))])
     results = np.vstack([generate_cluster(model, {p: np.array([params[p][i]]) if p not in ['mean', 'var'] else params[p] for p in params.keys()}, kernel, function, ntrials, cluster_sizes[i], deterministic=deterministic) for i in range(K)])
     return results, clusters
+
+
+
+def generate1(model, params, kernel, function, nparticipants, ntrials, K, mixture):
+    
+    choices = np.arange(len(function))
+    participants = (mixture * nparticipants).astype(int)
+    participants[-1] = nparticipants - participants[:-1].sum()
+    split_matrix = np.repeat(np.eye(K), participants, axis=0)
+        
+    actions = [[] for j in range(nparticipants)]
+    rewards = [[] for j in range(nparticipants)]
+    action_vec = np.zeros(shape=(nparticipants,len(function)))
+    all_X = None
+    for i in range(ntrials):
+        
+        #get information about the current trial
+        trial = np.zeros(shape=(nparticipants, 1, len(function)))
+        trial[:,:,i] = np.ones(nparticipants)[:,None]
+        
+        #calculate values for gp acquisition functions
+        mean_var = np.array([get_mean_var(kernel, actions[j], rewards[j], choices) for j in range(nparticipants)])#.transpose(0,2,1)
+        mes_utility = np.array([get_mes_utility(*mv) for mv in mean_var])[:,None,:]
+        
+        #combine trial and gp data, along with actions from the previous trial
+        X = np.hstack((trial, action_vec[:,None,:], mean_var, mes_utility))[:,:,:,None]
+        likelihood, utility = get_likelihood_utility(X, model, params, K, mixture)
+        likelihood = (likelihood[0] * split_matrix[:,:,None]).sum(axis=1)
+        utility = (utility[0] * split_matrix[:,:,None]).sum(axis=1)
+        
+        action_vec = np.array([np.random.multinomial(1, likelihood[j]) for j in range(nparticipants)])
+        action_idx = action_vec.argmax(axis=1)[:,None]
+        reward = function[action_idx]
+                
+        # add actions and utility/likelihood
+        X = np.hstack((X, action_vec[:,None,:,None]))
+        X = np.hstack((X, utility[:,None,:,None]))
+        X = np.hstack((X, likelihood[:,None,:,None]))
+
+        if i == 0:
+            actions = action_idx
+            rewards = reward
+            all_X = X
+        else:
+            actions = np.hstack((actions, action_idx))
+            rewards = np.hstack((rewards, reward))
+            all_X = np.vstack((all_X.T, X.T)).T
+        
+    return all_X
+    
+    
+    
+def get_likelihood_utility(X, model, params, K, mixture):
+    
+    params = get_params(X, model, params)
+    return model(**params)
+
+
+def log_likelihood(X, model, params, K, mixture):
+    
+    actions = X[:,5,:,:]
+    likelihood, utility = get_likelihood_utility(X, model, params, K, mixture)
+    action_likelihood = likelihood.transpose(1,3,0,2) * actions[:,:,:,None]
+    kll = np.log(action_likelihood.sum(axis=1)).sum(axis=0).sum(axis=0)
+    ll = kll * mixture
+    return ll.sum()
+
+
+def phase_ucb_acq1(mean, var, trial, steepness, x_midpoint, yscale, temperature):
+    
+    trial = trial.argmax(axis=1)
+    position = trial - x_midpoint[:,None,None] #(k, nparticipants, ntrials)
+    growth = np.exp(-steepness[:,None, None] * position) #(k, nparticipants, ntrials)
+    denom = 1 + growth * yscale[:,None,None] #(k, nparticipants, ntrials)
+    explore_param = 1 - (1. / denom) #(k, nparticipants, ntrials)
+    exploit = (mean.transpose(1, 0, 2)[:,None] * (1- explore_param)).T #(ntrials, nparticipants, k, nchoices)
+    explore = (var.transpose(1, 0, 2)[:,None] * (explore_param)).T #(ntrials, nparticipants, k, nchoices)
+    utility = exploit + explore
+    likelihood = softmax1(utility, temperature)
+    return likelihood, utility
+    
+    
+    
+def softmax1(utility, temperature):
+    """
+    Returns likelihood given utility and temperature
+    Parameters:
+        utility: (ntrials, nparticipants, k, nchoices)
+        temperature: (K)
+    """
+    center = utility.max(axis = 3, keepdims = True)  #(ntrials, nparticipants, K, 1)
+    centered_utility = utility - center #(ntrials, nparticipants, K, choices)
+    
+    exp_u = np.exp(centered_utility / temperature[:,None]) #(ntrials, nparticipants, K, choices)
+    exp_u_row_sums = exp_u.sum(axis = 3, keepdims = True) #(ntrials, nparticipants, K, 1)
+    likelihood = exp_u / exp_u_row_sums #(ntrials, nparticipants, K, choices)
+    return likelihood
+
+
+def get_params(X, model, params):
+    
+    #get information about trials and previous actions
+    trial = X[:,0,:,:]
+    previous_actions = X[:,1,:,:]
+    params['trial'] = trial
+    params['previous_actions'] = previous_actions
+    
+    #get values for gp acquisition functions
+    mean = X[:,2,:,:]
+    var = X[:,3,:,:]
+    mes_utility = X[:,4,:,:]
+    params['mean'] = mean
+    params['var'] = var
+    params['mes_utility'] = mes_utility
+    
+    parameter_names = list(signature(model).parameters)
+    model_params = {p: params[p] for p in parameter_names}
+    return model_params
+    
     
 
 def likelihood(X, model, params, K, mixture, c=0):
@@ -323,6 +442,8 @@ def mes_acq(mes_utility, temperature):
 def mixture_acq(mean, var, trial, linear_interp, last_actions, all_actions, choices, is_first, mes_utility,
                 steepness, x_midpoint, yscale, phase_ucb_temperature, learning_rate, stay_penalty, local_temperature,
                 mes_temperature, mixture):
+    
+    print (mixture)
     
     phase_ucb_u, phase_ucb_l = phase_ucb_acq(mean, var, trial, steepness, x_midpoint, yscale, phase_ucb_temperature)
     local_u, local_l = local_acq(linear_interp, last_actions, all_actions, choices, is_first, learning_rate,
