@@ -197,13 +197,28 @@ def generate1(model, params, kernel, function, nparticipants, ntrials, K, mixtur
         #get information about the current trial
         trial = np.zeros(shape=(nparticipants, 1, len(function)))
         trial[:,:,i] = np.ones(nparticipants)[:,None]
+        if i < 2:
+            is_first_two = np.ones(shape=(nparticipants, 1, len(function)))
+        else:
+            is_first_two = np.zeros(shape=(nparticipants, 1, len(function)))
+            
+        #get linear interpolation and participant choices (add participant dimmension to choices)
+        if i == 0:
+            linear_interp = np.ones(shape=(nparticipants, 1, len(function)))
+        else:
+            sorted_actions = np.sort(actions, axis=1)
+            sorted_rewards = function[sorted_actions]
+            linear_interp = np.array([np.interp(choices, sorted_actions[j], sorted_rewards[j]) for j in range(nparticipants)])[:,None,:]        
+        participant_choices = choices * np.ones((nparticipants,1))[:,None,:]
         
         #calculate values for gp acquisition functions
         mean_var = np.array([get_mean_var(kernel, actions[j], rewards[j], choices) for j in range(nparticipants)])#.transpose(0,2,1)
         mes_utility = np.array([get_mes_utility(*mv) for mv in mean_var])[:,None,:]
         
-        #combine trial and gp data, along with actions from the previous trial
-        X = np.hstack((trial, action_vec[:,None,:], mean_var, mes_utility))[:,:,:,None]
+        #combine data
+        X = np.hstack((trial, is_first_two, action_vec[:,None,:], linear_interp, participant_choices,
+                       mean_var, mes_utility))[:,:,:,None]
+        
         likelihood, utility = get_likelihood_utility(X, model, params, K, mixture)
         likelihood = (likelihood[0] * split_matrix[:,:,None]).sum(axis=1)
         utility = (utility[0] * split_matrix[:,:,None]).sum(axis=1)
@@ -227,7 +242,35 @@ def generate1(model, params, kernel, function, nparticipants, ntrials, K, mixtur
             all_X = np.vstack((all_X.T, X.T)).T
         
     return all_X
+
+
+def get_params(X, model, params):
     
+    #get information about trials and previous actions
+    trial = X[:,0,:,:]
+    is_first_two = X[:,1,:,:]
+    previous_actions = X[:,2,:,:]
+    params['trial'] = trial
+    params['is_first_two'] = is_first_two
+    params['previous_actions'] = previous_actions
+    
+    #get linear interpolation and possible choices
+    linear_interp = X[:,3,:,:]
+    choices = X[:,4,:,:]
+    params['linear_interp'] = linear_interp
+    params['choices'] = choices
+    
+    #get values for gp acquisition functions
+    mean = X[:,5,:,:]
+    var = X[:,6,:,:]
+    mes_utility = X[:,7,:,:]
+    params['mean'] = mean
+    params['var'] = var
+    params['mes_utility'] = mes_utility
+    
+    parameter_names = list(signature(model).parameters)
+    model_params = {p: params[p] for p in parameter_names}
+    return model_params
     
     
 def get_likelihood_utility(X, model, params, K, mixture):
@@ -236,14 +279,25 @@ def get_likelihood_utility(X, model, params, K, mixture):
     return model(**params)
 
 
+#def get_pa
+
+
 def log_likelihood(X, model, params, K, mixture):
     
-    actions = X[:,5,:,:]
+    actions = X[:,8,:,:]
     likelihood, utility = get_likelihood_utility(X, model, params, K, mixture)
-    action_likelihood = likelihood.transpose(1,3,0,2) * actions[:,:,:,None]
-    kll = np.log(action_likelihood.sum(axis=1)).sum(axis=0).sum(axis=0)
-    ll = kll * mixture
-    return ll.sum()
+    mixture_likelihood = (likelihood.transpose(1,3,0,2) * actions[:,:,:,None]).sum(axis=1)
+    action_likelihood = (mixture_likelihood * mixture[None,None,:]).sum(axis=2)
+    
+    participant_log_likelihood = np.log(action_likelihood).sum(axis=1)
+    log_likelihood = participant_log_likelihood.sum()
+    return log_likelihood
+    
+
+
+def local_acq1(linear_interp, actions, choices, is_first):
+    
+    pass
 
 
 def phase_ucb_acq1(mean, var, trial, steepness, x_midpoint, yscale, temperature):
@@ -275,27 +329,6 @@ def softmax1(utility, temperature):
     exp_u_row_sums = exp_u.sum(axis = 3, keepdims = True) #(ntrials, nparticipants, K, 1)
     likelihood = exp_u / exp_u_row_sums #(ntrials, nparticipants, K, choices)
     return likelihood
-
-
-def get_params(X, model, params):
-    
-    #get information about trials and previous actions
-    trial = X[:,0,:,:]
-    previous_actions = X[:,1,:,:]
-    params['trial'] = trial
-    params['previous_actions'] = previous_actions
-    
-    #get values for gp acquisition functions
-    mean = X[:,2,:,:]
-    var = X[:,3,:,:]
-    mes_utility = X[:,4,:,:]
-    params['mean'] = mean
-    params['var'] = var
-    params['mes_utility'] = mes_utility
-    
-    parameter_names = list(signature(model).parameters)
-    model_params = {p: params[p] for p in parameter_names}
-    return model_params
     
     
 
