@@ -191,7 +191,7 @@ def generate1(model, params, kernel, function, nparticipants, ntrials, K, mixtur
     actions = [[] for j in range(nparticipants)]
     rewards = [[] for j in range(nparticipants)]
     action_vec = np.zeros(shape=(nparticipants,len(function))) #last action
-    all_actions_vec = np.zeros(shape=(nparticipants, 1, len(function)))
+    all_actions_vec = np.zeros(shape=(nparticipants,len(function)))
     all_X = None
     for i in range(ntrials):
         
@@ -220,7 +220,7 @@ def generate1(model, params, kernel, function, nparticipants, ntrials, K, mixtur
         mes_utility = np.array([get_mes_utility(*mv) for mv in mean_var])[:,None,:]
         
         #combine data
-        X = np.hstack((trial, is_first_two, action_vec[:,None,:], all_actions_vec,
+        X = np.hstack((trial, is_first_two, action_vec[:,None,:], all_actions_vec[:,None,:],
                        gradient, participant_choices,
                        mean_var, mes_utility))[:,:,:,None]
         
