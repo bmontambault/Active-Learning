@@ -190,7 +190,7 @@ def generate1(model, params, kernel, function, nparticipants, ntrials, K, mixtur
         
     actions = [[] for j in range(nparticipants)]
     rewards = [[] for j in range(nparticipants)]
-    action_vec = np.zeros(shape=(nparticipants,len(function)))
+    action_vec = np.zeros(shape=(nparticipants,len(function))) #last action
     all_X = None
     for i in range(ntrials):
         
@@ -202,13 +202,15 @@ def generate1(model, params, kernel, function, nparticipants, ntrials, K, mixtur
         else:
             is_first_two = np.zeros(shape=(nparticipants, 1, len(function)))
             
-        #get linear interpolation and participant choices (add participant dimmension to choices)
+        #get gradient and participant choices (add participant dimmension to choices)
         if i == 0:
-            linear_interp = np.ones(shape=(nparticipants, 1, len(function)))
+            gradient = np.zeros(shape=(nparticipants, 1, len(function)))
         else:
             sorted_actions = np.sort(actions, axis=1)
             sorted_rewards = function[sorted_actions]
-            linear_interp = np.array([np.interp(choices, sorted_actions[j], sorted_rewards[j]) for j in range(nparticipants)])[:,None,:]        
+            linear_interp = np.array([np.interp(choices, sorted_actions[j], sorted_rewards[j]) for j in range(nparticipants)])[:,None,:]
+            gradient = np.gradient(linear_interp, axis=2)
+        
         participant_choices = choices * np.ones((nparticipants,1))[:,None,:]
         
         #calculate values for gp acquisition functions
@@ -216,7 +218,7 @@ def generate1(model, params, kernel, function, nparticipants, ntrials, K, mixtur
         mes_utility = np.array([get_mes_utility(*mv) for mv in mean_var])[:,None,:]
         
         #combine data
-        X = np.hstack((trial, is_first_two, action_vec[:,None,:], linear_interp, participant_choices,
+        X = np.hstack((trial, is_first_two, action_vec[:,None,:], gradient, participant_choices,
                        mean_var, mes_utility))[:,:,:,None]
         
         likelihood, utility = get_likelihood_utility(X, model, params, K, mixture)
@@ -249,15 +251,15 @@ def get_params(X, model, params):
     #get information about trials and previous actions
     trial = X[:,0,:,:]
     is_first_two = X[:,1,:,:]
-    previous_actions = X[:,2,:,:]
+    last_actions = X[:,2,:,:]
     params['trial'] = trial
     params['is_first_two'] = is_first_two
-    params['previous_actions'] = previous_actions
+    params['last_actions'] = last_actions
     
     #get linear interpolation and possible choices
-    linear_interp = X[:,3,:,:]
+    gradient = X[:,3,:,:]
     choices = X[:,4,:,:]
-    params['linear_interp'] = linear_interp
+    params['gradient'] = gradient
     params['choices'] = choices
     
     #get values for gp acquisition functions
@@ -279,7 +281,6 @@ def get_likelihood_utility(X, model, params, K, mixture):
     return model(**params)
 
 
-#def get_pa
 
 
 def log_likelihood(X, model, params, K, mixture):
@@ -295,9 +296,18 @@ def log_likelihood(X, model, params, K, mixture):
     
 
 
-def local_acq1(linear_interp, actions, choices, is_first):
+def local_acq1(gradient, last_actions, choices, is_first_two, learning_rate, stay_penalty, temperature):
     
-    pass
+    last_gradient = (gradient * last_actions).sum(axis=1)
+    actions_x = last_actions.argmax(axis=1)
+    next_action = actions_x[:,:,None] + last_gradient[:,:,None] * learning_rate
+    distance = next_action[:,None,:,:] - choices[:,:,:,None]
+    dist_utility = np.exp(-distance) * (1 - is_first_two[:,:,:,None])
+    utility = is_first_two[:,:,:,None] + dist_utility
+    utility = utility.transpose(2,0,3,1)
+    likelihood = softmax1(utility, temperature)
+    return likelihood, utility
+
 
 
 def phase_ucb_acq1(mean, var, trial, steepness, x_midpoint, yscale, temperature):
