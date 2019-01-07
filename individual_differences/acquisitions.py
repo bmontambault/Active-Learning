@@ -191,6 +191,7 @@ def generate1(model, params, kernel, function, nparticipants, ntrials, K, mixtur
     actions = [[] for j in range(nparticipants)]
     rewards = [[] for j in range(nparticipants)]
     action_vec = np.zeros(shape=(nparticipants,len(function))) #last action
+    all_actions_vec = np.zeros(shape=(nparticipants, 1, len(function)))
     all_X = None
     for i in range(ntrials):
         
@@ -210,6 +211,7 @@ def generate1(model, params, kernel, function, nparticipants, ntrials, K, mixtur
             sorted_rewards = function[sorted_actions]
             linear_interp = np.array([np.interp(choices, sorted_actions[j], sorted_rewards[j]) for j in range(nparticipants)])[:,None,:]
             gradient = np.gradient(linear_interp, axis=2)
+            all_actions_vec += action_vec
         
         participant_choices = choices * np.ones((nparticipants,1))[:,None,:]
         
@@ -218,7 +220,8 @@ def generate1(model, params, kernel, function, nparticipants, ntrials, K, mixtur
         mes_utility = np.array([get_mes_utility(*mv) for mv in mean_var])[:,None,:]
         
         #combine data
-        X = np.hstack((trial, is_first_two, action_vec[:,None,:], gradient, participant_choices,
+        X = np.hstack((trial, is_first_two, action_vec[:,None,:], all_actions_vec,
+                       gradient, participant_choices,
                        mean_var, mes_utility))[:,:,:,None]
         
         likelihood, utility = get_likelihood_utility(X, model, params, K, mixture)
@@ -252,20 +255,22 @@ def get_params(X, model, params):
     trial = X[:,0,:,:]
     is_first_two = X[:,1,:,:]
     last_actions = X[:,2,:,:]
+    all_actions = X[:,3,:,:]
     params['trial'] = trial
     params['is_first_two'] = is_first_two
     params['last_actions'] = last_actions
+    params['all_actions'] = all_actions
     
     #get linear interpolation and possible choices
-    gradient = X[:,3,:,:]
-    choices = X[:,4,:,:]
+    gradient = X[:,4,:,:]
+    choices = X[:,5,:,:]
     params['gradient'] = gradient
     params['choices'] = choices
     
     #get values for gp acquisition functions
-    mean = X[:,5,:,:]
-    var = X[:,6,:,:]
-    mes_utility = X[:,7,:,:]
+    mean = X[:,6,:,:]
+    var = X[:,7,:,:]
+    mes_utility = X[:,8,:,:]
     params['mean'] = mean
     params['var'] = var
     params['mes_utility'] = mes_utility
@@ -296,14 +301,21 @@ def log_likelihood(X, model, params, K, mixture):
     
 
 
-def local_acq1(gradient, last_actions, choices, is_first_two, learning_rate, stay_penalty, temperature):
+def local_acq1(gradient, last_actions, all_actions, choices, is_first_two, learning_rate, stay_penalty, temperature):
     
     last_gradient = (gradient * last_actions).sum(axis=1)
     actions_x = last_actions.argmax(axis=1)
     next_action = actions_x[:,:,None] + last_gradient[:,:,None] * learning_rate
-    distance = next_action[:,None,:,:] - choices[:,:,:,None]
+    distance = np.abs(next_action[:,None,:,:] - choices[:,:,:,None])
     dist_utility = np.exp(-distance) * (1 - is_first_two[:,:,:,None])
-    utility = is_first_two[:,:,:,None] + dist_utility
+    
+    move_utility = is_first_two[:,:,:,None] + dist_utility
+    penalty_utility = all_actions[:,:,:,None] * stay_penalty
+    utility = move_utility - penalty_utility
+    
+    #penalty = (all_actions[:,:,:,None] * stay_penalty)
+    #utility = move_utility + penalty
+    
     utility = utility.transpose(2,0,3,1)
     likelihood = softmax1(utility, temperature)
     return likelihood, utility
