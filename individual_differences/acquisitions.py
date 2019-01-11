@@ -318,6 +318,7 @@ def local_acq1(gradient, last_actions, all_actions, choices, is_first_two, learn
     
     utility = utility.transpose(2,0,3,1)
     likelihood = softmax1(utility, temperature)
+    #print (likelihood.shape)
     return likelihood, utility
 
 
@@ -331,9 +332,52 @@ def phase_ucb_acq1(mean, var, trial, steepness, x_midpoint, yscale, temperature)
     explore_param = 1 - (1. / denom) #(k, nparticipants, ntrials)
     exploit = (mean.transpose(1, 0, 2)[:,None] * (1- explore_param)).T #(ntrials, nparticipants, k, nchoices)
     explore = (var.transpose(1, 0, 2)[:,None] * (explore_param)).T #(ntrials, nparticipants, k, nchoices)
+    
     utility = exploit + explore
     likelihood = softmax1(utility, temperature)
+    #print (likelihood.shape)
     return likelihood, utility
+
+
+def mes_acq1(mes_utility, temperature):
+    
+    utility = mes_utility.transpose(2,0,1)[:,:,None,:]
+    utility = np.repeat(utility, 3, axis=2)
+    likelihood = softmax1(utility, temperature)
+    
+    #print (likelihood.shape)
+    return likelihood, utility
+
+
+def mixture_acq1(mean, var, trial, gradient, last_actions, all_actions, choices, is_first_two, mes_utility,
+                steepness, x_midpoint, yscale, phase_ucb_temperature, learning_rate, stay_penalty, local_temperature,
+                mes_temperature, mixture):
+    
+    phase_ucb_u, phase_ucb_l = phase_ucb_acq1(mean, var, trial, steepness, x_midpoint, yscale, phase_ucb_temperature)
+    local_u, local_l = local_acq1(gradient, last_actions, all_actions, choices, is_first_two, learning_rate, stay_penalty, local_temperature)
+    mes_u, mes_l = mes_acq1(mes_utility, mes_temperature)
+    
+    all_utility = np.array([phase_ucb_u, local_u, mes_u])
+    all_likelihood = np.array([phase_ucb_l, local_l, mes_l])
+    
+    utility = (all_utility * mixture[:,None,None,:,None]).sum(axis=0)
+    likelihood = (all_likelihood * mixture[:,None,None,:,None]).sum(axis=0)
+    return utility, likelihood
+
+
+def mini_mixture_acq1(mean, var, trial, gradient, last_actions, all_actions, choices, is_first_two, mes_utility,
+                steepness, x_midpoint, yscale, phase_ucb_temperature, learning_rate, stay_penalty, local_temperature,
+                mixture):
+    
+    phase_ucb_u, phase_ucb_l = phase_ucb_acq1(mean, var, trial, steepness, x_midpoint, yscale, phase_ucb_temperature)
+    local_u, local_l = local_acq1(gradient, last_actions, all_actions, choices, is_first_two, learning_rate, stay_penalty, local_temperature)
+    
+    all_utility = np.array([phase_ucb_u, local_u])
+    all_likelihood = np.array([phase_ucb_l, local_l])
+    
+    utility = (all_utility * mixture[:,None,None,:,None]).sum(axis=0)
+    likelihood = (all_likelihood * mixture[:,None,None,:,None]).sum(axis=0)
+    return utility, likelihood
     
     
     
