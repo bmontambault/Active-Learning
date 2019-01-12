@@ -1,5 +1,6 @@
 import GPy
 import numpy as np
+from theano import tensor as tt
 import scipy.stats as st
 from inspect import signature
 
@@ -249,7 +250,7 @@ def generate1(model, params, kernel, function, nparticipants, ntrials, K, mixtur
     return all_X
 
 
-def get_params(X, model, params):
+def get_params(X, model, params, k):
     
     #get information about trials and previous actions
     trial = X[:,0,:,:]
@@ -274,6 +275,7 @@ def get_params(X, model, params):
     params['mean'] = mean
     params['var'] = var
     params['mes_utility'] = mes_utility
+    params['k'] = k
     
     parameter_names = list(signature(model).parameters)
     model_params = {p: params[p] for p in parameter_names}
@@ -282,7 +284,7 @@ def get_params(X, model, params):
     
 def get_likelihood_utility(X, model, params, K, mixture):
     
-    params = get_params(X, model, params)
+    params = get_params(X, model, params, K)
     return model(**params)
 
 
@@ -339,10 +341,10 @@ def phase_ucb_acq1(mean, var, trial, steepness, x_midpoint, yscale, temperature)
     return likelihood, utility
 
 
-def mes_acq1(mes_utility, temperature):
+def mes_acq1(mes_utility, temperature, k):
     
     utility = mes_utility.transpose(2,0,1)[:,:,None,:]
-    utility = np.repeat(utility, 3, axis=2)
+    utility = np.repeat(utility, k, axis=2)
     likelihood = softmax1(utility, temperature)
     
     #print (likelihood.shape)
@@ -351,17 +353,33 @@ def mes_acq1(mes_utility, temperature):
 
 def mixture_acq1(mean, var, trial, gradient, last_actions, all_actions, choices, is_first_two, mes_utility,
                 steepness, x_midpoint, yscale, phase_ucb_temperature, learning_rate, stay_penalty, local_temperature,
-                mes_temperature, mixture):
+                mes_temperature, k, mixture):
     
     phase_ucb_u, phase_ucb_l = phase_ucb_acq1(mean, var, trial, steepness, x_midpoint, yscale, phase_ucb_temperature)
     local_u, local_l = local_acq1(gradient, last_actions, all_actions, choices, is_first_two, learning_rate, stay_penalty, local_temperature)
-    mes_u, mes_l = mes_acq1(mes_utility, mes_temperature)
+    mes_u, mes_l = mes_acq1(mes_utility, mes_temperature, k)
     
     all_utility = np.array([phase_ucb_u, local_u, mes_u])
     all_likelihood = np.array([phase_ucb_l, local_l, mes_l])
     
-    utility = (all_utility * mixture[:,None,None,:,None]).sum(axis=0)
-    likelihood = (all_likelihood * mixture[:,None,None,:,None]).sum(axis=0)
+    utility = (all_utility * mixture.T[:,None,None,:,None]).sum(axis=0)
+    likelihood = (all_likelihood * mixture.T[:,None,None,:,None]).sum(axis=0)
+    return utility, likelihood
+
+
+def mixture_acq2(mean, var, trial, gradient, last_actions, all_actions, choices, is_first_two, mes_utility,
+                steepness, x_midpoint, yscale, phase_ucb_temperature, learning_rate, stay_penalty, local_temperature,
+                mes_temperature, k, mixture):
+    
+    phase_ucb_u, phase_ucb_l = phase_ucb_acq1(mean, var, trial, steepness, x_midpoint, yscale, phase_ucb_temperature)
+    local_u, local_l = local_acq1(gradient, last_actions, all_actions, choices, is_first_two, learning_rate, stay_penalty, local_temperature)
+    mes_u, mes_l = mes_acq1(mes_utility, mes_temperature, k)
+    
+    all_utility = tt.stack([phase_ucb_u, local_u, mes_u])
+    all_likelihood = tt.stack([phase_ucb_l, local_l, mes_l])
+    
+    utility = (all_utility * mixture.T[:,None,None,:,None]).sum(axis=0)
+    likelihood = (all_likelihood * mixture.T[:,None,None,:,None]).sum(axis=0)
     return utility, likelihood
 
 
@@ -542,7 +560,7 @@ def mixture_acq(mean, var, trial, linear_interp, last_actions, all_actions, choi
                 steepness, x_midpoint, yscale, phase_ucb_temperature, learning_rate, stay_penalty, local_temperature,
                 mes_temperature, mixture):
     
-    print (mixture)
+
     
     phase_ucb_u, phase_ucb_l = phase_ucb_acq(mean, var, trial, steepness, x_midpoint, yscale, phase_ucb_temperature)
     local_u, local_l = local_acq(linear_interp, last_actions, all_actions, choices, is_first, learning_rate,
@@ -551,6 +569,7 @@ def mixture_acq(mean, var, trial, linear_interp, last_actions, all_actions, choi
     
     all_utility = np.array([phase_ucb_u, local_u, mes_u])
     all_likelihood = np.array([phase_ucb_l, local_l, mes_l])
+
     
     utility = (all_utility * mixture.T[:,:,None,None,None]).sum(axis=0)
     likelihood = (all_likelihood * mixture.T[:,:,None,None,None]).sum(axis=0)
