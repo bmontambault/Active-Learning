@@ -3,6 +3,17 @@ import numpy as np
 import scipy.stats as st
 
 
+def get_kernel(results, kernel, function_name):
+    
+    function_samples = list(results[results['function_name'] == function_name].iloc[0]['function_samples'].values())
+    function_samples_n = np.array([((f - np.mean(f)) / np.std(f)) for f in function_samples])
+    stacked_function_samples_x = np.hstack([np.arange(len(f)) for f in function_samples_n])[:,None]
+    stacked_function_samples_y = np.hstack(function_samples_n)[:,None]
+    m = GPy.models.GPRegression(X = stacked_function_samples_x, Y = stacked_function_samples_y, kernel = kernel)
+    m.optimize()
+    return m.kern
+
+
 def get_mean_var(kernel, actions, rewards, choices):
     
     if len(actions) == 0:
