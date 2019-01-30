@@ -10,6 +10,59 @@ from single_mes import mes_likelihood
 
 
 
+def get_assignments(samples_df, X, fmax, goals):
+    
+    assignment_columns = [c for c in samples_df.columns if 'assignments' in c]
+    nparticipants = len(assignment_columns)
+    all_assignments = []
+    for i in range(nparticipants):
+        assignment = samples_df['assignments__'+str(i)].value_counts().index[0]
+        all_assignments.append(assignment)
+    
+    unique_clusters = [str(x) for x in list(set(all_assignments))]
+    cluster_columns = [c for c in samples_df.columns if c.split('__')[-1] in unique_clusters and 'beta' not in c and 'assignments' not in c]
+    
+    actions = X[0,:,:,:].argmax(axis=1)
+    nassignments = []
+    for i in range(len(unique_clusters)):
+        cluster = unique_clusters[i]
+        participants_idx = [j for j in range(len(all_assignments)) if all_assignments[j] == int(cluster)]
+        #cluster_actions = actions[:,np.array(participants_idx)]
+        #splot = sns.pairplot(samples_df[['explore_param__'+cluster, 'temperature__'+cluster]], diag_kind="kde")
+        #for i, j in zip(*np.triu_indices_from(splot.axes, 1)):
+        #    splot.axes[i, j].clear()
+        
+        fig, axes = plt.subplots(2, 3, figsize=(8,5))
+        nfassignments = []
+        for l in range(3):
+            ngassignments = []
+            for m in range(2):
+                f = [79, 41, 32][l]
+                g = ['max_score_last', 'find_max_last'][m]
+                subplot_idx = [k for k in participants_idx if fmax[k] == f and goals[k] == g]
+                
+                ngassignments.append(len(subplot_idx))
+                if len(subplot_idx) > 0:
+                    subplot_actions = actions[:, np.array(subplot_idx)]
+                    axes[m][l].plot(subplot_actions)
+                axes[m][l].axhline(f, ls='--', c='black')
+                axes[m][l].set_ylim([0, 82])
+                axes[m][l].set_xlim([0, 25])
+            nfassignments.append(ngassignments)
+        nassignments.append(nfassignments)
+            
+    
+    return all_assignments, samples_df[cluster_columns], nassignments, fig#, splot
+
+
+def cluster_distributions(nassignments):
+    
+    cluster_frequencies = nassignments.sum(axis=1).sum(axis=1)
+    cluster_probabilities = cluster_frequencies / cluster_frequencies.sum()
+    
+    
+
+
 def plot_multi(samples_df, X):
     
     actions = X[0,:,:,:].argmax(axis=1).T 
@@ -159,7 +212,7 @@ def assign_ucb_clusters(trace, X):
     
     trials = np.arange(X.shape[1])
     mean_weights = trace['w'].mean(axis=0)
-    samples = np.array([[s['steepness'], s['x_midpoint'], s['yscale'], s['temperature']] for s in np.array(trace)])#[:,:,idx]
+    samples = np.array([[s['steepness'], s['x_midpoint'], s['temperature']] for s in np.array(trace)])#[:,:,idx]
     args = samples.mean(axis=0).T
     
     all_likelihoods = []
@@ -171,9 +224,8 @@ def assign_ucb_clusters(trace, X):
         
         cluster_likelihoods = []
         for arg in args:
-            steepness, x_midpoint, yscale, temperature = arg
-            l = ucb_likelihood(actions, mean, var, trials, np.array([steepness]), np.array([x_midpoint]),
-                           np.array([yscale]), np.array([temperature]))
+            steepness, x_midpoint, temperature = arg
+            l = ucb_likelihood(actions, mean, var, trials, np.array([steepness]), np.array([x_midpoint]), np.array([temperature]))
             cluster_likelihoods.append(l)
         all_likelihoods.append(cluster_likelihoods)
     cluster_assignments = np.array(all_likelihoods + np.log(mean_weights[None,:])).argmax(axis=1)
@@ -184,7 +236,7 @@ def assign_mes_clusters(trace, X):
     
     trials = np.arange(X.shape[1])
     mean_weights = trace['w'].mean(axis=0)
-    samples = np.array([[s['steepness'], s['x_midpoint'], s['yscale'], s['temperature']] for s in np.array(trace)])#[:,:,idx]
+    samples = np.array([[s['steepness'], s['x_midpoint'], s['temperature']] for s in np.array(trace)])#[:,:,idx]
     args = samples.mean(axis=0).T
     
     all_likelihoods = []
@@ -239,12 +291,12 @@ def get_explore_clusters(trace, threshold, ntrials):
     
     mean_weights = trace['w'].mean(axis=0)
     idx = np.argwhere(mean_weights>=threshold).ravel()
-    samples = np.array([[s['steepness'], s['x_midpoint'], s['yscale'], s['temperature']] for s in np.array(trace)])#[:,:,idx]
+    samples = np.array([[s['steepness'], s['x_midpoint'], s['temperature']] for s in np.array(trace)])#[:,:,idx]
     
     trials = np.arange(ntrials)
     position = trials[:,None,None] - samples[:,1,:]
     growth = np.exp(-samples[:,0,:] * position)
-    denom = 1 + samples[:,2,:] * growth
+    denom = 1 + growth
     e = 1 - 1. / denom
 
     mean_e = e.mean(axis=1)
