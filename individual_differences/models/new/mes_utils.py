@@ -65,10 +65,10 @@ def get_mes_utility(mean, var, samples=100, precision=.001, return_gumbel=False)
     a, b = fit_gumbel(mean, std, precision)
     ymax_samples = sample_gumbel(a, b, samples)
     
-    plt.hist(ymax_samples, bins=50)
-    x = np.linspace(np.min(ymax_samples), np.max(ymax_samples))
-    plt.plot(x, [gumbel_pdf(a, b, y)*50000 for y in x])
-    plt.show()
+    #plt.hist(ymax_samples, bins=50)
+    #x = np.linspace(np.min(ymax_samples), np.max(ymax_samples))
+    #plt.plot(x, [gumbel_pdf(a, b, y)*50000 for y in x])
+    #plt.show()
     
     #z_scores = z_score(ymax_samples, mean, std)
     z = (ymax_samples - mean[:,None]) / std[:,None]
@@ -77,8 +77,9 @@ def get_mes_utility(mean, var, samples=100, precision=.001, return_gumbel=False)
     
     info = z * np.exp(log_norm_pdf_z - np.log(2) + log_norm_cdf_z)
     entropy = log_norm_cdf_z
-    return np.mean(info - entropy, axis=1)
+    return np.mean(info - entropy, axis=1), info.mean(axis=1), entropy.mean(axis=1)
     
+
     mes_utility = np.mean(z * np.exp(log_norm_pdf_z - (np.log(2) + log_norm_cdf_z)) - log_norm_cdf_z, axis = 1)
     if return_gumbel:
         return mes_utility, a, b
