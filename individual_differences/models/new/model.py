@@ -59,10 +59,10 @@ def group_static_ucb_mes_model(X, explore_param_alpha=.01, explore_param_beta=.0
     nchoices = X.shape[2]
     ntrials = X.shape[1]
     actions = theano.shared(X[-1])
-    mean = theano.shared(X[1])
-    var = theano.shared(X[2])
-    #mes = theano.shared(X[3])
-    mes = theano.shared(X[4])
+    mean = theano.shared(X[0])
+    var = theano.shared(X[1])
+    mes = theano.shared(X[3])
+    #mes = theano.shared(X[4])
     random_likelihood = theano.shared((1./nchoices)*np.ones(shape=(ntrials, maxk, nchoices, nparticipants)))
     with pm.Model() as model:
     
