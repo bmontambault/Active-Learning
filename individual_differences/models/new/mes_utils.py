@@ -71,7 +71,11 @@ def get_mes_utility(mean, var, samples=100, precision=.001, return_gumbel=False)
     #plt.show()
     
     #z_scores = z_score(ymax_samples, mean, std)
-    z = (ymax_samples - mean[:,None]) / std[:,None]
+    z = (ymax_samples[:,None] - mean) / std
+    return np.mean(z * st.norm.pdf(z) / (2. * st.norm.cdf(z)) - st.norm.logcdf(z), axis=0)
+
+    
+    """
     log_norm_cdf_z = st.norm.logcdf(z)
     log_norm_pdf_z = st.norm.logpdf(z)
     
@@ -85,3 +89,16 @@ def get_mes_utility(mean, var, samples=100, precision=.001, return_gumbel=False)
         return mes_utility, a, b
     else:
         return mes_utility
+    """
+    
+def gpflowopt_mes(mean, var, samples=100, precision=.001):
+    std = np.sqrt(var)
+    a, b = fit_gumbel(mean, std, precision)
+    ymax_samples = sample_gumbel(a, b, samples)
+    
+    gamma = (ymax_samples[:,None] - mean) / np.sqrt(var)
+    print (gamma)
+    return np.mean(gamma * st.norm.pdf(gamma) / (2. * st.norm.cdf(gamma)) - st.norm.logcdf(gamma), axis=0)
+    
+    
+    
