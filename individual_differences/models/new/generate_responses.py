@@ -1,7 +1,11 @@
 import numpy as np
 import pandas as pd
-import GPy
+#import GPy
 import matplotlib.pyplot as plt
+
+import sys
+sys.path.append('../../../../GPy')
+import GPy
 
 from mes_utils import get_mes_utility, gumbel_pdf
 
@@ -27,7 +31,6 @@ def fit_function_samples(samples):
     centered_samples = samples_array - samples_array.mean(axis=1)[:,None]
     X = np.arange(centered_samples.shape[1])[:,None]
     y = centered_samples.T
-        
     kern = GPy.kern.RBF(1)
     model = GPy.models.GPRegression(X, y, kern)
     model.optimize()
@@ -65,8 +68,8 @@ def vectorize_response(results_row, kern=None):
         lower = mean.ravel() - std
         upper = mean.ravel() + std
         
-        mes_utility, info, entropy = get_mes_utility(mean.ravel(), var.ravel(), 100000, .0001, True)
-        vector.append([mean.ravel(), var.ravel(), mes_utility, info, entropy, lower, upper, centered_function, filled_actions, filled_rewards])
+        mes_utility = get_mes_utility(mean.ravel(), var.ravel(), 100000, .0001, True)
+        vector.append([mean.ravel(), var.ravel(), mes_utility, lower, upper, centered_function, filled_actions, filled_rewards])
     
     vector = np.array(vector)
     actions = np.array(results_row['response'])

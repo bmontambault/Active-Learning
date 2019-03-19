@@ -60,7 +60,7 @@ def gumbel_pdf(a, b, y):
     return - ((1 / b) * np.exp(-(z + np.exp(-z))))
 
 
-def get_mes_utility(mean, var, samples=100, precision=.001, return_gumbel=False):
+def get_mes_utility(mean, var, samples=1000, precision=.001, return_gumbel=False):
     std = np.sqrt(var)
     a, b = fit_gumbel(mean, std, precision)
     ymax_samples = sample_gumbel(a, b, samples)
